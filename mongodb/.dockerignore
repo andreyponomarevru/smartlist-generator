@@ -1,0 +1,6 @@
+*.env
+Dockerfile
+
+# Docker volumes
+data/
+dump/

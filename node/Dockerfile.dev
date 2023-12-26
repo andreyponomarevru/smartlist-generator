@@ -1,0 +1,11 @@
+FROM node:alpine
+
+WORKDIR /node
+
+COPY package*.json ./
+RUN npm install
+
+USER node
+COPY . .
+
+CMD npm run execute

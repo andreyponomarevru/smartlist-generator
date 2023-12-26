@@ -1,0 +1,36 @@
+version: "3.7"
+
+services:
+
+  node:
+    container_name: node
+    build:
+      context: ./node
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./node/src:/node/src
+      - ./node/tsconfig.json:/node/tsconfig.json
+    expose:
+      - "8080"
+    ports:
+      - "8080:8080"
+      - "9229:9229"
+    env_file:
+      - ./node/.env
+      # Share Mongo's env vars like username, password, etc., with Node to be 
+      # able to connect to Mongo from Node container)
+      - ./mongodb/.env
+  mongodb:
+    container_name: mongodb
+    build:
+      context: ./mongodb
+      dockerfile: Dockerfile
+    volumes:
+      - ./mongodb/data/db/:/data/db/
+      - ./mongodb/data/log/:/var/log/mongodb/
+      - ./mongodb/initdb.d/:/docker-entrypoint-initdb.d/
+      - ./mongodb/mongod.conf:/etc/mongod.conf
+    ports:
+      - "27018:27017"
+    env_file:
+      - ./mongodb/.env
