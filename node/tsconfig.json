@@ -1,8 +1,6 @@
 {
   "compilerOptions": {
-    "types": ["node"],
-
-    "target": "es6",
+    "target": "ES6",
     "module": "commonjs",
     "sourceMap": true,
     "outDir": "./build",
@@ -17,7 +15,8 @@
     "forceConsistentCasingInFileNames": true,
     "allowJs": true,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "skipLibCheck": true
   },
   "compileOnSave": true,
   "include": ["src/**/*"],

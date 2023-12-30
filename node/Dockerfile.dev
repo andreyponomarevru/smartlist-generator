@@ -3,9 +3,9 @@ FROM node:alpine
 WORKDIR /node
 
 COPY package*.json ./
-RUN npm install
+RUN yarn install
 
 USER node
 COPY . .
 
-CMD npm run execute
+CMD yarn run start
