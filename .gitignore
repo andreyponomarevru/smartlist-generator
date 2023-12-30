@@ -55,7 +55,6 @@ log/
 *~
 ~*
 .*
-package-lock.json
 .goutputstream-*
 node_modules/
 dist/
