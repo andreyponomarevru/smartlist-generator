@@ -1,7 +1,6 @@
 version: "3.7"
 
 services:
-
   node:
     container_name: node
     build:
@@ -18,20 +17,19 @@ services:
       - "9229:9229"
     env_file:
       - ./node/.env
-      # Share Mongo's env vars like username, password, etc., with Node to be 
+      # Share Mongo's env vars like username, password, etc., with Node to be
       # able to connect to Mongo from Node container)
       - ./mongodb/.env
-  mongodb:
-    container_name: mongodb
+
+  postgres:
+    container_name: postgres
     build:
-      context: ./mongodb
+      context: ./postgres
       dockerfile: Dockerfile
-    volumes:
-      - ./mongodb/data/db/:/data/db/
-      - ./mongodb/data/log/:/var/log/mongodb/
-      - ./mongodb/initdb.d/:/docker-entrypoint-initdb.d/
-      - ./mongodb/mongod.conf:/etc/mongod.conf
-    ports:
-      - "27018:27017"
+    restart: always
     env_file:
-      - ./mongodb/.env
+      - ./postgres/.env
+    ports:
+      - 5433:5432
+    volumes:
+      - ./postgres/volume/:/var/lib/postgresql/data
