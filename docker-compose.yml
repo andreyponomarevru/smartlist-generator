@@ -9,7 +9,8 @@ services:
     volumes:
       - ./node/src:/node/src
       - ./node/tsconfig.json:/node/tsconfig.json
-      - /mnt/CE64EB6A64EB53AD/music-lib/tracks:/tracks
+      - /mnt/CE64EB6A64EB53AD/music-lib/tracks:/tracks/
+
     expose:
       - "8080"
     ports:
@@ -17,9 +18,9 @@ services:
       - "9229:9229"
     env_file:
       - ./node/.env
-      # Share Mongo's env vars like username, password, etc., with Node to be
-      # able to connect to Mongo from Node container)
-      - ./mongodb/.env
+      - ./postgres/.env
+    depends_on:
+      - postgres
 
   postgres:
     container_name: postgres
@@ -33,3 +34,4 @@ services:
       - 5433:5432
     volumes:
       - ./postgres/volume/:/var/lib/postgresql/data
+      - ./postgres/docker-entrypoint-initdb.d/init-dev.sql:/docker-entrypoint-initdb.d/init.sql
