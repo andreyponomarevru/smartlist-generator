@@ -19,8 +19,6 @@ services:
     env_file:
       - ./node/.env
       - ./postgres/.env
-    depends_on:
-      - postgres
 
   postgres:
     container_name: postgres
