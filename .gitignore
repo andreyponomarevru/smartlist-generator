@@ -6,6 +6,7 @@ PRIVATE-NOTES.md
 volume/
 redis_data/
 mongodb/data
+ui/
 
 ################
 ### Postgres ###
