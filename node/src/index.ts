@@ -1,27 +1,15 @@
-import express from "express";
-import util from "util";
-import * as mm from "music-metadata";
+import express, { Express, Request, Response } from "express";
+// import { router as tracksRouter } from "./controller/tracks";
+import {
+  onUncaughtException,
+  onUnhandledRejection,
+  onWarning,
+} from "./event-handlers/node-process";
+import { HTTP_PORT } from "./config/env";
+import { httpServer } from "./http-server";
 
-// Spin up server
+process.once("uncaughtException", onUncaughtException);
+process.on("unhandledRejection", onUnhandledRejection);
+process.on("warning", onWarning);
 
-const app = express();
-app.use(express.json());
-
-// Process tracks
-
-async function parseTrack(trackPath: string) {
-  const metadata = await mm.parseFile(trackPath);
-  console.log(
-    util.inspect(metadata.format.duration, { showHidden: true, depth: null }),
-  );
-
-  const genre = metadata?.common?.genre?.[0];
-  const artist = metadata.common.artist;
-  const year = metadata.common.year;
-
-  if (!genre || !artist || !year) {
-    throw new Error(`Some id3v2 tag is empty: ${trackPath}`);
-  }
-
-  return { filepath: trackPath, genre, artist, year };
-}
+httpServer.listen(HTTP_PORT);
