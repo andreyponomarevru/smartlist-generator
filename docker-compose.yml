@@ -9,7 +9,7 @@ services:
     volumes:
       - ./node/src:/node/src
       - ./node/tsconfig.json:/node/tsconfig.json
-      - /mnt/CE64EB6A64EB53AD/music-lib/tracks:/tracks/
+      - /mnt/CE64EB6A64EB53AD/music-lib/inbox-listened/chillout_psy_tagged:/tracks
 
     expose:
       - "8080"
