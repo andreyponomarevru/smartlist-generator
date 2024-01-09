@@ -14,22 +14,14 @@ export type Genre = string[];
 export type FilePath = string;
 export type TrackId = number;
 
-export interface ParsedTrack {
-  filePath: string;
-  duration: number;
-  artist: string[];
-  year: number;
-  title: string;
-  genre: string[];
-}
 export interface Track {
-  trackId?: number;
-  filePath: string;
-  duration: number;
-  artist: string[];
-  year: number;
-  title: string;
-  genre: string[];
+  trackId?: TrackId;
+  filePath: FilePath;
+  duration: Duration;
+  artist: Artist;
+  year: Year;
+  title: Title;
+  genre: Genre;
 }
 
 export type UserSettings = {
@@ -55,6 +47,5 @@ export interface PaginatedAPIResponse<Items> {
 export type FilterParams = {
   yearIds: number[] | null;
   artistIds: number[] | null;
-  labelIds: number[] | null;
   genreIds: number[] | null;
 };
