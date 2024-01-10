@@ -106,585 +106,359 @@ FROM
   (SELECT COUNT(*) FROM genre) AS genre_count;
 
 
+--
 
-CREATE VIEW view_playlist AS
-WITH 
-  opener AS (
-    SELECT 
-      tr.track_id, 
-      array_agg(DISTINCT ar.name) AS artist, 
-      tr.file_path, 
-      tr.title, 
-      array_agg(DISTINCT ge.name) AS genre 
-    FROM track AS tr
-      INNER JOIN year AS ye ON ye.year_id = tr.year_id
-      INNER JOIN track_genre AS tr_ge ON tr_ge.track_id = tr.track_id
+-- Comments in this query are relevant for all queries below. Most queries 
+-- differ in only WHERE clause.
+CREATE VIEW view_opener AS
+WITH opener AS (
+    -- Get all tracks matching our requirements
+    SELECT tr_ge.track_id, ye.year FROM track_genre AS tr_ge 
       INNER JOIN genre AS ge ON ge.genre_id = tr_ge.genre_id
-      INNER JOIN track_artist AS tr_ar ON tr_ar.track_id = tr.track_id
-      INNER JOIN artist AS ar ON ar.artist_id = tr_ar.artist_id
+      INNER JOIN track AS tr ON tr.track_id = tr_ge.track_id
+      INNER JOIN year AS ye ON ye.year_id = tr.year_id
     WHERE 
-      ye.year >= 2020 AND 
-      ge.name = 'Opener'
-    GROUP BY tr.track_id, tr.file_path
-    ORDER BY random()
-    LIMIT 1
-  ),
+      ye.year >= 2020 AND
+      ge.name = 'Opener'  
+    GROUP BY tr_ge.track_id, ye.year
+)
+-- The main query just joins, nothing else. We need it because otherwise, the 'genre' column contains only one value - the one mentioned in WHERE condition above - 'Opener'.
+SELECT 
+  tr.track_id, 
+  opener.year,
+  array_agg(DISTINCT ar.name) AS artist, 
+  tr.title, 
+  array_agg(DISTINCT ge.name) AS genre,
+  duration,
+  tr.file_path
+FROM track AS tr
+  INNER JOIN opener ON opener.track_id = tr.track_id
+  INNER JOIN track_genre AS tr_ge ON tr_ge.track_id = opener.track_id
+  INNER JOIN genre AS ge ON ge.genre_id = tr_ge.genre_id
+  INNER JOIN track_artist AS tr_ar ON tr_ar.track_id = tr.track_id
+  INNER JOIN artist AS ar ON ar.artist_id = tr_ar.artist_id
+GROUP BY tr.track_id, opener.year
+ORDER BY random()
+LIMIT 1;
 
-  dub AS (
-    SELECT 
-      tr.track_id, 
-      array_agg(DISTINCT ar.name) AS artist,       
-      tr.file_path, 
-      tr.title, 
-      array_agg(DISTINCT ge.name) AS genre
-    FROM track AS tr
-      INNER JOIN year AS ye ON ye.year_id = tr.year_id
-      INNER JOIN track_genre AS tr_ge ON tr_ge.track_id = tr.track_id
+
+CREATE VIEW view_dub AS
+WITH dub AS (
+    SELECT tr_ge.track_id, ye.year FROM track_genre AS tr_ge 
       INNER JOIN genre AS ge ON ge.genre_id = tr_ge.genre_id
-      INNER JOIN track_artist AS tr_ar ON tr_ar.track_id = tr.track_id
-      INNER JOIN artist AS ar ON ar.artist_id = tr_ar.artist_id
-    WHERE
+      INNER JOIN track AS tr ON tr.track_id = tr_ge.track_id
+      INNER JOIN year AS ye ON ye.year_id = tr.year_id
+    WHERE 
       ye.year >= 2020 AND
       ge.name = 'Dub' AND
-      ge.name != 'Opener' AND
-      ge.name != 'Closer' AND
-      NOT EXISTS (
-        SELECT 
-          previous_cte.track_id 
-        FROM 
-          opener AS previous_cte
-        WHERE 
-          tr.track_id = previous_cte.track_id 
-      )
-    GROUP BY tr.track_id, tr.file_path
-    ORDER BY random()
-    LIMIT 1
-  ),
+      ge.name != 'Opener' AND 
+      ge.name != 'Closer'
+    GROUP BY tr_ge.track_id, ye.year
+)
+SELECT 
+  tr.track_id, 
+  dub.year,
+  array_agg(DISTINCT ar.name) AS artist, 
+  tr.title, 
+  array_agg(DISTINCT ge.name) AS genre,
+  duration,
+  tr.file_path
+FROM track AS tr
+  INNER JOIN dub ON dub.track_id = tr.track_id
+  INNER JOIN track_genre AS tr_ge ON tr_ge.track_id = dub.track_id
+  INNER JOIN genre AS ge ON ge.genre_id = tr_ge.genre_id
+  INNER JOIN track_artist AS tr_ar ON tr_ar.track_id = tr.track_id
+  INNER JOIN artist AS ar ON ar.artist_id = tr_ar.artist_id
+GROUP BY tr.track_id, dub.year
+ORDER BY random()
+LIMIT 1;
 
-  beatless_ambient AS (
-    SELECT
-      tr.track_id, 
-      array_agg(DISTINCT ar.name) AS artist, 
-      tr.file_path, 
-      tr.title, 
-      array_agg(DISTINCT ge.name) AS genre
-    FROM track AS tr
+
+CREATE VIEW view_beatless_ambient AS
+WITH beatless_ambient AS (
+    SELECT tr_ge.track_id, ye.year FROM track_genre AS tr_ge 
+      INNER JOIN genre AS ge ON ge.genre_id = tr_ge.genre_id
+      INNER JOIN track AS tr ON tr.track_id = tr_ge.track_id
       INNER JOIN year AS ye ON ye.year_id = tr.year_id
-      INNER JOIN track_genre AS tr_ge ON tr_ge.track_id = tr.track_id
-      INNER JOIN genre  AS ge ON ge.genre_id = tr_ge.genre_id
-      INNER JOIN track_artist AS tr_ar ON tr_ar.track_id = tr.track_id
-      INNER JOIN artist AS ar ON ar.artist_id = tr_ar.artist_id
-    WHERE
-      ye.year >= 2020 AND
-      ge.name IN ('Beatless', 'Ambient') AND
-      ge.name != 'Opener' AND
-      ge.name != 'Closer' AND
-      NOT EXISTS (
-        SELECT 
-          previous_cte1.track_id, 
-          previous_cte2.track_id 
-        FROM 
-          opener AS previous_cte1, 
-          dub AS previous_cte2 
-        WHERE 
-          tr.track_id IN (
-            previous_cte1.track_id, 
-            previous_cte2.track_id
-          )
-      )
-    GROUP BY tr.track_id, tr.file_path HAVING COUNT(*) = 2 
-    ORDER BY random()
-    LIMIT 1
-  ),
-
-  ambient_or_downtempo AS (
-    SELECT 
-      tr.track_id, 
-      array_agg(DISTINCT ar.name) AS artist,       
-      tr.file_path, 
-      tr.title, 
-      array_agg(DISTINCT ge.name) AS genre
-    FROM track AS tr
-      INNER JOIN year AS ye ON ye.year_id = tr.year_id 
-      INNER JOIN track_genre AS tr_ge ON tr_ge.track_id = tr.track_id 
-      INNER JOIN genre AS ge ON ge.genre_id = tr_ge.genre_id 
-      INNER JOIN track_artist AS tr_ar ON tr_ar.track_id = tr.track_id
-      INNER JOIN artist AS ar ON ar.artist_id = tr_ar.artist_id
-    WHERE
-      ye.year >= 2020 AND
-      ge.name IN ('Ambient', 'Downtempo', 'Trip-Hop') AND 
-      ge.name != 'Opener' AND
-      ge.name != 'Closer' AND
-      NOT EXISTS (
-        SELECT 
-          previous_cte1.track_id,
-          previous_cte2.track_id,
-          previous_cte3.track_id
-        FROM 
-          opener AS previous_cte1, 
-          dub AS previous_cte2, 
-          beatless_ambient AS previous_cte3
-        WHERE tr.track_id IN (
-          previous_cte1.track_id, 
-          previous_cte2.track_id,
-          previous_cte3.track_id
-        )
-      )
-    GROUP BY tr.track_id, tr.file_path
-    ORDER BY random()
-    LIMIT 4
-  ),
-
-  jungle_or_breakbeat AS (
-    SELECT
-      tr.track_id, 
-      array_agg(DISTINCT ar.name) AS artist,       
-      tr.file_path, 
-      tr.title, 
-      array_agg(DISTINCT ge.name) AS genre
-    FROM track AS tr
-      INNER JOIN year AS ye ON ye.year_id = tr.year_id
-      INNER JOIN track_genre AS tr_ge ON tr_ge.track_id = tr.track_id 
-      INNER JOIN genre  AS ge ON ge.genre_id = tr_ge.genre_id 
-      INNER JOIN track_artist AS tr_ar ON tr_ar.track_id = tr.track_id
-      INNER JOIN artist AS ar ON ar.artist_id = tr_ar.artist_id
     WHERE 
       ye.year >= 2020 AND
-      (ge.name = 'Jungle' OR ge.name = 'Breakbeat') AND
-      ge.name != 'Opener' AND
-      ge.name != 'Closer' AND
-      NOT EXISTS (
-        SELECT 
-          previous_cte1.track_id,
-          previous_cte2.track_id,
-          previous_cte3.track_id,
-          previous_cte4.track_id
-        FROM 
-          opener AS previous_cte1, 
-          dub AS previous_cte2, 
-          beatless_ambient AS previous_cte3, 
-          ambient_or_downtempo AS previous_cte4
-        WHERE 
-          tr.track_id IN (
-            previous_cte1.track_id, 
-            previous_cte2.track_id, 
-            previous_cte3.track_id, 
-            previous_cte4.track_id
-          )
-      )
-    GROUP BY tr.track_id, tr.file_path
-    ORDER BY random()
-    LIMIT 1
-  ),
+      ge.name IN ('Beatless', 'Ambient') AND
+      ge.name NOT IN ('Opener', 'Closer')
+    GROUP BY tr_ge.track_id, ye.year HAVING COUNT(*) = 2
+)
+SELECT 
+  tr.track_id, 
+  beatless_ambient.year,
+  array_agg(DISTINCT ar.name) AS artist, 
+  tr.title, 
+  array_agg(DISTINCT ge.name) AS genre,
+  duration,
+  tr.file_path
+FROM track AS tr
+  INNER JOIN beatless_ambient ON beatless_ambient.track_id = tr.track_id
+  INNER JOIN track_genre AS tr_ge ON tr_ge.track_id = beatless_ambient.track_id
+  INNER JOIN genre AS ge ON ge.genre_id = tr_ge.genre_id
+  INNER JOIN track_artist AS tr_ar ON tr_ar.track_id = tr.track_id
+  INNER JOIN artist AS ar ON ar.artist_id = tr_ar.artist_id
+GROUP BY tr.track_id, beatless_ambient.year
+ORDER BY random()
+LIMIT 1;
 
-  electro AS (
-    SELECT 
-      tr.track_id, 
-      array_agg(DISTINCT ar.name) AS artist,       
-      tr.file_path, 
-      tr.title, 
-      array_agg(DISTINCT ge.name) AS genre
-    FROM track AS tr 
-      INNER JOIN year AS ye ON ye.year_id = tr.year_id 
-      INNER JOIN track_genre AS tr_ge ON tr_ge.track_id = tr.track_id 
-      INNER JOIN genre  AS ge ON ge.genre_id = tr_ge.genre_id 
-      INNER JOIN track_artist AS tr_ar ON tr_ar.track_id = tr.track_id
-      INNER JOIN artist AS ar ON ar.artist_id = tr_ar.artist_id
+
+CREATE VIEW view_ambient_downtempo AS
+WITH ambient_downtempo AS (
+    SELECT tr_ge.track_id, ye.year FROM track_genre AS tr_ge 
+      INNER JOIN genre AS ge ON ge.genre_id = tr_ge.genre_id
+      INNER JOIN track AS tr ON tr.track_id = tr_ge.track_id
+      INNER JOIN year AS ye ON ye.year_id = tr.year_id
+    WHERE 
+      ye.year >= 2020 AND
+      ge.name IN ('Ambient', 'Downtempo', 'Trip-Hop') AND
+      ge.name != 'Opener' AND 
+      ge.name != 'Closer'
+    GROUP BY tr_ge.track_id, ye.year
+)
+SELECT 
+  tr.track_id, 
+  ambient_downtempo.year,
+  array_agg(DISTINCT ar.name) AS artist, 
+  tr.title, 
+  array_agg(DISTINCT ge.name) AS genre,
+  duration,
+  tr.file_path
+FROM track AS tr
+  INNER JOIN ambient_downtempo ON ambient_downtempo.track_id = tr.track_id
+  INNER JOIN track_genre AS tr_ge ON tr_ge.track_id = ambient_downtempo.track_id
+  INNER JOIN genre AS ge ON ge.genre_id = tr_ge.genre_id
+  INNER JOIN track_artist AS tr_ar ON tr_ar.track_id = tr.track_id
+  INNER JOIN artist AS ar ON ar.artist_id = tr_ar.artist_id
+GROUP BY tr.track_id, ambient_downtempo.year
+ORDER BY random()
+LIMIT 4;
+
+
+
+CREATE VIEW view_jungle_breakbeat AS
+WITH jungle_breakbeat AS (
+    SELECT tr_ge.track_id, ye.year FROM track_genre AS tr_ge 
+      INNER JOIN genre AS ge ON ge.genre_id = tr_ge.genre_id
+      INNER JOIN track AS tr ON tr.track_id = tr_ge.track_id
+      INNER JOIN year AS ye ON ye.year_id = tr.year_id
+    WHERE 
+      ye.year >= 2020 AND
+      ge.name IN ('Jungle', 'Breakbeat') AND
+      ge.name != 'Opener' AND 
+      ge.name != 'Closer'
+    GROUP BY tr_ge.track_id, ye.year
+)
+SELECT 
+  tr.track_id, 
+  jungle_breakbeat.year,
+  array_agg(DISTINCT ar.name) AS artist, 
+  tr.title, 
+  array_agg(DISTINCT ge.name) AS genre,
+  duration,
+  tr.file_path
+FROM track AS tr
+  INNER JOIN jungle_breakbeat ON jungle_breakbeat.track_id = tr.track_id
+  INNER JOIN track_genre AS tr_ge ON tr_ge.track_id = jungle_breakbeat.track_id
+  INNER JOIN genre AS ge ON ge.genre_id = tr_ge.genre_id
+  INNER JOIN track_artist AS tr_ar ON tr_ar.track_id = tr.track_id
+  INNER JOIN artist AS ar ON ar.artist_id = tr_ar.artist_id
+GROUP BY tr.track_id, jungle_breakbeat.year
+ORDER BY random()
+LIMIT 1;
+
+
+
+CREATE VIEW view_electro AS
+WITH electro AS (
+    SELECT tr_ge.track_id, ye.year FROM track_genre AS tr_ge 
+      INNER JOIN genre AS ge ON ge.genre_id = tr_ge.genre_id
+      INNER JOIN track AS tr ON tr.track_id = tr_ge.track_id
+      INNER JOIN year AS ye ON ye.year_id = tr.year_id
     WHERE 
       ye.year >= 2020 AND
       ge.name = 'Electro' AND
-      ge.name != 'Opener' AND
-      ge.name != 'Closer' AND
-      NOT EXISTS (
-        SELECT 
-          previous_cte1.track_id,
-          previous_cte2.track_id,
-          previous_cte3.track_id,
-          previous_cte4.track_id,
-          previous_cte5.track_id
-        FROM 
-          opener AS previous_cte1, 
-          dub AS previous_cte2, 
-          beatless_ambient AS previous_cte3, 
-          ambient_or_downtempo AS previous_cte4, 
-          jungle_or_breakbeat AS previous_cte5 
-        WHERE 
-          tr.track_id IN (
-            previous_cte1.track_id, 
-            previous_cte2.track_id, 
-            previous_cte3.track_id, 
-            previous_cte4.track_id,
-            previous_cte5.track_id
-          )
-      )
-    GROUP BY tr.track_id, tr.file_path
-    ORDER BY random()
-    LIMIT 1
-  ),
+      ge.name != 'Opener' AND 
+      ge.name != 'Closer'
+    GROUP BY tr_ge.track_id, ye.year
+)
+SELECT 
+  tr.track_id, 
+  electro.year,
+  array_agg(DISTINCT ar.name) AS artist, 
+  tr.title, 
+  array_agg(DISTINCT ge.name) AS genre,
+  duration,
+  tr.file_path
+FROM track AS tr
+  INNER JOIN electro ON electro.track_id = tr.track_id
+  INNER JOIN track_genre AS tr_ge ON tr_ge.track_id = electro.track_id
+  INNER JOIN genre AS ge ON ge.genre_id = tr_ge.genre_id
+  INNER JOIN track_artist AS tr_ar ON tr_ar.track_id = tr.track_id
+  INNER JOIN artist AS ar ON ar.artist_id = tr_ar.artist_id
+GROUP BY tr.track_id, electro.year
+ORDER BY random()
+LIMIT 1;
 
-  indie_soul_rock AS (
-    SELECT 
-      tr.track_id, 
-      array_agg(DISTINCT ar.name) AS artist,       
-      tr.file_path, 
-      tr.title, 
-      array_agg(DISTINCT ge.name) AS genre
-    FROM track AS tr 
-      INNER JOIN year AS ye ON ye.year_id = tr.year_id 
-      INNER JOIN track_genre AS tr_ge ON tr_ge.track_id = tr.track_id 
-      INNER JOIN genre  AS ge ON ge.genre_id = tr_ge.genre_id 
-      INNER JOIN track_artist AS tr_ar ON tr_ar.track_id = tr.track_id
-      INNER JOIN artist AS ar ON ar.artist_id = tr_ar.artist_id
-    WHERE
+
+
+CREATE VIEW view_indie_soul_psychodelicrock AS
+WITH indie_soul_psychodelicrock AS (
+    SELECT tr_ge.track_id, ye.year FROM track_genre AS tr_ge 
+      INNER JOIN genre AS ge ON ge.genre_id = tr_ge.genre_id
+      INNER JOIN track AS tr ON tr.track_id = tr_ge.track_id
+      INNER JOIN year AS ye ON ye.year_id = tr.year_id
+    WHERE 
       ge.name IN ('Indie', 'Soul', 'Psychedelic Rock') AND
-      ge.name != 'Opener' AND
-      ge.name != 'Closer' AND
-      NOT EXISTS (
-        SELECT 
-          previous_cte1.track_id,
-          previous_cte2.track_id,
-          previous_cte3.track_id,
-          previous_cte4.track_id,
-          previous_cte5.track_id,
-          previous_cte6.track_id
-        FROM 
-          opener AS previous_cte1, 
-          dub AS previous_cte2, 
-          beatless_ambient AS previous_cte3, 
-          ambient_or_downtempo AS previous_cte4, 
-          jungle_or_breakbeat AS previous_cte5, 
-          electro AS previous_cte6 
-        WHERE 
-          tr.track_id IN (
-            previous_cte1.track_id,
-            previous_cte2.track_id,
-            previous_cte3.track_id,
-            previous_cte4.track_id,
-            previous_cte5.track_id,
-            previous_cte6.track_id
-          )
-      )
-    GROUP BY tr.track_id, tr.file_path
-    ORDER BY random()
-    LIMIT 1
-  ),
+      ge.name != 'Opener' AND 
+      ge.name != 'Closer'
+    GROUP BY tr_ge.track_id, ye.year
+)
+SELECT 
+  tr.track_id, 
+  indie_soul_psychodelicrock.year,
+  array_agg(DISTINCT ar.name) AS artist, 
+  tr.title, 
+  array_agg(DISTINCT ge.name) AS genre,
+  duration,
+  tr.file_path
+FROM track AS tr
+  INNER JOIN indie_soul_psychodelicrock ON indie_soul_psychodelicrock.track_id = tr.track_id
+  INNER JOIN track_genre AS tr_ge ON tr_ge.track_id = indie_soul_psychodelicrock.track_id
+  INNER JOIN genre AS ge ON ge.genre_id = tr_ge.genre_id
+  INNER JOIN track_artist AS tr_ar ON tr_ar.track_id = tr.track_id
+  INNER JOIN artist AS ar ON ar.artist_id = tr_ar.artist_id
+GROUP BY tr.track_id, indie_soul_psychodelicrock.year
+ORDER BY random()
+LIMIT 1;
 
-  beat AS (
-    SELECT 
-      tr.track_id, 
-      array_agg(DISTINCT ar.name) AS artist,       
-      tr.file_path, 
-      tr.title, 
-      array_agg(DISTINCT ge.name) AS genre
-    FROM track AS tr 
-      INNER JOIN year AS ye ON ye.year_id = tr.year_id 
-      INNER JOIN track_genre AS tr_ge ON tr_ge.track_id = tr.track_id 
-      INNER JOIN genre  AS ge ON ge.genre_id = tr_ge.genre_id 
-      INNER JOIN track_artist AS tr_ar ON tr_ar.track_id = tr.track_id
-      INNER JOIN artist AS ar ON ar.artist_id = tr_ar.artist_id
+
+
+CREATE VIEW view_dance AS
+WITH dance AS (
+    SELECT tr_ge.track_id, ye.year FROM track_genre AS tr_ge 
+      INNER JOIN genre AS ge ON ge.genre_id = tr_ge.genre_id
+      INNER JOIN track AS tr ON tr.track_id = tr_ge.track_id
+      INNER JOIN year AS ye ON ye.year_id = tr.year_id
     WHERE 
       ye.year >= 2020 AND 
-      ge.name IN ('House', 'Acid House', 'Italo House', 'Techno', 'Trance') AND
+      ge.name IN ('House', 'Acid House', 'Italo House', 'Techno', 'Trance', 'Psytrance') AND
       ge.name != 'Opener' AND
-      ge.name != 'Closer' AND
-      NOT EXISTS (
-        SELECT
-          previous_cte1.track_id,
-          previous_cte2.track_id,
-          previous_cte3.track_id,
-          previous_cte4.track_id,
-          previous_cte5.track_id,
-          previous_cte6.track_id,
-          previous_cte7.track_id
-        FROM 
-          opener AS previous_cte1, 
-          dub AS previous_cte2, 
-          beatless_ambient AS previous_cte3, 
-          ambient_or_downtempo AS previous_cte4, 
-          jungle_or_breakbeat AS previous_cte5, 
-          electro AS previous_cte6,
-          indie_soul_rock AS previous_cte7
-        WHERE
-          tr.track_id IN (
-            previous_cte1.track_id,
-            previous_cte2.track_id,
-            previous_cte3.track_id,
-            previous_cte4.track_id,
-            previous_cte5.track_id,
-            previous_cte6.track_id,
-            previous_cte7.track_id
-          )
-      )
-    GROUP BY tr.track_id, tr.file_path
-    ORDER BY random()
-    LIMIT 1
-  ),
+      ge.name != 'Closer' 
+    GROUP BY tr_ge.track_id, ye.year
+)
+SELECT 
+  tr.track_id, 
+  dance.year,
+  array_agg(DISTINCT ar.name) AS artist, 
+  tr.title, 
+  array_agg(DISTINCT ge.name) AS genre,
+  duration,
+  tr.file_path
+FROM track AS tr
+  INNER JOIN dance ON dance.track_id = tr.track_id
+  INNER JOIN track_genre AS tr_ge ON tr_ge.track_id = dance.track_id
+  INNER JOIN genre AS ge ON ge.genre_id = tr_ge.genre_id
+  INNER JOIN track_artist AS tr_ar ON tr_ar.track_id = tr.track_id
+  INNER JOIN artist AS ar ON ar.artist_id = tr_ar.artist_id
+GROUP BY tr.track_id, dance.year
+ORDER BY random()
+LIMIT 1;
 
-  world_music AS (
-    SELECT 
-      tr.track_id, 
-      array_agg(DISTINCT ar.name) AS artist,       
-      tr.file_path, 
-      tr.title, 
-      array_agg(DISTINCT ge.name) AS genre
-    FROM track AS tr 
-      INNER JOIN year AS ye ON ye.year_id = tr.year_id 
-      INNER JOIN track_genre AS tr_ge ON tr_ge.track_id = tr.track_id 
-      INNER JOIN genre  AS ge ON ge.genre_id = tr_ge.genre_id 
-      INNER JOIN track_artist AS tr_ar ON tr_ar.track_id = tr.track_id
-      INNER JOIN artist AS ar ON ar.artist_id = tr_ar.artist_id
+
+
+CREATE VIEW view_worldmusic AS
+WITH worldmusic AS (
+    SELECT tr_ge.track_id, ye.year FROM track_genre AS tr_ge 
+      INNER JOIN genre AS ge ON ge.genre_id = tr_ge.genre_id
+      INNER JOIN track AS tr ON tr.track_id = tr_ge.track_id
+      INNER JOIN year AS ye ON ye.year_id = tr.year_id
     WHERE 
       ge.name = 'World Music' AND
       ge.name != 'Opener' AND
-      ge.name != 'Closer' AND 
-      NOT EXISTS (
-        SELECT
-          previous_cte1.track_id,
-          previous_cte2.track_id,
-          previous_cte3.track_id,
-          previous_cte4.track_id,
-          previous_cte5.track_id,
-          previous_cte6.track_id,
-          previous_cte7.track_id,
-          previous_cte8.track_id
-        FROM 
-          opener AS previous_cte1, 
-          dub AS previous_cte2, 
-          beatless_ambient AS previous_cte3, 
-          ambient_or_downtempo AS previous_cte4, 
-          jungle_or_breakbeat AS previous_cte5, 
-          electro AS previous_cte6,
-          indie_soul_rock AS previous_cte7,
-          beat AS previous_cte8 
-        WHERE 
-          tr.track_id IN (
-            previous_cte1.track_id,
-            previous_cte2.track_id,
-            previous_cte3.track_id,
-            previous_cte4.track_id,
-            previous_cte5.track_id,
-            previous_cte6.track_id,
-            previous_cte7.track_id,
-            previous_cte8.track_id
-          )
-      )
-    GROUP BY tr.track_id, tr.file_path
-    ORDER BY random()
-    LIMIT 1
-  ),
+      ge.name != 'Closer' 
+    GROUP BY tr_ge.track_id, ye.year
+)
+SELECT 
+  tr.track_id, 
+  worldmusic.year,
+  array_agg(DISTINCT ar.name) AS artist, 
+  tr.title, 
+  array_agg(DISTINCT ge.name) AS genre,
+  duration,
+  tr.file_path
+FROM track AS tr
+  INNER JOIN worldmusic ON worldmusic.track_id = tr.track_id
+  INNER JOIN track_genre AS tr_ge ON tr_ge.track_id = worldmusic.track_id
+  INNER JOIN genre AS ge ON ge.genre_id = tr_ge.genre_id
+  INNER JOIN track_artist AS tr_ar ON tr_ar.track_id = tr.track_id
+  INNER JOIN artist AS ar ON ar.artist_id = tr_ar.artist_id
+GROUP BY tr.track_id, worldmusic.year
+ORDER BY random()
+LIMIT 1;
 
-  any_old AS (
-    SELECT 
-      tr.track_id, 
-      array_agg(DISTINCT ar.name) AS artist,       
-      tr.file_path, 
-      tr.title, 
-      array_agg(DISTINCT ge.name) AS genre
-    FROM track AS tr 
-      INNER JOIN year AS ye ON ye.year_id = tr.year_id 
-      INNER JOIN track_genre AS tr_ge ON tr_ge.track_id = tr.track_id 
-      INNER JOIN genre  AS ge ON ge.genre_id = tr_ge.genre_id 
-      INNER JOIN track_artist AS tr_ar ON tr_ar.track_id = tr.track_id
-      INNER JOIN artist AS ar ON ar.artist_id = tr_ar.artist_id
+
+
+CREATE VIEW view_anyold AS
+WITH anyold AS (
+    SELECT tr_ge.track_id, ye.year FROM track_genre AS tr_ge 
+      INNER JOIN genre AS ge ON ge.genre_id = tr_ge.genre_id
+      INNER JOIN track AS tr ON tr.track_id = tr_ge.track_id
+      INNER JOIN year AS ye ON ye.year_id = tr.year_id
     WHERE 
       ye.year >= 2004 AND 
-      ge.name IN ('Acid House', 'Ambient', 'Techno', 'Electro', 'Dub') AND
+      ge.name IN ('Ambient', 'Electro', 'Dub') AND
       ge.name != 'Opener' AND
-      ge.name != 'Closer' AND 
-      NOT EXISTS (
-        SELECT 
-          previous_cte1.track_id,
-          previous_cte2.track_id,
-          previous_cte3.track_id,
-          previous_cte4.track_id,
-          previous_cte5.track_id,
-          previous_cte6.track_id,
-          previous_cte7.track_id,
-          previous_cte8.track_id,
-          previous_cte9.track_id
-        FROM 
-          opener AS previous_cte1, 
-          dub AS previous_cte2, 
-          beatless_ambient AS previous_cte3, 
-          ambient_or_downtempo AS previous_cte4, 
-          jungle_or_breakbeat AS previous_cte5, 
-          electro AS previous_cte6,
-          indie_soul_rock AS previous_cte7,
-          beat AS previous_cte8,
-          world_music AS previous_cte9
-        WHERE 
-          tr.track_id IN (
-            previous_cte1.track_id,
-            previous_cte2.track_id,
-            previous_cte3.track_id,
-            previous_cte4.track_id,
-            previous_cte5.track_id,
-            previous_cte6.track_id,
-            previous_cte7.track_id,
-            previous_cte8.track_id,
-            previous_cte9.track_id
-          )
-      )
-    GROUP BY tr.track_id, tr.file_path
-    ORDER BY random()
-    LIMIT 1
-  ),
+      ge.name != 'Closer' 
+    GROUP BY tr_ge.track_id, ye.year
+)
+SELECT 
+  tr.track_id, 
+  anyold.year,
+  array_agg(DISTINCT ar.name) AS artist, 
+  tr.title, 
+  array_agg(DISTINCT ge.name) AS genre,
+  duration,
+  tr.file_path
+FROM track AS tr
+  INNER JOIN anyold ON anyold.track_id = tr.track_id
+  INNER JOIN track_genre AS tr_ge ON tr_ge.track_id = anyold.track_id
+  INNER JOIN genre AS ge ON ge.genre_id = tr_ge.genre_id
+  INNER JOIN track_artist AS tr_ar ON tr_ar.track_id = tr.track_id
+  INNER JOIN artist AS ar ON ar.artist_id = tr_ar.artist_id
+GROUP BY tr.track_id, anyold.year
+ORDER BY random()
+LIMIT 1;
 
-  closer AS (
-    SELECT 
-      tr.track_id, 
-      array_agg(DISTINCT ar.name) AS artist,       
-      tr.file_path, 
-      tr.title, 
-      array_agg(DISTINCT ge.name) AS genre
-    FROM track AS tr 
-      INNER JOIN year AS ye ON ye.year_id = tr.year_id 
-      INNER JOIN track_genre AS tr_ge ON tr_ge.track_id = tr.track_id 
-      INNER JOIN genre  AS ge ON ge.genre_id = tr_ge.genre_id 
-      INNER JOIN track_artist AS tr_ar ON tr_ar.track_id = tr.track_id
-      INNER JOIN artist AS ar ON ar.artist_id = tr_ar.artist_id
+
+
+CREATE VIEW view_closer AS
+WITH closer AS (
+    SELECT tr_ge.track_id, ye.year FROM track_genre AS tr_ge 
+      INNER JOIN genre AS ge ON ge.genre_id = tr_ge.genre_id
+      INNER JOIN track AS tr ON tr.track_id = tr_ge.track_id
+      INNER JOIN year AS ye ON ye.year_id = tr.year_id
     WHERE 
-      ye.year >= 2020 AND 
-      ge.name IN ('Closer', 'Vocal') AND
-      ge.name != 'Opener' AND
-      ge.name != 'Closer' AND 
-      NOT EXISTS (
-        SELECT 
-          previous_cte1.track_id,
-          previous_cte2.track_id,
-          previous_cte3.track_id,
-          previous_cte4.track_id,
-          previous_cte5.track_id,
-          previous_cte6.track_id,
-          previous_cte7.track_id,
-          previous_cte8.track_id,
-          previous_cte9.track_id,
-          previous_cte10.track_id
-        FROM 
-          opener AS previous_cte1, 
-          dub AS previous_cte2, 
-          beatless_ambient AS previous_cte3, 
-          ambient_or_downtempo AS previous_cte4, 
-          jungle_or_breakbeat AS previous_cte5, 
-          electro AS previous_cte6,
-          indie_soul_rock AS previous_cte7,
-          beat AS previous_cte8,
-          world_music AS previous_cte9,
-          any_old AS previous_cte10
-        WHERE
-          tr.track_id IN (
-            previous_cte1.track_id,
-            previous_cte2.track_id,
-            previous_cte3.track_id,
-            previous_cte4.track_id,
-            previous_cte5.track_id,
-            previous_cte6.track_id,
-            previous_cte7.track_id,
-            previous_cte8.track_id,
-            previous_cte9.track_id,
-            previous_cte10.track_id
-          )
-      )
-    GROUP BY tr.track_id, tr.file_path
-    ORDER BY random()
-    LIMIT 1
-  )
-
+    ye.year >= 2020 AND 
+    ge.name IN ('Closer', 'Vocal')
+    GROUP BY tr_ge.track_id, ye.year
+)
 SELECT 
-  o.track_id AS "trackId", 
-  o.artist, 
-  o.title, 
-  o.genre, 
-  o.file_path AS "filePath"
-FROM 
-  opener AS o UNION
-
-SELECT 
-  d.track_id AS "trackId", 
-  d.artist, 
-  d.title, 
-  d.genre, 
-  d.file_path AS "filePath"
-FROM 
-  dub AS d UNION 
-
-SELECT 
-  b.track_id AS "trackId", 
-  b.artist, 
-  b.title, 
-  b.genre, 
-  b.file_path AS "filePath"
-FROM 
-  beatless_ambient AS b UNION
-
-SELECT 
-  a.track_id AS "trackId", 
-  a.artist, 
-  a.title, 
-  a.genre, 
-  a.file_path AS "filePath"
-FROM 
-  ambient_or_downtempo AS a UNION
-
-SELECT 
-  j.track_id AS "trackId", 
-  j.artist, 
-  j.title, 
-  j.genre, 
-  j.file_path AS "filePath"
-FROM 
-  jungle_or_breakbeat AS j UNION
-
-SELECT 
-  e.track_id AS "trackId", 
-  e.artist, 
-  e.title, 
-  e.genre, 
-  e.file_path AS "filePath"
-FROM 
-  electro AS e UNION 
-
-SELECT 
-  i.track_id AS "trackId", 
-  i.artist, 
-  i.title, 
-  i.genre, 
-  i.file_path AS "filePath"
-FROM 
-  indie_soul_rock AS i UNION
-
-SELECT 
-  be.track_id AS "trackId", 
-  be.artist, 
-  be.title, 
-  be.genre, 
-  be.file_path AS "filePath"
-FROM 
-  beat AS be UNION
-
-SELECT 
-  w.track_id AS "trackId", 
-  w.artist,
-  w.title, 
-  w.genre, 
-  w.file_path AS "filePath"
-FROM 
-  world_music AS w UNION 
-
-SELECT 
-  an.track_id AS "trackId", 
-  an.artist, 
-  an.title, 
-  an.genre, 
-  an.file_path AS "filePath"
-FROM 
-  any_old AS an UNION
-
-SELECT 
-  result.track_id AS "trackId", 
-  result.artist, 
-  result.title, 
-  result.genre, 
-  result.file_path AS "filePath"
-FROM 
-  closer AS result;
+  tr.track_id, 
+  closer.year,
+  array_agg(DISTINCT ar.name) AS artist, 
+  tr.title, 
+  array_agg(DISTINCT ge.name) AS genre,
+  duration,
+  tr.file_path
+FROM track AS tr
+  INNER JOIN closer ON closer.track_id = tr.track_id
+  INNER JOIN track_genre AS tr_ge ON tr_ge.track_id = closer.track_id
+  INNER JOIN genre AS ge ON ge.genre_id = tr_ge.genre_id
+  INNER JOIN track_artist AS tr_ar ON tr_ar.track_id = tr.track_id
+  INNER JOIN artist AS ar ON ar.artist_id = tr_ar.artist_id
+GROUP BY tr.track_id, closer.year
+ORDER BY random()
+LIMIT 1;
