@@ -1,9 +1,8 @@
 import path from "path";
 import fs from "fs-extra";
-import util from "util";
 import * as mm from "music-metadata";
 import { v4 as uuid } from "uuid";
-import { ParsedTrack } from "../types";
+import { Track } from "../types";
 import { SUPPORTED_CODEC } from "../config/env";
 
 export function logDBError(msg: string, err: unknown) {
@@ -63,14 +62,14 @@ export function filterByExtension(filepath: string) {
 }
 
 export class TrackMetadataParser {
-  private readonly filePath: string;
+  readonly #filePath: string;
 
   constructor(filePath: string) {
-    this.filePath = filePath;
+    this.#filePath = filePath;
   }
 
-  async parseAudioFile(): Promise<ParsedTrack> {
-    const trackMetadata = await mm.parseFile(this.filePath);
+  async parseAudioFile(): Promise<Track> {
+    const trackMetadata = await mm.parseFile(this.#filePath);
 
     const duration = this.parseDuration(trackMetadata.format.duration);
     const artist = this.parseTrackArtist(trackMetadata.common.artists);
@@ -79,7 +78,7 @@ export class TrackMetadataParser {
     const genre = this.parseGenre(trackMetadata.common.genre);
 
     const extendedMetadata = {
-      filePath: this.filePath,
+      filePath: this.#filePath,
       duration,
       artist,
       year,
@@ -111,11 +110,13 @@ export class TrackMetadataParser {
 
   private parseArray(arr?: string[]): string[] {
     if (Array.isArray(arr) && arr.length > 0 && arr[0].length > 0) {
-      // filter out empty artist names. Use Set to get rid of duplicate items
+      // Use Set to get rid of duplicate items
       return [...new Set(arr.filter((str) => str !== ""))];
     } else {
       console.debug(
-        `${this.filePath}: ID3 tag value which is either not an array or an empty array is set to "Unknown"`,
+        `${
+          this.#filePath
+        }: ID3 tag value which is either not an array or an empty array is set to "Unknown"`,
       );
       return [];
     }
