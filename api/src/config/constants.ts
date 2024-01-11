@@ -1,5 +1,19 @@
 import { HttpError } from "../utils/error";
 
+export const SUBPLAYLISTS = [
+  "Opener",
+  "Dub",
+  "Beatless Ambient",
+  "Ambient Downtempo",
+  "Jungle Breakbeat",
+  "Electro",
+  "Indie Soul Psy Rock",
+  "Dance",
+  "World Music",
+  "Any Old",
+  "Closer",
+] as const;
+
 export const GENRES = [
   "2-Step",
   "Garage House",
@@ -35,7 +49,7 @@ export const GENRES = [
   "Vocal",
   "World Music",
   "[Soundtrack]",
-];
+] as const;
 
 export const SORT_BY = [
   "year",
@@ -57,30 +71,6 @@ export const DATABASE_ERROR_CODES: {
 };
 
 // 'as const' allows us to use this array as type
-export const RESOURCES = [
-  "user_own_account",
-  "all_user_accounts",
-  "user_own_settings",
-  "user_own_bookmarks",
-  "broadcast",
-  "all_broadcasts",
-  "broadcast_draft",
-  "all_broadcast_drafts",
-  "scheduled_broadcast",
-  "stream_like",
-  "audio_stream",
-  "user_own_chat_message",
-  "any_chat_message",
-] as const;
-
-export const PERMISSIONS = [
-  "create",
-  "read",
-  "update",
-  "delete",
-  "update_partially",
-] as const;
-
 export const HTTP_ERROR_MESSAGES = [
   "Specify either email OR username",
   "Invalid email, username or password",
