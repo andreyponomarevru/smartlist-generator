@@ -1,0 +1,15 @@
+@import "../../global.scss";
+
+.stats-header {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  padding: 0 1rem;
+
+  &__title {
+    font-weight: bold;
+  }
+
+  &__count {
+  }
+}
