@@ -1,16 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 import { Track } from "../track/track";
-import { Btn } from "../btn/btn";
+import { SmallBtn } from "../small-btn/small-btn";
 
 import "./subplaylist.scss";
 
 const { REACT_APP_API_ROOT } = process.env;
 
-interface SubplaylistProps {
+interface Props {
   name: string;
 }
 
-function Subplaylist(props: SubplaylistProps) {
+function Subplaylist(props: Props) {
   const apiResponse = [
     {
       year: 2001,
@@ -36,14 +36,18 @@ function Subplaylist(props: SubplaylistProps) {
     <div className="subplaylist">
       <header className="subplaylist__header">
         <h3 className="subplaylist__name">{props.name}</h3>
-        <Btn className="subplaylist__btn1" name="Reset" theme="white" />
-        <Btn className="subplaylist__btn2" name="Roll the dice" theme="white" />
+        <SmallBtn className="subplaylist__btn1" name="Reset" theme="white" />
+        <SmallBtn
+          className="subplaylist__btn2"
+          name="Roll the dice"
+          theme="white"
+        />
       </header>
-      <div className="subplaylist__list">
+      <ul className="subplaylist__list">
         {apiResponse.map((track) => (
           <Track meta={track} />
         ))}
-      </div>
+      </ul>
     </div>
   );
 }
