@@ -3,6 +3,15 @@ import Joi from "joi";
 import { SORT_BY, SORT_ORDER, PER_PAGE_NUMS } from "../config/constants";
 import { FilterParams } from "../types";
 
+export const createPlaylistSchema = Joi.object<{ name: string }>({
+  name: Joi.string().min(1).max(255).required().messages({
+    "string.base": `"name" should be a type of 'string'`,
+    "number.min": `"name" min length is 1 symbol`,
+    "number.max": `"name" max length is 255 symbols`,
+    "any.required": `"name" is required`,
+  }),
+});
+
 export const schemaSort = Joi.object()
   .keys({
     sortBy: Joi.string()
@@ -54,18 +63,10 @@ export const schemaId = Joi.number().integer().min(1).required().messages({
   "any.required": `"id" is required`,
 });
 
-export const schemaCatNo = Joi.string().min(1).max(255).required().messages({
-  "string.base": `"catNo" must be a type of 'string'`,
-  "number.min": `"catNo" min length is 1 symbol`,
-  "number.max": `"catNo" max length is 255 symbols`,
-  "any.required": `"id" is required`,
-});
-
 export const schemaFilterParams = Joi.object<FilterParams>()
   .keys({
     yearIds: Joi.array().items(Joi.number()).allow(null),
     artistIds: Joi.array().items(Joi.number()).allow(null),
-    labelIds: Joi.array().items(Joi.number()).allow(null),
     genreIds: Joi.array().items(Joi.number()).allow(null),
   })
   .options({ presence: "required" });
