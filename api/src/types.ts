@@ -1,27 +1,29 @@
+import { GENRES } from "./config/constants";
+
 export interface Cover {
   readonly url: string;
   readonly destinationFilepath?: string;
   readonly data?: Buffer;
 }
 
-export type Title = string;
-export type Year = number;
-export type ReleaseId = number;
-export type CoverPath = string;
-export type Artist = string[];
-export type Duration = number;
-export type Genre = string[];
-export type FilePath = string;
-export type TrackId = number;
-
 export interface Track {
-  trackId?: TrackId;
-  filePath: FilePath;
-  duration: Duration;
-  artist: Artist;
-  year: Year;
-  title: Title;
-  genre: Genre;
+  trackId?: number;
+  filePath: string;
+  duration: number;
+  artist: string[];
+  year: number;
+  title: string;
+  genre: string[];
+}
+
+export interface ValidatedTrack {
+  trackId?: number;
+  filePath: string;
+  duration: number;
+  artist: string[];
+  year: number;
+  title: string;
+  genre: typeof GENRES[number][];
 }
 
 export type UserSettings = {
@@ -48,4 +50,9 @@ export type FilterParams = {
   yearIds: number[] | null;
   artistIds: number[] | null;
   genreIds: number[] | null;
+};
+
+export type CreateSubplaylistDBResponse = {
+  subplaylist_id: number;
+  name: string;
 };
