@@ -1,7 +1,7 @@
 version: "3.7"
 
 services:
-  node:
+  api:
     container_name: api
     build:
       context: ./api
