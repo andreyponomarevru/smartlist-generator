@@ -35,6 +35,6 @@ export async function validateLib(
   }
 }
 
-router.get("/", validateLib);
+router.get("/api/lib/validation", validateLib);
 
 export { router };
