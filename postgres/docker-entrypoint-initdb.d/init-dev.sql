@@ -2,6 +2,28 @@
 -- MUSIC DATABASE
 --
 
+
+
+CREATE TABLE IF NOT EXISTS subplaylist (
+  PRIMARY KEY (subplaylist_id),
+  subplaylist_id integer            GENERATED ALWAYS AS IDENTITY,
+  name           varchar(100)       NOT NULL, 
+                                    UNIQUE (name),
+                                    CHECK (name != '')
+);
+
+
+
+CREATE TABLE IF NOT EXISTS playlist (
+  PRIMARY KEY (playlist_id),
+  playlist_id    integer            GENERATED ALWAYS AS IDENTITY,
+  name           varchar(255)       NOT NULL,
+                                    UNIQUE (name),
+                                    CHECK (name != '')
+);
+
+
+
 CREATE TABLE IF NOT EXISTS year (
   PRIMARY KEY (year_id),
   year_id        integer            GENERATED ALWAYS AS IDENTITY,
@@ -21,12 +43,41 @@ CREATE TABLE IF NOT EXISTS track (
   duration         numeric          NOT NULL,
   file_path        varchar(255),    UNIQUE (file_path),
   								                  CHECK (file_path != ''),
-  is_excluded      boolean          DEFAULT false,
                                   
   FOREIGN KEY (year_id) REFERENCES year (year_id)
     ON DELETE RESTRICT
 );
 CREATE INDEX track_title_idx ON track (lower(title) varchar_pattern_ops);
+
+
+
+CREATE TABLE IF NOT EXISTS track_subplaylist (
+  PRIMARY KEY (subplaylist_id, track_id),
+  track_id       integer            NOT NULL,
+  subplaylist_id integer            NOT NULL,
+
+  FOREIGN KEY (track_id) REFERENCES track (track_id)
+    ON UPDATE NO ACTION
+    ON DELETE CASCADE,
+  FOREIGN KEY (subplaylist_id) REFERENCES subplaylist (subplaylist_id)
+    ON UPDATE NO ACTION
+    ON DELETE RESTRICT
+);
+
+
+
+CREATE TABLE IF NOT EXISTS track_playlist (
+  PRIMARY KEY (track_id, playlist_id),
+  track_id          integer            NOT NULL,
+  playlist_id       integer            NOT NULL,
+
+  FOREIGN KEY (track_id) REFERENCES track (track_id)
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION,
+  FOREIGN KEY (playlist_id) REFERENCES playlist (playlist_id)
+    ON UPDATE NO ACTION
+    ON DELETE CASCADE
+);
 
 
 
@@ -58,8 +109,8 @@ CREATE TABLE IF NOT EXISTS genre (
   PRIMARY KEY (genre_id),
   genre_id         integer          GENERATED ALWAYS AS IDENTITY,
   name             varchar(200)     NOT NULL,
-  								 UNIQUE (name),
-  							   CHECK (name != '')
+  								                  UNIQUE (name),
+  							                    CHECK (name != '')
 );
 
 
@@ -85,7 +136,7 @@ CREATE TABLE IF NOT EXISTS appuser (
   PRIMARY KEY (appuser_id),
   appuser_id           integer        GENERATED ALWAYS AS IDENTITY,
   name                 varchar(50)    NOT NULL,
-											 CHECK (name != ''),
+										                  CHECK (name != ''),
   settings             jsonb
 );
 
@@ -304,8 +355,8 @@ LIMIT 1;
 
 
 
-CREATE VIEW view_indie_soul_psychodelicrock AS
-WITH indie_soul_psychodelicrock AS (
+CREATE VIEW view_indie_soul_psyrock AS
+WITH indie_soul_psyrock AS (
     SELECT tr_ge.track_id, ye.year FROM track_genre AS tr_ge 
       INNER JOIN genre AS ge ON ge.genre_id = tr_ge.genre_id
       INNER JOIN track AS tr ON tr.track_id = tr_ge.track_id
@@ -318,19 +369,19 @@ WITH indie_soul_psychodelicrock AS (
 )
 SELECT 
   tr.track_id, 
-  indie_soul_psychodelicrock.year,
+  indie_soul_psyrock.year,
   array_agg(DISTINCT ar.name) AS artist, 
   tr.title, 
   array_agg(DISTINCT ge.name) AS genre,
   duration,
   tr.file_path
 FROM track AS tr
-  INNER JOIN indie_soul_psychodelicrock ON indie_soul_psychodelicrock.track_id = tr.track_id
-  INNER JOIN track_genre AS tr_ge ON tr_ge.track_id = indie_soul_psychodelicrock.track_id
+  INNER JOIN indie_soul_psyrock ON indie_soul_psyrock.track_id = tr.track_id
+  INNER JOIN track_genre AS tr_ge ON tr_ge.track_id = indie_soul_psyrock.track_id
   INNER JOIN genre AS ge ON ge.genre_id = tr_ge.genre_id
   INNER JOIN track_artist AS tr_ar ON tr_ar.track_id = tr.track_id
   INNER JOIN artist AS ar ON ar.artist_id = tr_ar.artist_id
-GROUP BY tr.track_id, indie_soul_psychodelicrock.year
+GROUP BY tr.track_id, indie_soul_psyrock.year
 ORDER BY random()
 LIMIT 1;
 
