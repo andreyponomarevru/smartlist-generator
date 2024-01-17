@@ -1,11 +1,14 @@
+import format from "pg-format";
 import { connectDB } from "../../config/postgres";
 import { schemaCreateTrack } from "./validation-schemas";
 import { TrackMetadataParser, logDBError } from "../../utils/utilities";
-import { Track } from "../../types";
+import { ValidatedTrack } from "../../types";
+import { CreateSubplaylistDBResponse } from "../../types";
+import { getTrackSubplaylistIds } from "./get-track-subplaylist-ids";
 
 export async function create(filePath: string): Promise<void> {
   const trackMetadataParser = new TrackMetadataParser(filePath);
-  const newTrack: Track = await schemaCreateTrack.validateAsync(
+  const newTrack = await schemaCreateTrack.validateAsync(
     await trackMetadataParser.parseAudioFile(),
   );
 
@@ -16,10 +19,10 @@ export async function create(filePath: string): Promise<void> {
     await client.query("BEGIN");
 
     // Insert year
-
-    const insertYearQuery = {
-      text:
-        "WITH \
+    const { year_id: yearId } = (
+      await pool.query({
+        text:
+          "WITH \
            input_rows (year) AS (VALUES ($1::smallint)), \
            ins AS ( \
              INSERT INTO year (year) \
@@ -32,28 +35,60 @@ export async function create(filePath: string): Promise<void> {
          UNION ALL \
          \
          SELECT t.year_id FROM input_rows JOIN year AS t USING (year);",
-      values: [newTrack.year],
-    };
-    const { year_id: yearId } = (await pool.query(insertYearQuery)).rows[0];
+        values: [newTrack.year],
+      })
+    ).rows[0];
 
+    //
     // Insert track
+    //
+    const { track_id: trackId } = (
+      await client.query({
+        text:
+          "INSERT INTO track (title, year_id, duration, file_path) \
+           VALUES ($1, $2::numeric, $3, $4) \
+           RETURNING track_id",
+        values: [newTrack.title, yearId, newTrack.duration, newTrack.filePath],
+      })
+    ).rows[0];
 
-    const insertTrackQuery = {
-      text:
-        "INSERT INTO track (title, year_id, duration, file_path) \
-         VALUES ($1, $2::numeric, $3, $4) \
-				 RETURNING track_id",
-      values: [newTrack.title, yearId, newTrack.duration, newTrack.filePath],
-    };
-    const { track_id } = (await client.query(insertTrackQuery)).rows[0];
+    //
+    // Assign track to subplaylist(s)
+    //
+    const subplaylists = (
+      await pool.query<CreateSubplaylistDBResponse>({
+        text: "SELECT subplaylist_id, name FROM subplaylist;",
+      })
+    ).rows.map((row) => ({
+      subplaylistId: row.subplaylist_id,
+      name: row.name,
+    }));
 
+    const trackSubplaylistIds = getTrackSubplaylistIds(subplaylists, {
+      year: newTrack.year,
+      genres: newTrack.genre,
+    });
+
+    for (const id of trackSubplaylistIds) {
+      await client.query({
+        text:
+          "INSERT INTO\
+            track_subplaylist (track_id, subplaylist_id)\
+          VALUES\
+            ($1, $2);",
+        values: [trackId, id],
+      });
+    }
+
+    //
     // Insert genres
-
+    //
     for (const genre of newTrack.genre) {
       // TODO: verify this query, I think it can be simplified
-      const insertGenreQuery = {
-        text:
-          "\
+      const { genre_id } = (
+        await client.query({
+          text:
+            "\
 					WITH \
             input_rows (name) AS ( VALUES ($1) ), \
             ins AS ( \
@@ -69,16 +104,16 @@ export async function create(filePath: string): Promise<void> {
           \
 					SELECT g.genre_id FROM input_rows \
           JOIN genre AS g USING (name);",
-        values: [genre],
-      };
-      const { genre_id } = (await client.query(insertGenreQuery)).rows[0];
+          values: [genre],
+        })
+      ).rows[0];
 
       const inserTrackGenreQuery = {
         text:
           "INSERT INTO track_genre (track_id, genre_id) \
 				   VALUES ($1::integer, $2::integer) \
            ON CONFLICT DO NOTHING;",
-        values: [track_id, genre_id],
+        values: [trackId, genre_id],
       };
       await client.query(inserTrackGenreQuery);
     }
@@ -86,9 +121,10 @@ export async function create(filePath: string): Promise<void> {
     // Insert artists
 
     for (const artist of newTrack.artist) {
-      const insertArtistQuery = {
-        text:
-          "\
+      const { artist_id } = (
+        await client.query({
+          text:
+            "\
 					WITH \
 						input_rows (name) AS (VALUES ($1)), \
 						\
@@ -99,25 +135,23 @@ export async function create(filePath: string): Promise<void> {
               RETURNING artist_id \
 						) \
           \
-					SELECT artist_id \
-					FROM ins \
+					SELECT artist_id FROM ins \
           \
           UNION ALL \
           \
 					SELECT a.artist_id FROM input_rows \
 					JOIN artist AS a USING (name);",
-        values: [artist],
-      };
-      const { artist_id } = (await client.query(insertArtistQuery)).rows[0];
+          values: [artist],
+        })
+      ).rows[0];
 
-      const inserTrackArtistQuery = {
+      await client.query({
         text:
           "INSERT INTO track_artist (track_id, artist_id) \
 					 VALUES ($1::integer, $2::integer) \
            ON CONFLICT DO NOTHING",
-        values: [track_id, artist_id],
-      };
-      await client.query(inserTrackArtistQuery);
+        values: [trackId, artist_id],
+      });
     }
 
     await client.query("COMMIT");
@@ -139,32 +173,42 @@ export async function destroyAll() {
   const pool = await connectDB();
 
   try {
-    const query = {
-      text: "TRUNCATE year, track, artist, track_artist, genre, track_genre;",
-    };
-    await pool.query(query);
+    await pool.query({
+      text:
+        "TRUNCATE\
+          year,\
+          track,\
+          artist,\
+          track_artist,\
+          genre,\
+          track_genre,\
+          playlist,\
+          subplaylist,\
+          track_subplaylist,\
+          track_playlist;",
+    });
   } catch (err) {
     logDBError("An error occured while clearing all db tables.", err);
     throw err;
   }
 }
 
+/*
 export async function excludeFromLib(trackId: number): Promise<number> {
   const pool = await connectDB();
 
   try {
     // Exclude tracks from the library
-    const deleteTrackQuery = {
+    const res = await pool.query<{ trackId: number }>({
       text:
         "UPDATE track SET is_excluded = true \
          WHERE track_id = $1 RETURNING track_id AS trackId",
       values: [trackId],
-    };
-
-    const res = await pool.query<{ trackId: number }>(deleteTrackQuery);
+    });
     return res.rows[0].trackId;
   } catch (err) {
     logDBError("An error occured while excluding track from the db.", err);
     throw err;
   }
 }
+*/
