@@ -1,7 +1,7 @@
 import React from "react";
 
-import { parseResponse } from "../utils/parse-response";
-import { handleResponseErr } from "../utils/handle-response-err";
+import { parseResponse } from "../utils/api";
+import { handleResponseErr } from "../utils/api";
 import { APIResponse } from "../types";
 
 type FetchInit = { type: "FETCH_INIT" };
@@ -95,7 +95,7 @@ function useFetch<ResponseBody>(
               "Something went wrong. Please check your connection."
             ),
           });
-          console.log("[useFetch] Dispatched 'FETCH_FAILURE'");
+          console.log(`[useFetch] — ${url} — Dispatched 'FETCH_FAILURE'`);
         }
         // If the request was aborted by the cleanup function (i.e. component
         // was unmounted), then stop executing function:
@@ -104,12 +104,12 @@ function useFetch<ResponseBody>(
 
       try {
         const resBody = await parseResponse<ResponseBody>(res);
-        console.log("[useFetch] Response body:", resBody);
+        console.log(`[useFetch] — ${url} — Response body:`, resBody);
 
         // if component is not unmounted
         if (!signal.aborted) {
           dispatch({ type: "FETCH_SUCCESS", payload: resBody });
-          console.log("[useFetch] Dispatched 'FETCH_SUCCESS'");
+          console.log(`[useFetch] — ${url} — Dispatched 'FETCH_SUCCESS'`);
         }
       } catch (err) {
         // if component is not unmounted
@@ -119,7 +119,7 @@ function useFetch<ResponseBody>(
             type: "FETCH_FAILURE",
             error: parsedErr,
           });
-          console.log("[useFetch] Dispatched 'FETCH_FAILURE'");
+          console.log(`[useFetch] — ${url} — Dispatched 'FETCH_FAILURE'`);
         }
       }
     })();
