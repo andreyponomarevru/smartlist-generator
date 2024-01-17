@@ -1,9 +1,9 @@
 import Joi from "joi";
 
-import { Track } from "../../types";
+import { Track, ValidatedTrack } from "../../types";
 import { GENRES } from "../../config/constants";
 
-export const schemaCreateTrack = Joi.object<Track>({
+export const schemaCreateTrack = Joi.object<ValidatedTrack>({
   filePath: Joi.string().trim().min(1).max(255).messages({
     "string.base": '"filePath" should be a type of "string"',
     "string.empty": '"filePath" cannot be an empty string',
