@@ -3,7 +3,7 @@ import { TrackMeta } from "../../types";
 
 import "./track.scss";
 
-interface TrackProps {
+interface TrackProps extends React.HTMLAttributes<HTMLUListElement> {
   meta: TrackMeta;
 }
 
