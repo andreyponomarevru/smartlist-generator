@@ -7,7 +7,8 @@
   grid-template-columns: 5% 20% 20% 50% 5%;
   color: $color_gray_darkest;
   scrollbar-width: none;
-  padding: 0.5rem;
+  padding: 0.5rem 1rem;
+  align-items: center;
 
   &__year {
     grid-area: Year;
@@ -28,6 +29,8 @@
   &__length {
     grid-area: Length;
     font-size: $font-size_sm;
+    display: flex;
+    justify-content: flex-end;
   }
 
   &:nth-child(odd) {
