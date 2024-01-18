@@ -1,22 +1,41 @@
 @import "../../global.scss";
 
 .stats {
-  overflow-y: scroll;
-  height: 100%;
-  max-height: 18rem;
-  font-size: $font-size_sm;
+  display: flex;
+  flex-flow: column nowrap;
+  row-gap: 0.5rem;
+  background-color: #ebc7e4;
+  padding: 1rem;
+  border-radius: $border_radius_block;
+
+  &__header {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    margin: 0 0.5rem;
+  }
+
+  &__title {
+    font-weight: bold;
+  }
+
+  &__list {
+    overflow-y: scroll;
+    height: 100%;
+    max-height: 12rem;
+    font-size: $font-size_sm;
+  }
 
   &__row {
     list-style-type: none;
     display: flex;
-    flex-flow: row nowrap;
+    grid-template-areas: "Name Counter";
     justify-content: space-between;
     column-gap: 1rem;
-    padding: 0.5rem 1rem;
-  }
-
-  &__row:nth-child(odd) {
-    background-color: $color_sand;
+    padding: 0.3rem 0;
+    margin: 0 0.5rem;
+    border-bottom: 1px solid $color_white;
+    text-overflow: ellipsis;
   }
 
   &__counter {
@@ -24,6 +43,6 @@
     right: 0;
     background-color: white;
     border-radius: 0.3rem;
-    padding: 0.2rem 0.3rem;
+    padding: 0.1rem 0.3rem;
   }
 }

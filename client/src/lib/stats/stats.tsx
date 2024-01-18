@@ -1,25 +1,24 @@
 import * as React from "react";
-import { StatsResponse, APIResponse } from "../../types";
-import { StatsHeader } from "../stats-header/stats-header";
+import { GetStatsResponse, APIResponse } from "../../types";
 import { Message } from "../message/message";
 import { Loader } from "../loader/loader";
 
 import "./stats.scss";
 
-interface Props {
-  className?: string;
-  stats: APIResponse<StatsResponse>;
+interface Props extends React.HTMLAttributes<HTMLElement> {
+  stats: APIResponse<GetStatsResponse>;
+  title: string;
 }
 
 export function Stats(props: Props) {
-  const { stats } = props;
-
   return (
     <section className={`stats ${props.className || ""}`}>
-      <StatsHeader
-        title="Subplaylists"
-        count={stats.response?.body?.results.length || 0}
-      />
+      <header className="stats__header">
+        <span className="stats__title">{props.title}</span>
+        <span className="stats__header-count">
+          {props.stats.response?.body?.results.length || 0}
+        </span>
+      </header>
 
       {props.stats.isLoading && <Loader for="page" color="pink" />}
       {props.stats.error && (
