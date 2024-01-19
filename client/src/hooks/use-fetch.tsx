@@ -16,11 +16,7 @@ type FetchFailure<T> = {
 type ResetState = { type: "RESET_STATE" };
 
 type Action<T> = FetchInit | FetchSuccess<T> | FetchFailure<T> | ResetState;
-type State<T> = {
-  isLoading: boolean;
-  error: null | Error | APIResponse<T>["error"];
-  response: null | APIResponse<T>["response"];
-};
+type State<T> = APIResponse<T>;
 
 // We need this wrapping function only to pass the data type to the reducer
 function createDataFetchReducer<T>() {

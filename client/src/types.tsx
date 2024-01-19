@@ -1,11 +1,15 @@
 import { GENRES } from "./config/constants";
-import { ParsedResponse } from "./utils/api";
 
 export type TrackMeta = {
   year: number;
   artist: string[];
   title: string;
   length: string;
+};
+
+export type NewPlaylist = {
+  id: number;
+  name: string;
 };
 
 //
@@ -28,8 +32,13 @@ export type Credentials = {
 // API
 //
 
+export type ParsedResponse<T> = {
+  status: number;
+  body: T | null;
+};
+
 export interface APIResponse<Results> {
-  error: APIError | null;
+  error: APIError | Error | null;
   isLoading: boolean;
   response: ParsedResponse<Results> | null;
 }
