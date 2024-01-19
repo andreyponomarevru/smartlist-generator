@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import { parseResponse } from "../utils/api";
 import { handleResponseErr } from "../utils/api";
@@ -42,7 +42,7 @@ function dataFetchReducer<T>(state: State<T>, action: Action<T>): State<T> {
   }
 }
 
-function useFetch<ResponseBody>(url: RequestInfo, request?: RequestInit) {
+function useFetch<ResponseBody>() {
   const initialState: State<ResponseBody> = {
     isLoading: false,
     error: null,
@@ -59,65 +59,61 @@ function useFetch<ResponseBody>(url: RequestInfo, request?: RequestInit) {
 
   //
 
-  let res: Response;
+  let abortController: AbortController | undefined;
+  let res: Response | undefined;
 
-  React.useEffect(() => {
+  async function fetchNow(url: RequestInfo, request?: RequestInit) {
+    abortController = new AbortController();
+    const signal = abortController.signal;
+
     dispatch({ type: "FETCH_INIT" });
     console.log("[useFetch] Dispatched 'FETCH_INIT'");
 
-    const abortController = new AbortController();
-    const signal = abortController.signal;
-
-    (async function fetchNow() {
-      try {
-        res = await fetch(url, { ...request, signal });
-      } catch {
-        // if component is not unmounted
-        if (!signal.aborted) {
-          dispatch({
-            type: "FETCH_FAILURE",
-            error: new Error(
-              "Something went wrong. Please check your connection."
-            ),
-          });
-          console.log(`[useFetch] — ${url} — Dispatched 'FETCH_FAILURE'`);
-        }
-        // If the request was aborted by the cleanup function (i.e. component
-        // was unmounted), then stop executing the function:
-        return;
+    try {
+      res = await fetch(url, { ...request, signal });
+    } catch {
+      // if component is not unmounted
+      if (!signal.aborted) {
+        dispatch({
+          type: "FETCH_FAILURE",
+          error: new Error(
+            "Something went wrong. Please check your connection."
+          ),
+        });
+        console.log(`[useFetch] — ${url} — Dispatched 'FETCH_FAILURE'`);
       }
+      // If the request was aborted by the cleanup function (i.e. component
+      // was unmounted), then stop executing the function:
+      return;
+    }
 
-      try {
-        const resBody = await parseResponse<ResponseBody>(res);
-        console.log(`[useFetch] — ${url} — Response body:`, resBody);
+    try {
+      const resBody = await parseResponse<ResponseBody>(res);
+      console.log(`[useFetch] — ${url} — Response body:`, resBody);
 
-        // if component is not unmounted
-        if (!signal.aborted) {
-          dispatch({ type: "FETCH_SUCCESS", payload: resBody });
-          console.log(`[useFetch] — ${url} — Dispatched 'FETCH_SUCCESS'`);
-        }
-      } catch (err) {
-        // if component is not unmounted
-        if (!signal.aborted) {
-          const parsedErr = await handleResponseErr(err as Response);
-          dispatch({
-            type: "FETCH_FAILURE",
-            error: parsedErr,
-          });
-          console.log(`[useFetch] — ${url} — Dispatched 'FETCH_FAILURE'`);
-        }
+      // if component is not unmounted
+      if (!signal.aborted) {
+        dispatch({ type: "FETCH_SUCCESS", payload: resBody });
+        console.log(`[useFetch] — ${url} — Dispatched 'FETCH_SUCCESS'`);
       }
-    })();
+    } catch (err) {
+      // if component is not unmounted
+      if (!signal.aborted) {
+        const parsedErr = await handleResponseErr(err as Response);
+        dispatch({
+          type: "FETCH_FAILURE",
+          error: parsedErr,
+        });
+        console.log(`[useFetch] — ${url} — Dispatched 'FETCH_FAILURE'`);
+      }
+    }
+  }
 
-    // Return the cleanup function
-    return () => {
-      // Cancel the fetch request when the component unmounts
-      abortController.abort();
-    };
-    // Empty array means "run 'useEffect' only once, after the initial render", but here we need to run 'useEffect' in case the 'url' arg changes
-  }, [url]);
+  useEffect(() => {
+    return () => abortController && abortController.abort();
+  }, []);
 
-  return { state, resetState };
+  return { state, resetState, fetchNow };
 }
 
-export { useFetch /*, useFetchNow*/ };
+export { useFetch };
