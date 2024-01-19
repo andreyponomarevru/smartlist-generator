@@ -17,33 +17,29 @@ type Action<T> =
   | { type: "RESET_STATE" };
 type State<T> = APIResponse<T>;
 
-// We need this wrapping function only to pass the data type to the reducer
-function createDataFetchReducer<T>() {
-  // This is is the actual reducer function
-  return function (state: State<T>, action: Action<T>): State<T> {
-    switch (action.type) {
-      case "FETCH_INIT": {
-        return { ...state, isLoading: true, error: null };
-      }
-      case "FETCH_SUCCESS": {
-        return {
-          ...state,
-          isLoading: false,
-          error: null,
-          response: action.payload,
-        };
-      }
-      case "FETCH_FAILURE": {
-        return { ...state, isLoading: false, error: action.error };
-      }
-      case "RESET_STATE": {
-        return { isLoading: false, error: null, response: null };
-      }
-      default: {
-        throw new Error(`Unknown action`);
-      }
+function dataFetchReducer<T>(state: State<T>, action: Action<T>): State<T> {
+  switch (action.type) {
+    case "FETCH_INIT": {
+      return { ...state, isLoading: true, error: null };
     }
-  };
+    case "FETCH_SUCCESS": {
+      return {
+        ...state,
+        isLoading: false,
+        error: null,
+        response: action.payload,
+      };
+    }
+    case "FETCH_FAILURE": {
+      return { ...state, isLoading: false, error: action.error };
+    }
+    case "RESET_STATE": {
+      return { isLoading: false, error: null, response: null };
+    }
+    default: {
+      throw new Error(`Unknown action`);
+    }
+  }
 }
 
 function useFetch<ResponseBody>(url: RequestInfo, request?: RequestInit) {
@@ -53,9 +49,9 @@ function useFetch<ResponseBody>(url: RequestInfo, request?: RequestInit) {
     response: null,
   };
 
-  const dataFetchReducer = createDataFetchReducer<ResponseBody>();
-
-  const [state, dispatch] = React.useReducer(dataFetchReducer, initialState);
+  const [state, dispatch] = React.useReducer<
+    React.Reducer<State<ResponseBody>, Action<ResponseBody>>
+  >(dataFetchReducer, initialState);
 
   function resetState() {
     dispatch({ type: "RESET_STATE" });
@@ -72,7 +68,7 @@ function useFetch<ResponseBody>(url: RequestInfo, request?: RequestInit) {
     const abortController = new AbortController();
     const signal = abortController.signal;
 
-    (async function performFetching() {
+    (async function fetchNow() {
       try {
         res = await fetch(url, { ...request, signal });
       } catch {
@@ -87,7 +83,7 @@ function useFetch<ResponseBody>(url: RequestInfo, request?: RequestInit) {
           console.log(`[useFetch] — ${url} — Dispatched 'FETCH_FAILURE'`);
         }
         // If the request was aborted by the cleanup function (i.e. component
-        // was unmounted), then stop executing function:
+        // was unmounted), then stop executing the function:
         return;
       }
 
@@ -118,10 +114,10 @@ function useFetch<ResponseBody>(url: RequestInfo, request?: RequestInit) {
       // Cancel the fetch request when the component unmounts
       abortController.abort();
     };
-    // empty array means "run 'useEffect' only once, after the initial render"
+    // Empty array means "run 'useEffect' only once, after the initial render", but here we need to run 'useEffect' in case the 'url' arg changes
   }, [url]);
 
-  return { state: state as APIResponse<ResponseBody>, resetState };
+  return { state, resetState };
 }
 
 export { useFetch /*, useFetchNow*/ };
