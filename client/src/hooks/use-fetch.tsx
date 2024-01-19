@@ -4,18 +4,17 @@ import { parseResponse } from "../utils/api";
 import { handleResponseErr } from "../utils/api";
 import { APIResponse } from "../types";
 
-type FetchInit = { type: "FETCH_INIT" };
-type FetchSuccess<T> = {
-  type: "FETCH_SUCCESS";
-  payload: APIResponse<T>["response"];
-};
-type FetchFailure<T> = {
-  type: "FETCH_FAILURE";
-  error: APIResponse<T>["error"] | Error;
-};
-type ResetState = { type: "RESET_STATE" };
-
-type Action<T> = FetchInit | FetchSuccess<T> | FetchFailure<T> | ResetState;
+type Action<T> =
+  | { type: "FETCH_INIT" }
+  | {
+      type: "FETCH_SUCCESS";
+      payload: APIResponse<T>["response"];
+    }
+  | {
+      type: "FETCH_FAILURE";
+      error: APIResponse<T>["error"];
+    }
+  | { type: "RESET_STATE" };
 type State<T> = APIResponse<T>;
 
 // We need this wrapping function only to pass the data type to the reducer
@@ -47,13 +46,7 @@ function createDataFetchReducer<T>() {
   };
 }
 
-function useFetch<ResponseBody>(
-  url: RequestInfo,
-  request?: RequestInit
-): {
-  state: APIResponse<ResponseBody>;
-  resetState: () => void;
-} {
+function useFetch<ResponseBody>(url: RequestInfo, request?: RequestInit) {
   const initialState: State<ResponseBody> = {
     isLoading: false,
     error: null,
@@ -131,4 +124,4 @@ function useFetch<ResponseBody>(
   return { state: state as APIResponse<ResponseBody>, resetState };
 }
 
-export { State, useFetch };
+export { useFetch /*, useFetchNow*/ };
