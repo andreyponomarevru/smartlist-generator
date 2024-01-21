@@ -59,3 +59,20 @@ export async function readAll() {
     throw err;
   }
 }
+
+export async function destroy(id: number) {
+  const pool = await connectDB();
+
+  try {
+    const response = await pool.query<{ playlist_id: number }>({
+      text:
+        "DELETE FROM playlist WHERE playlist_id = $1 RETURNING playlist_id;",
+      values: [id],
+    });
+
+    return response.rows.length > 0 ? { playlistId: id } : null;
+  } catch (err) {
+    logDBError("Can't delete playlist.", err);
+    throw err;
+  }
+}

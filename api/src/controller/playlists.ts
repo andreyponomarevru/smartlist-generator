@@ -54,6 +54,23 @@ export async function getPlaylist(
   }
 }
 
+export async function destroyPlaylist(
+  req: Request<
+    Record<string, unknown>,
+    Record<string, unknown>,
+    { id: number }
+  >,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    await playlistsModel.destroy(req.params.id as number);
+    res.status(204).end();
+  } catch (err) {
+    next(err);
+  }
+}
+
 router.post(
   "/api/playlists",
   validate(createPlaylistSchema, "body"),
@@ -61,5 +78,6 @@ router.post(
 );
 router.get("/api/playlists", getPlaylists);
 router.get("/api/playlists/:id", getPlaylist);
+router.delete("/api/playlists/:id", destroyPlaylist);
 
 export { router };
