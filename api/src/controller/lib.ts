@@ -11,7 +11,7 @@ async function populateLib(req: Request, res: Response, next: NextFunction) {
   try {
     res.sendStatus(200);
     console.log("Starting populating db ...");
-    await subplatlistsModel.create(SUBPLAYLISTS);
+    await subplatlistsModel.createLookupTable(SUBPLAYLISTS);
     await traverseDirs(MUSIC_LIB_DIR, tracksModel.create);
     console.log("Done. Database populated.");
   } catch (err) {
