@@ -42,7 +42,7 @@ export async function getPlaylists(
 }
 
 export async function getPlaylist(
-  req: Request<{ id: number }>,
+  req: Request<{ id: number }, any, any>,
   res: Response<{ results: Playlist | null }>,
   next: NextFunction,
 ) {
@@ -54,7 +54,7 @@ export async function getPlaylist(
 }
 
 export async function updatePlaylist(
-  req: Request<{ id: number }, Record<string, string>, { name: string }>,
+  req: Request<{ id: number }, any, { name: string }>,
   res: Response,
   next: NextFunction,
 ) {
@@ -90,7 +90,11 @@ router.post(
 
 router.get("/api/playlists", getPlaylists);
 
-router.get("/api/playlists/:id", getPlaylist);
+router.get(
+  "/api/playlists/:id",
+  validate(schemaId, "params"),
+  getPlaylist as any,
+);
 
 router.patch(
   "/api/playlists/:id",
@@ -98,6 +102,10 @@ router.patch(
   validate(schemaUpdatePlaylist, "body"),
   updatePlaylist as any,
 );
-router.delete("/api/playlists/:id", destroyPlaylist);
+router.delete(
+  "/api/playlists/:id",
+  validate(schemaId, "params"),
+  destroyPlaylist as any,
+);
 
 export { router };
