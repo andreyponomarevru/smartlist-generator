@@ -1,5 +1,6 @@
 import { logDBError } from "../../utils/utilities";
 import { connectDB } from "../../config/postgres";
+import { GeneratedSubplaylist } from "../../types";
 
 type Playlist = {
   playlist_id: number;
@@ -145,6 +146,54 @@ export async function removeTrack({
            track_id;",
       values: [playlistId, trackId],
     });
+  } catch (err) {
+    logDBError("Can't delete playlist.", err);
+    throw err;
+  }
+}
+
+export async function getTracks(
+  playlistId: number,
+): Promise<GeneratedSubplaylist[]> {
+  const pool = await connectDB();
+
+  try {
+    const response = await pool.query<{
+      track_id: number;
+      title: string;
+      duration: string;
+      file_path: string;
+      year: number;
+      artist: string[];
+      genre: string[];
+      subplaylist_id: number;
+    }>({
+      text:
+        "SELECT \
+           viewtr.* \
+         FROM \
+           view_track AS viewtr \
+         INNER JOIN track_playlist AS tr_pl ON viewtr.track_id = tr_pl.track_id WHERE \
+           tr_pl.playlist_id = $1 AND \
+           tr_pl.subplaylist_id = viewtr.subplaylist_id;",
+      values: [playlistId],
+    });
+
+    return response.rows.length === 0
+      ? []
+      : response.rows.map((row) => {
+          return {
+            track_id: row.track_id,
+            trackId: row.track_id,
+            title: row.title,
+            duration: parseFloat(row.duration),
+            filePath: row.file_path,
+            year: row.year,
+            artist: row.artist,
+            genre: row.genre,
+            subplaylistId: row.subplaylist_id,
+          };
+        });
   } catch (err) {
     logDBError("Can't delete playlist.", err);
     throw err;
