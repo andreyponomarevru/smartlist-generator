@@ -60,6 +60,26 @@ export async function readAll() {
   }
 }
 
+export async function update({
+  playlistId,
+  name,
+}: {
+  playlistId: number;
+  name: string;
+}) {
+  const pool = await connectDB();
+
+  try {
+    await pool.query({
+      text: "UPDATE playlist SET name = $1 WHERE playlist_id = $2;",
+      values: [name, playlistId],
+    });
+  } catch (err) {
+    logDBError("Can't update playlist.", err);
+    throw err;
+  }
+}
+
 export async function destroy(id: number) {
   const pool = await connectDB();
 
