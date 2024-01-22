@@ -96,3 +96,57 @@ export async function destroy(id: number) {
     throw err;
   }
 }
+
+//
+
+export async function addTrack({
+  trackId,
+  playlistId,
+  subplaylistId,
+}: {
+  trackId: number;
+  playlistId: number;
+  subplaylistId: number;
+}) {
+  const pool = await connectDB();
+
+  try {
+    await pool.query({
+      text:
+        "INSERT INTO \
+           track_playlist (track_id, playlist_id, subplaylist_id) \
+         VALUES \
+           ($1, $2, $3);",
+      values: [trackId, playlistId, subplaylistId],
+    });
+  } catch (err) {
+    logDBError("Can't delete playlist.", err);
+    throw err;
+  }
+}
+
+export async function removeTrack({
+  playlistId,
+  trackId,
+}: {
+  playlistId: number;
+  trackId: number;
+}) {
+  const pool = await connectDB();
+
+  try {
+    await pool.query<{ track_id: number }>({
+      text:
+        "DELETE FROM \
+           track_playlist \
+         WHERE \
+           playlist_id = $1 AND track_id = $2 \
+         RETURNING \
+           track_id;",
+      values: [playlistId, trackId],
+    });
+  } catch (err) {
+    logDBError("Can't delete playlist.", err);
+    throw err;
+  }
+}

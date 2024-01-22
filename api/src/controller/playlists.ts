@@ -5,6 +5,7 @@ import {
   schemaCreatePlaylist,
   schemaUpdatePlaylist,
   schemaId,
+  schemaAddTrackToPlaylist,
 } from "../config/validation-schemas";
 
 const router = express.Router();
@@ -12,11 +13,7 @@ const router = express.Router();
 type Playlist = { id: number; name: string };
 
 export async function createPlaylist(
-  req: Request<
-    Record<string, string>,
-    Record<string, string>,
-    { name: string }
-  >,
+  req: Request<any, any, { name: string }>,
   res: Response<{ results: Playlist }>,
   next: NextFunction,
 ) {
@@ -82,6 +79,43 @@ export async function destroyPlaylist(
   }
 }
 
+//
+
+export async function addTrackToPlaylist(
+  req: Request<{ id: number }, { trackId: number; subplaylistId: number }>,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    await playlistsModel.addTrack({
+      playlistId: req.params.id,
+      trackId: req.body.trackId,
+      subplaylistId: req.body.subplaylistId,
+    });
+    res.status(201).end();
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function removeTrackFromPlaylist(
+  req: Request<{ id: number }, any, any, { id: number }>,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    await playlistsModel.removeTrack({
+      playlistId: req.params.id,
+      trackId: req.query.id,
+    });
+    res.status(204).end();
+  } catch (err) {
+    next(err);
+  }
+}
+
+//
+
 router.post(
   "/api/playlists",
   validate(schemaCreatePlaylist, "body"),
@@ -106,6 +140,22 @@ router.delete(
   "/api/playlists/:id",
   validate(schemaId, "params"),
   destroyPlaylist as any,
+);
+
+//
+
+router.post(
+  "/api/playlists/:id/tracks",
+  validate(schemaId, "params"),
+  validate(schemaAddTrackToPlaylist, "body"),
+  addTrackToPlaylist as any,
+);
+
+router.delete(
+  "/api/playlists/:id/tracks",
+  validate(schemaId, "params"),
+  validate(schemaId, "query"),
+  removeTrackFromPlaylist as any,
 );
 
 export { router };
