@@ -114,6 +114,18 @@ export async function removeTrackFromPlaylist(
   }
 }
 
+export async function getTracksFromPlaylist(
+  req: Request<{ id: number }>,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    res.json({ results: await playlistsModel.getTracks(req.params.id) });
+  } catch (err) {
+    next(err);
+  }
+}
+
 //
 
 router.post(
@@ -143,6 +155,12 @@ router.delete(
 );
 
 //
+
+router.get(
+  "/api/playlists/:id/tracks",
+  validate(schemaId, "params"),
+  getTracksFromPlaylist as any,
+);
 
 router.post(
   "/api/playlists/:id/tracks",
