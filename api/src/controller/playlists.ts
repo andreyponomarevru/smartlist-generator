@@ -1,8 +1,11 @@
 import express, { Request, Response, NextFunction } from "express";
-import util from "util";
 import * as playlistsModel from "../model/playlist/queries";
 import { validate } from "../middlewares/validate";
-import { createPlaylistSchema } from "../config/validation-schemas";
+import {
+  schemaCreatePlaylist,
+  schemaUpdatePlaylist,
+  schemaId,
+} from "../config/validation-schemas";
 
 const router = express.Router();
 
@@ -10,8 +13,8 @@ type Playlist = { id: number; name: string };
 
 export async function createPlaylist(
   req: Request<
-    Record<string, unknown>,
-    Record<string, unknown>,
+    Record<string, string>,
+    Record<string, string>,
     { name: string }
   >,
   res: Response<{ results: Playlist }>,
@@ -39,32 +42,40 @@ export async function getPlaylists(
 }
 
 export async function getPlaylist(
-  req: Request<
-    Record<string, unknown>,
-    Record<string, unknown>,
-    { id: number }
-  >,
+  req: Request<{ id: number }>,
   res: Response<{ results: Playlist | null }>,
   next: NextFunction,
 ) {
   try {
-    res.json({ results: await playlistsModel.read(req.params.id as number) });
+    res.json({ results: await playlistsModel.read(req.params.id) });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function updatePlaylist(
+  req: Request<{ id: number }, Record<string, string>, { name: string }>,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    await playlistsModel.update({
+      playlistId: req.params.id,
+      name: req.body.name,
+    });
+    res.status(204).end();
   } catch (err) {
     next(err);
   }
 }
 
 export async function destroyPlaylist(
-  req: Request<
-    Record<string, unknown>,
-    Record<string, unknown>,
-    { id: number }
-  >,
+  req: Request<{ id: number }>,
   res: Response,
   next: NextFunction,
 ) {
   try {
-    await playlistsModel.destroy(req.params.id as number);
+    await playlistsModel.destroy(req.params.id);
     res.status(204).end();
   } catch (err) {
     next(err);
@@ -73,11 +84,20 @@ export async function destroyPlaylist(
 
 router.post(
   "/api/playlists",
-  validate(createPlaylistSchema, "body"),
+  validate(schemaCreatePlaylist, "body"),
   createPlaylist,
 );
+
 router.get("/api/playlists", getPlaylists);
+
 router.get("/api/playlists/:id", getPlaylist);
+
+router.patch(
+  "/api/playlists/:id",
+  validate(schemaId, "params"),
+  validate(schemaUpdatePlaylist, "body"),
+  updatePlaylist as any,
+);
 router.delete("/api/playlists/:id", destroyPlaylist);
 
 export { router };
