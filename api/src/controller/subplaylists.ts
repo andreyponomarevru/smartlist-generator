@@ -1,27 +1,32 @@
 import util from "util";
 import express, { Request, Response, NextFunction } from "express";
 import * as subplaylistsModel from "../model/subplaylist/queries";
-import { GeneratedSubplaylist, GenerateSubplaylistRequest } from "../types";
+import { GeneratedSubplaylist } from "../types";
 import { validate } from "../middlewares/validate";
-import { schemaGenerateSubplaylist } from "../config/validation-schemas";
+import {
+  schemaGenerateSubplaylist,
+  schemaId,
+} from "../config/validation-schemas";
 
 const router = express.Router();
 
 export async function getTracksFromSubplaylist(
-  req: Request<
-    Record<string, unknown>,
-    Record<string, unknown>,
-    GenerateSubplaylistRequest
-  >,
+  req: Request<{ id: number }, any, any, { limit: number; exclude: number[] }>,
   res: Response<{ results: GeneratedSubplaylist[] }>,
   next: NextFunction,
 ) {
   try {
+    req.query;
+    req.params;
     res.status(201).json({
       results: await subplaylistsModel.generateSubplaylist({
-        subplaylistId: (req.query.id as unknown) as number,
-        limit: (req.query.limit as unknown) as number,
-        excludeTrackId: ((req.query.exclude as unknown) as number[]) || [],
+        subplaylistId: req.params.id,
+        limit: req.query.limit,
+        excludeTrackId: req.query.exclude
+          ? Array.isArray(req.query.exclude)
+            ? req.query.exclude
+            : [req.query.exclude]
+          : [],
       }),
     });
     res.end();
@@ -31,9 +36,10 @@ export async function getTracksFromSubplaylist(
 }
 
 router.get(
-  "/api/subplaylists",
+  "/api/subplaylists/:id",
+  validate(schemaId, "params"),
   validate(schemaGenerateSubplaylist, "query"),
-  getTracksFromSubplaylist,
+  getTracksFromSubplaylist as any,
 );
 
 export { router };
