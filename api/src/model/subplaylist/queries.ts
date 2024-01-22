@@ -35,21 +35,21 @@ export async function generateSubplaylist({
     const response = await pool.query<{
       track_id: number;
       title: string;
-      duration: number;
+      duration: string;
       file_path: string;
       year: number;
       artist: string[];
       genre: string[];
     }>({
       text: `SELECT \
-          * \
-         FROM \
-           view_track \
-         WHERE \
-           subplaylist_id = $1 \
-         ${excludeTrackId.length === 0 ? "" : "AND track_id != ALL ($3)"} \
-         LIMIT \
-           $2;`,
+                * \
+             FROM \
+               view_track \
+             WHERE \
+               subplaylist_id = $1 \
+             ${excludeTrackId.length === 0 ? "" : "AND track_id != ALL ($3)"} \
+             LIMIT \
+               $2;`,
       values:
         excludeTrackId.length === 0
           ? [subplaylistId, limit]
@@ -62,7 +62,7 @@ export async function generateSubplaylist({
           return {
             trackId: row.track_id,
             title: row.title,
-            duration: row.duration,
+            duration: parseFloat(row.duration),
             filePath: row.file_path,
             year: row.year,
             artist: row.artist,
