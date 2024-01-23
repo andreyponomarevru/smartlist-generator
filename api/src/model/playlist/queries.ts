@@ -1,3 +1,4 @@
+import format from "pg-format";
 import { logDBError } from "../../utils/utilities";
 import { connectDB } from "../../config/postgres";
 import { GeneratedSubplaylist } from "../../types";
@@ -148,6 +149,34 @@ export async function removeTrack({
     });
   } catch (err) {
     logDBError("Can't delete playlist.", err);
+    throw err;
+  }
+}
+
+export async function updateTracksInPlaylist(
+  playlistId: number,
+  newTracks: { trackId: number; subplaylistId: number }[],
+) {
+  const pool = await connectDB();
+
+  try {
+    // TODO refactor in a single query
+    await pool.query({
+      text: "DELETE FROM track_playlist WHERE playlist_id = $1;",
+      values: [playlistId],
+    });
+
+    await pool.query({
+      text: format(
+        "INSERT INTO track_playlist (track_id, playlist_id, subplaylist_id) \
+           VALUES %L;",
+        newTracks.map((track) => {
+          return [track.trackId, playlistId, track.subplaylistId];
+        }),
+      ),
+    });
+  } catch (err) {
+    logDBError("Can't update tracks in playlist.", err);
     throw err;
   }
 }

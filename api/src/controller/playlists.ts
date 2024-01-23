@@ -6,6 +6,7 @@ import {
   schemaUpdatePlaylist,
   schemaId,
   schemaAddTrackToPlaylist,
+  schemaUpdateTracksInPlaylist,
 } from "../config/validation-schemas";
 
 const router = express.Router();
@@ -126,6 +127,26 @@ export async function getTracksFromPlaylist(
   }
 }
 
+export async function updateTracksInPlaylist(
+  req: Request<{ id: number }, { trackId: number; subplaylistId: number }[]>,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    res.json({
+      results: await playlistsModel.updateTracksInPlaylist(
+        req.params.id,
+        // For some reason, during validation Joi parses array into object
+        // so we need to convert it back.
+        Object.values(req.body),
+      ),
+    });
+    res.status(204).end();
+  } catch (err) {
+    next(err);
+  }
+}
+
 //
 
 router.post(
@@ -167,6 +188,13 @@ router.post(
   validate(schemaId, "params"),
   validate(schemaAddTrackToPlaylist, "body"),
   addTrackToPlaylist as any,
+);
+
+router.put(
+  "/api/playlists/:id/tracks",
+  validate(schemaId, "params"),
+  validate(schemaUpdateTracksInPlaylist, "body"),
+  updateTracksInPlaylist as any,
 );
 
 router.delete(
