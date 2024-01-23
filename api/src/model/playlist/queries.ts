@@ -127,12 +127,12 @@ export async function addTrack({
   }
 }
 
-export async function removeTrack({
+export async function removeTracks({
   playlistId,
-  trackId,
+  trackIds,
 }: {
   playlistId: number;
-  trackId: number;
+  trackIds: number[];
 }) {
   const pool = await connectDB();
 
@@ -142,10 +142,8 @@ export async function removeTrack({
         "DELETE FROM \
            track_playlist \
          WHERE \
-           playlist_id = $1 AND track_id = $2 \
-         RETURNING \
-           track_id;",
-      values: [playlistId, trackId],
+           playlist_id = $1 AND track_id = ANY ($2)",
+      values: [playlistId, trackIds],
     });
   } catch (err) {
     logDBError("Can't delete playlist.", err);
@@ -153,7 +151,7 @@ export async function removeTrack({
   }
 }
 
-export async function updateTracksInPlaylist(
+export async function updateTracks(
   playlistId: number,
   newTracks: { trackId: number; subplaylistId: number }[],
 ) {
@@ -168,8 +166,10 @@ export async function updateTracksInPlaylist(
 
     await pool.query({
       text: format(
-        "INSERT INTO track_playlist (track_id, playlist_id, subplaylist_id) \
-           VALUES %L;",
+        "INSERT INTO \
+           track_playlist (track_id, playlist_id, subplaylist_id) \
+         VALUES \
+           %L;",
         newTracks.map((track) => {
           return [track.trackId, playlistId, track.subplaylistId];
         }),
@@ -181,7 +181,7 @@ export async function updateTracksInPlaylist(
   }
 }
 
-export async function getTracks(
+export async function readTracks(
   playlistId: number,
 ): Promise<GeneratedSubplaylist[]> {
   const pool = await connectDB();

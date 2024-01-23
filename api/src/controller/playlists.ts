@@ -4,9 +4,10 @@ import { validate } from "../middlewares/validate";
 import {
   schemaCreatePlaylist,
   schemaUpdatePlaylist,
-  schemaId,
+  schemaIdParam,
   schemaAddTrackToPlaylist,
   schemaUpdateTracksInPlaylist,
+  schemaRemoveTracksFromPlaylist,
 } from "../config/validation-schemas";
 
 const router = express.Router();
@@ -99,15 +100,15 @@ export async function addTrackToPlaylist(
   }
 }
 
-export async function removeTrackFromPlaylist(
-  req: Request<{ id: number }, any, any, { id: number }>,
+export async function removeTracksFromPlaylist(
+  req: Request<{ id: number }, any, any, { id: number | number[] }>,
   res: Response,
   next: NextFunction,
 ) {
   try {
-    await playlistsModel.removeTrack({
+    await playlistsModel.removeTracks({
       playlistId: req.params.id,
-      trackId: req.query.id,
+      trackIds: Array.isArray(req.query.id) ? req.query.id : [req.query.id],
     });
     res.status(204).end();
   } catch (err) {
@@ -121,7 +122,7 @@ export async function getTracksFromPlaylist(
   next: NextFunction,
 ) {
   try {
-    res.json({ results: await playlistsModel.getTracks(req.params.id) });
+    res.json({ results: await playlistsModel.readTracks(req.params.id) });
   } catch (err) {
     next(err);
   }
@@ -134,7 +135,7 @@ export async function updateTracksInPlaylist(
 ) {
   try {
     res.json({
-      results: await playlistsModel.updateTracksInPlaylist(
+      results: await playlistsModel.updateTracks(
         req.params.id,
         // For some reason, during validation Joi parses array into object
         // so we need to convert it back.
@@ -159,19 +160,19 @@ router.get("/api/playlists", getPlaylists);
 
 router.get(
   "/api/playlists/:id",
-  validate(schemaId, "params"),
+  validate(schemaIdParam, "params"),
   getPlaylist as any,
 );
 
 router.patch(
   "/api/playlists/:id",
-  validate(schemaId, "params"),
+  validate(schemaIdParam, "params"),
   validate(schemaUpdatePlaylist, "body"),
   updatePlaylist as any,
 );
 router.delete(
   "/api/playlists/:id",
-  validate(schemaId, "params"),
+  validate(schemaIdParam, "params"),
   destroyPlaylist as any,
 );
 
@@ -179,29 +180,29 @@ router.delete(
 
 router.get(
   "/api/playlists/:id/tracks",
-  validate(schemaId, "params"),
+  validate(schemaIdParam, "params"),
   getTracksFromPlaylist as any,
 );
 
 router.post(
   "/api/playlists/:id/tracks",
-  validate(schemaId, "params"),
+  validate(schemaIdParam, "params"),
   validate(schemaAddTrackToPlaylist, "body"),
   addTrackToPlaylist as any,
 );
 
 router.put(
   "/api/playlists/:id/tracks",
-  validate(schemaId, "params"),
+  validate(schemaIdParam, "params"),
   validate(schemaUpdateTracksInPlaylist, "body"),
   updateTracksInPlaylist as any,
 );
 
 router.delete(
   "/api/playlists/:id/tracks",
-  validate(schemaId, "params"),
-  validate(schemaId, "query"),
-  removeTrackFromPlaylist as any,
+  validate(schemaIdParam, "params"),
+  validate(schemaRemoveTracksFromPlaylist, "query"),
+  removeTracksFromPlaylist as any,
 );
 
 export { router };

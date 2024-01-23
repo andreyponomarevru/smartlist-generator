@@ -5,7 +5,7 @@ import { GeneratedSubplaylist } from "../types";
 import { validate } from "../middlewares/validate";
 import {
   schemaGenerateSubplaylist,
-  schemaId,
+  schemaIdParam,
 } from "../config/validation-schemas";
 
 const router = express.Router();
@@ -37,7 +37,7 @@ export async function getTracksFromSubplaylist(
 
 router.get(
   "/api/subplaylists/:id",
-  validate(schemaId, "params"),
+  validate(schemaIdParam, "params"),
   validate(schemaGenerateSubplaylist, "query"),
   getTracksFromSubplaylist as any,
 );
