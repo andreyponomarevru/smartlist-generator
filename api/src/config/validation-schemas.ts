@@ -1,5 +1,29 @@
 import Joi from "joi";
 
+const schemaTrackId = Joi.number()
+  .positive()
+  .integer()
+  .min(1)
+  .required()
+  .messages({
+    "number.base": `"trackId" must be a type of 'number'`,
+    "number.integer": `"trackId" must be an integer`,
+    "number.min": `"trackId" minimum value is "1"`,
+    "any.required": `"trackId" is required`,
+  });
+
+const schemaSubplaylistId = Joi.number()
+  .positive()
+  .integer()
+  .min(1)
+  .required()
+  .messages({
+    "number.base": `"subplaylistId" must be a type of 'number'`,
+    "number.integer": `"subplaylistId" must be an integer`,
+    "number.min": `"subplaylistId" minimum value is "1"`,
+    "any.required": `"subplaylistId" is required`,
+  });
+
 export const schemaId = Joi.object<{ id: number }>({
   id: Joi.number().positive().integer().min(1).required().messages({
     "number.base": `"id" must be a type of 'number'`,
@@ -17,6 +41,28 @@ export const schemaCreatePlaylist = Joi.object<{ name: string }>({
     "any.required": `"name" is required`,
   }),
 });
+
+export const schemaAddTrackToPlaylist = Joi.object<{
+  trackId: number;
+  subplaylistId: number;
+}>({
+  trackId: schemaTrackId,
+  subplaylistId: schemaSubplaylistId,
+});
+
+export const schemaUpdateTracksInPlaylist = Joi.array<
+  {
+    trackId: number;
+    subplaylistId: number;
+  }[]
+>()
+  .min(1)
+  .items(
+    Joi.object().keys({
+      trackId: schemaTrackId,
+      subplaylistId: schemaSubplaylistId,
+    }),
+  );
 
 export const schemaUpdatePlaylist = Joi.object<{ name: string }>({
   name: Joi.string().min(1).max(255).required().messages({
@@ -39,5 +85,8 @@ export const schemaGenerateSubplaylist = Joi.object<{
     "number.min": `"limit" minimum value is "1"`,
     "any.required": `"limit" is required`,
   }),
-  exclude: Joi.array().items(Joi.number()),
+  exclude: Joi.alternatives().try(
+    Joi.array().items(Joi.number()),
+    Joi.number().integer().min(1).required(),
+  ),
 });
