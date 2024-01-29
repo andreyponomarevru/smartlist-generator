@@ -2,7 +2,6 @@ import { GENRES } from "./config/constants";
 
 export interface Track {
   trackId?: number;
-  filePath: string;
   duration: number;
   artist: string[];
   year: number;
@@ -20,24 +19,21 @@ export interface ValidatedTrack {
   genre: typeof GENRES[number][];
 }
 
-export type CreateSubplaylistDBResponse = {
-  subplaylist_id: number;
-  name: string;
-};
-
-export type GeneratedSubplaylist = {
-  trackId: number;
-  title: string;
-  duration: number;
-  filePath: string;
-  year: number;
-  artist: string[];
+export type FoundTrackDBResponse = {
+  artist: string;
+  duration: string;
   genre: string[];
-  subplaylistId: number;
+  genre_id: number[];
+  title: string;
+  track_id: number;
+  year: number;
 };
-
-export type GenerateSubplaylistRequest = {
-  subplaylistId: number;
-  limit: number;
-  excludeTrackId?: number[];
+export type FoundTrack = {
+  artist: string;
+  duration: number;
+  genre: string[];
+  genreId: number[];
+  title: string;
+  trackId: number;
+  year: number;
 };
