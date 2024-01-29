@@ -5,9 +5,7 @@ import {
   schemaCreatePlaylist,
   schemaUpdatePlaylist,
   schemaIdParam,
-  schemaAddTrackToPlaylist,
   schemaUpdateTracksInPlaylist,
-  schemaRemoveTracksFromPlaylist,
 } from "../config/validation-schemas";
 
 const router = express.Router();
@@ -83,23 +81,6 @@ export async function destroyPlaylist(
 
 //
 
-export async function addTrackToPlaylist(
-  req: Request<{ id: number }, { trackId: number; subplaylistId: number }>,
-  res: Response,
-  next: NextFunction,
-) {
-  try {
-    await playlistsModel.addTrack({
-      playlistId: req.params.id,
-      trackId: req.body.trackId,
-      subplaylistId: req.body.subplaylistId,
-    });
-    res.status(201).end();
-  } catch (err) {
-    next(err);
-  }
-}
-
 export async function removeTracksFromPlaylist(
   req: Request<{ id: number }, any, any, { id: number | number[] }>,
   res: Response,
@@ -129,7 +110,7 @@ export async function getTracksFromPlaylist(
 }
 
 export async function updateTracksInPlaylist(
-  req: Request<{ id: number }, { trackId: number; subplaylistId: number }[]>,
+  req: Request<{ id: number }, any, any, { id: number | number[] }>,
   res: Response,
   next: NextFunction,
 ) {
@@ -137,9 +118,7 @@ export async function updateTracksInPlaylist(
     res.json({
       results: await playlistsModel.updateTracks(
         req.params.id,
-        // For some reason, during validation Joi parses array into object
-        // so we need to convert it back.
-        Object.values(req.body),
+        Array.isArray(req.query.id) ? req.query.id : [req.query.id],
       ),
     });
     res.status(204).end();
@@ -184,25 +163,19 @@ router.get(
   getTracksFromPlaylist as any,
 );
 
-router.post(
-  "/api/playlists/:id/tracks",
-  validate(schemaIdParam, "params"),
-  validate(schemaAddTrackToPlaylist, "body"),
-  addTrackToPlaylist as any,
-);
-
 router.put(
   "/api/playlists/:id/tracks",
   validate(schemaIdParam, "params"),
-  validate(schemaUpdateTracksInPlaylist, "body"),
+  validate(schemaUpdateTracksInPlaylist, "query"),
   updateTracksInPlaylist as any,
 );
 
+/* I don't need this route
 router.delete(
   "/api/playlists/:id/tracks",
   validate(schemaIdParam, "params"),
   validate(schemaRemoveTracksFromPlaylist, "query"),
   removeTracksFromPlaylist as any,
-);
+);*/
 
 export { router };
