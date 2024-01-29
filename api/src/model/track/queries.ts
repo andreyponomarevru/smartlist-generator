@@ -1,10 +1,8 @@
-import format from "pg-format";
 import { connectDB } from "../../config/postgres";
 import { schemaCreateTrack } from "./validation-schemas";
 import { TrackMetadataParser, logDBError } from "../../utils/utilities";
-import { ValidatedTrack } from "../../types";
-import { CreateSubplaylistDBResponse } from "../../types";
-import { getTrackSubplaylistIds } from "./get-track-subplaylist-ids";
+import { SearchParams, buildSQLQuery } from "../../utils/query-builder";
+import { FoundTrackDBResponse, FoundTrack } from "../../types";
 
 export async function create(filePath: string): Promise<void> {
   const trackMetadataParser = new TrackMetadataParser(filePath);
@@ -18,67 +16,23 @@ export async function create(filePath: string): Promise<void> {
   try {
     await client.query("BEGIN");
 
-    // Insert year
-    const { year_id: yearId } = (
-      await pool.query({
-        text:
-          "WITH \
-           input_rows (year) AS (VALUES ($1::smallint)), \
-           ins AS ( \
-             INSERT INTO year (year) \
-               SELECT year FROM input_rows \
-             ON CONFLICT DO NOTHING \
-             RETURNING year_id \
-           ) \
-         SELECT year_id FROM ins \
-         \
-         UNION ALL \
-         \
-         SELECT t.year_id FROM input_rows JOIN year AS t USING (year);",
-        values: [newTrack.year],
-      })
-    ).rows[0];
-
     //
     // Insert track
     //
     const { track_id: trackId } = (
       await client.query({
         text:
-          "INSERT INTO track (title, year_id, duration, file_path) \
-           VALUES ($1, $2::numeric, $3, $4) \
+          "INSERT INTO track (title, year, duration, file_path) \
+           VALUES ($1, $2, $3, $4) \
            RETURNING track_id",
-        values: [newTrack.title, yearId, newTrack.duration, newTrack.filePath],
+        values: [
+          newTrack.title,
+          newTrack.year,
+          newTrack.duration,
+          newTrack.filePath,
+        ],
       })
     ).rows[0];
-
-    //
-    // Assign track to subplaylist(s)
-    //
-    const subplaylists = (
-      await pool.query<CreateSubplaylistDBResponse>({
-        text: "SELECT subplaylist_id, name FROM subplaylist;",
-      })
-    ).rows.map((row) => ({
-      subplaylistId: row.subplaylist_id,
-      name: row.name,
-    }));
-
-    const trackSubplaylistIds = getTrackSubplaylistIds(subplaylists, {
-      year: newTrack.year,
-      genres: newTrack.genre,
-    });
-
-    for (const id of trackSubplaylistIds) {
-      await client.query({
-        text:
-          "INSERT INTO\
-            track_subplaylist (track_id, subplaylist_id)\
-          VALUES\
-            ($1, $2);",
-        values: [trackId, id],
-      });
-    }
 
     //
     // Insert genres
@@ -118,29 +72,29 @@ export async function create(filePath: string): Promise<void> {
       await client.query(inserTrackGenreQuery);
     }
 
+    //
     // Insert artists
-
+    //
     for (const artist of newTrack.artist) {
       const { artist_id } = (
         await client.query({
           text:
-            "\
-					WITH \
-						input_rows (name) AS (VALUES ($1)), \
-						\
-						ins AS ( \
-							INSERT INTO artist (name) \
-                SELECT name FROM input_rows \
-              ON CONFLICT DO NOTHING \
-              RETURNING artist_id \
-						) \
-          \
-					SELECT artist_id FROM ins \
-          \
-          UNION ALL \
-          \
-					SELECT a.artist_id FROM input_rows \
-					JOIN artist AS a USING (name);",
+            "WITH \
+              input_rows (name) AS (VALUES ($1)), \
+              \
+              ins AS ( \
+                INSERT INTO artist (name) \
+                  SELECT name FROM input_rows \
+                ON CONFLICT DO NOTHING \
+                RETURNING artist_id \
+              ) \
+            \
+            SELECT artist_id FROM ins \
+            \
+            UNION ALL \
+            \
+            SELECT a.artist_id FROM input_rows \
+            JOIN artist AS a USING (name);",
           values: [artist],
         })
       ).rows[0];
@@ -167,48 +121,49 @@ export async function create(filePath: string): Promise<void> {
   }
 }
 
-export async function read() {}
-
-export async function destroyAll() {
+export async function readFilePath(trackId: number) {
   const pool = await connectDB();
 
   try {
-    await pool.query({
-      text:
-        "TRUNCATE\
-          year,\
-          track,\
-          artist,\
-          track_artist,\
-          genre,\
-          track_genre,\
-          playlist,\
-          subplaylist,\
-          track_subplaylist,\
-          track_playlist;",
-    });
-  } catch (err) {
-    logDBError("An error occured while clearing all db tables.", err);
-    throw err;
-  }
-}
-
-/*
-export async function excludeFromLib(trackId: number): Promise<number> {
-  const pool = await connectDB();
-
-  try {
-    // Exclude tracks from the library
-    const res = await pool.query<{ trackId: number }>({
-      text:
-        "UPDATE track SET is_excluded = true \
-         WHERE track_id = $1 RETURNING track_id AS trackId",
+    const getFilePath = {
+      text: "SELECT file_path FROM track WHERE track_id = $1;",
       values: [trackId],
-    });
-    return res.rows[0].trackId;
+    };
+    const response = await pool.query<{ file_path: string }>(getFilePath);
+
+    return response.rows.length === 0 ? null : response.rows[0].file_path;
   } catch (err) {
-    logDBError("An error occured while excluding track from the db.", err);
+    logDBError("Can't get file path from db.", err);
     throw err;
   }
 }
-*/
+
+export async function findTrack(
+  searchParams: SearchParams,
+): Promise<FoundTrack[]> {
+  const pool = await connectDB();
+
+  try {
+    const sql = buildSQLQuery(searchParams);
+    const response = await pool.query<FoundTrackDBResponse>(sql);
+
+    return response.rows.length === 0
+      ? []
+      : response.rows.map(
+          ({ artist, duration, genre, genre_id, title, track_id, year }) => {
+            return {
+              artist,
+              duration: parseFloat(duration),
+              genre,
+              genreId: genre_id,
+              title,
+              trackId: track_id,
+              year,
+            };
+          },
+        );
+  } catch (err) {
+    logDBError("Can't find tracks", err);
+    throw err;
+  }
+}
