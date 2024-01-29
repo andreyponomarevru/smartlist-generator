@@ -1,7 +1,7 @@
 import format from "pg-format";
 import { logDBError } from "../../utils/utilities";
 import { connectDB } from "../../config/postgres";
-import { GeneratedSubplaylist } from "../../types";
+import { FoundTrackDBResponse, FoundTrack } from "../../types";
 
 type Playlist = {
   playlist_id: number;
@@ -92,7 +92,7 @@ export async function destroy(id: number) {
       values: [id],
     });
 
-    return response.rows.length > 0 ? { playlistId: id } : null;
+    return response.rows.length === 0 ? null : { playlistId: id };
   } catch (err) {
     logDBError("Can't delete playlist.", err);
     throw err;
@@ -104,22 +104,16 @@ export async function destroy(id: number) {
 export async function addTrack({
   trackId,
   playlistId,
-  subplaylistId,
 }: {
   trackId: number;
   playlistId: number;
-  subplaylistId: number;
 }) {
   const pool = await connectDB();
 
   try {
     await pool.query({
-      text:
-        "INSERT INTO \
-           track_playlist (track_id, playlist_id, subplaylist_id) \
-         VALUES \
-           ($1, $2, $3);",
-      values: [trackId, playlistId, subplaylistId],
+      text: `INSERT INTO track_playlist (track_id, playlist_id) VALUES ($1, $2);`,
+      values: [trackId, playlistId],
     });
   } catch (err) {
     logDBError("Can't delete playlist.", err);
@@ -138,11 +132,11 @@ export async function removeTracks({
 
   try {
     await pool.query<{ track_id: number }>({
-      text:
-        "DELETE FROM \
-           track_playlist \
-         WHERE \
-           playlist_id = $1 AND track_id = ANY ($2)",
+      text: `
+        DELETE FROM track_playlist
+        WHERE 
+          playlist_id = $1 AND 
+          track_id = ANY ($2);`,
       values: [playlistId, trackIds],
     });
   } catch (err) {
@@ -151,10 +145,7 @@ export async function removeTracks({
   }
 }
 
-export async function updateTracks(
-  playlistId: number,
-  newTracks: { trackId: number; subplaylistId: number }[],
-) {
+export async function updateTracks(playlistId: number, newTracks: number[]) {
   const pool = await connectDB();
 
   try {
@@ -166,13 +157,9 @@ export async function updateTracks(
 
     await pool.query({
       text: format(
-        "INSERT INTO \
-           track_playlist (track_id, playlist_id, subplaylist_id) \
-         VALUES \
-           %L;",
-        newTracks.map((track) => {
-          return [track.trackId, playlistId, track.subplaylistId];
-        }),
+        `INSERT INTO track_playlist (track_id, playlist_id)
+         VALUES %L;`,
+        newTracks.map((trackId) => [trackId, playlistId]),
       ),
     });
   } catch (err) {
@@ -181,48 +168,48 @@ export async function updateTracks(
   }
 }
 
-export async function readTracks(
-  playlistId: number,
-): Promise<GeneratedSubplaylist[]> {
+export async function readTracks(playlistId: number): Promise<FoundTrack[]> {
   const pool = await connectDB();
 
   try {
-    const response = await pool.query<{
-      track_id: number;
-      title: string;
-      duration: string;
-      file_path: string;
-      year: number;
-      artist: string[];
-      genre: string[];
-      subplaylist_id: number;
-    }>({
-      text:
-        "SELECT \
-           viewtr.* \
-         FROM \
-           view_track AS viewtr \
-         INNER JOIN track_playlist AS tr_pl ON viewtr.track_id = tr_pl.track_id WHERE \
-           tr_pl.playlist_id = $1 AND \
-           tr_pl.subplaylist_id = viewtr.subplaylist_id;",
+    const response = await pool.query<FoundTrackDBResponse>({
+      text: `
+        SELECT 
+          tr.track_id, 
+          tr.title,
+          tr.duration,
+          tr.year,
+          array_agg(DISTINCT ar.name) AS artist,
+          array_agg(DISTINCT ge.genre_id) AS genre_id,
+          array_agg(DISTINCT ge.name) AS genre
+        FROM track_playlist AS tr_pl
+          INNER JOIN track AS tr ON tr_pl.track_id = tr.track_id
+          INNER JOIN track_genre AS tr_ge ON tr_pl.track_id = tr_ge.track_id 
+          INNER JOIN genre AS ge ON ge.genre_id = tr_ge.genre_id  
+          INNER JOIN track_artist AS tr_ar ON tr_ar.track_id = tr_pl.track_id
+          INNER JOIN artist AS ar ON ar.artist_id = tr_ar.artist_id
+        WHERE tr_pl.playlist_id = $1
+        GROUP BY 
+          tr.track_id,
+          tr.year;`,
       values: [playlistId],
     });
 
     return response.rows.length === 0
       ? []
-      : response.rows.map((row) => {
-          return {
-            track_id: row.track_id,
-            trackId: row.track_id,
-            title: row.title,
-            duration: parseFloat(row.duration),
-            filePath: row.file_path,
-            year: row.year,
-            artist: row.artist,
-            genre: row.genre,
-            subplaylistId: row.subplaylist_id,
-          };
-        });
+      : response.rows.map(
+          ({ artist, duration, genre, genre_id, title, track_id, year }) => {
+            return {
+              artist: artist,
+              duration: parseFloat(duration),
+              genre: genre,
+              genreId: genre_id,
+              title: title,
+              trackId: track_id,
+              year: year,
+            };
+          },
+        );
   } catch (err) {
     logDBError("Can't delete playlist.", err);
     throw err;
