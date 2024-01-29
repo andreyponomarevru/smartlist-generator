@@ -8,13 +8,9 @@ import * as env from "./config/env";
 import { handle404Error } from "./middlewares/handle-404-error";
 import { handleErrors } from "./middlewares/handle-errors";
 import { router as tracksRouter } from "./controller/tracks";
-import { router as genresRouter } from "./controller/genres";
-import { router as artistsRouter } from "./controller/artists";
 import { router as libRouter } from "./controller/lib";
-import { router as libValidationRouter } from "./controller/lib-validation";
 import { router as playlistRouter } from "./controller/playlists";
 import { router as statsRouter } from "./controller/stats";
-import { router as subplaylistsRouter } from "./controller/subplaylists";
 
 //
 // Express app
@@ -34,13 +30,9 @@ expressApp.use(express.json());
 expressApp.use(express.urlencoded({ extended: true }));
 expressApp.use(express.static(path.join(__dirname, "public")));
 expressApp.use("/", libRouter);
-expressApp.use("/", libValidationRouter);
+expressApp.use("/", tracksRouter);
 expressApp.use("/", statsRouter);
 expressApp.use("/", playlistRouter);
-expressApp.use("/", subplaylistsRouter);
-//expressApp.use("/lib/artists", artistsRouter);
-//expressApp.use("/lib/genres", genresRouter);
-//expressApp.use("/lib/tracks", tracksRouter);
 // If request doesn't match the routes above, it is past to 404 error handler
 expressApp.use(handle404Error);
 expressApp.use(handleErrors);
