@@ -7,6 +7,7 @@ import {
   schemaIdParam,
   schemaUpdateTracksInPlaylist,
 } from "../config/validation-schemas";
+import { FoundTrack } from "../types";
 
 const router = express.Router();
 
@@ -82,15 +83,12 @@ export async function destroyPlaylist(
 //
 
 export async function removeTracksFromPlaylist(
-  req: Request<{ id: number }, any, any, { id: number | number[] }>,
+  req: Request<{ id: number }>,
   res: Response,
   next: NextFunction,
 ) {
   try {
-    await playlistsModel.removeTracks({
-      playlistId: req.params.id,
-      trackIds: Array.isArray(req.query.id) ? req.query.id : [req.query.id],
-    });
+    await playlistsModel.removeAllTracks(req.params.id);
     res.status(204).end();
   } catch (err) {
     next(err);
@@ -110,17 +108,16 @@ export async function getTracksFromPlaylist(
 }
 
 export async function updateTracksInPlaylist(
-  req: Request<{ id: number }, any, any, { id: number | number[] }>,
+  req: Request<
+    { id: number },
+    any,
+    { tracks: { trackId: number; position: number }[] }
+  >,
   res: Response,
   next: NextFunction,
 ) {
   try {
-    res.json({
-      results: await playlistsModel.updateTracks(
-        req.params.id,
-        Array.isArray(req.query.id) ? req.query.id : [req.query.id],
-      ),
-    });
+    await playlistsModel.updateTracks(req.params.id, req.body.tracks);
     res.status(204).end();
   } catch (err) {
     next(err);
@@ -166,7 +163,7 @@ router.get(
 router.put(
   "/api/playlists/:id/tracks",
   validate(schemaIdParam, "params"),
-  validate(schemaUpdateTracksInPlaylist, "query"),
+  validate(schemaUpdateTracksInPlaylist, "body"),
   updateTracksInPlaylist as any,
 );
 
