@@ -101,51 +101,24 @@ export async function destroy(id: number) {
 
 //
 
-export async function addTrack({
-  trackId,
-  playlistId,
-}: {
-  trackId: number;
-  playlistId: number;
-}) {
-  const pool = await connectDB();
-
-  try {
-    await pool.query({
-      text: `INSERT INTO track_playlist (track_id, playlist_id) VALUES ($1, $2);`,
-      values: [trackId, playlistId],
-    });
-  } catch (err) {
-    logDBError("Can't delete playlist.", err);
-    throw err;
-  }
-}
-
-export async function removeTracks({
-  playlistId,
-  trackIds,
-}: {
-  playlistId: number;
-  trackIds: number[];
-}) {
+export async function removeAllTracks(playlistId: number) {
   const pool = await connectDB();
 
   try {
     await pool.query<{ track_id: number }>({
-      text: `
-        DELETE FROM track_playlist
-        WHERE 
-          playlist_id = $1 AND 
-          track_id = ANY ($2);`,
-      values: [playlistId, trackIds],
+      text: "DELETE FROM track_playlist WHERE playlist_id = $1;",
+      values: [playlistId],
     });
   } catch (err) {
-    logDBError("Can't delete playlist.", err);
+    logDBError("Can't remove tracks from playlist.", err);
     throw err;
   }
 }
 
-export async function updateTracks(playlistId: number, newTracks: number[]) {
+export async function updateTracks(
+  playlistId: number,
+  newTracks: { trackId: number; position: number }[],
+) {
   const pool = await connectDB();
 
   try {
@@ -157,9 +130,12 @@ export async function updateTracks(playlistId: number, newTracks: number[]) {
 
     await pool.query({
       text: format(
-        `INSERT INTO track_playlist (track_id, playlist_id)
-         VALUES %L;`,
-        newTracks.map((trackId) => [trackId, playlistId]),
+        `INSERT INTO track_playlist (track_id, playlist_id, position) VALUES %L;`,
+        newTracks.map(({ trackId, position }) => [
+          trackId,
+          playlistId,
+          position,
+        ]),
       ),
     });
   } catch (err) {
@@ -168,14 +144,20 @@ export async function updateTracks(playlistId: number, newTracks: number[]) {
   }
 }
 
-export async function readTracks(playlistId: number): Promise<FoundTrack[]> {
+type TrackInPlaylistDBResponse = FoundTrackDBResponse & { position: number };
+type TrackInPlaylist = FoundTrack & { position: number };
+
+export async function readTracks(
+  playlistId: number,
+): Promise<TrackInPlaylist[]> {
   const pool = await connectDB();
 
   try {
-    const response = await pool.query<FoundTrackDBResponse>({
+    const response = await pool.query<TrackInPlaylistDBResponse>({
       text: `
         SELECT 
           tr.track_id, 
+          tr_pl.position,
           tr.title,
           tr.duration,
           tr.year,
@@ -191,19 +173,30 @@ export async function readTracks(playlistId: number): Promise<FoundTrack[]> {
         WHERE tr_pl.playlist_id = $1
         GROUP BY 
           tr.track_id,
-          tr.year;`,
+          tr.year,
+          tr_pl.position;`,
       values: [playlistId],
     });
 
     return response.rows.length === 0
       ? []
       : response.rows.map(
-          ({ artist, duration, genre, genre_id, title, track_id, year }) => {
+          ({
+            artist,
+            duration,
+            genre,
+            genre_id,
+            position,
+            title,
+            track_id,
+            year,
+          }) => {
             return {
               artist: artist,
               duration: parseFloat(duration),
               genre: genre,
               genreId: genre_id,
+              position,
               title: title,
               trackId: track_id,
               year: year,
