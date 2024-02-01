@@ -44,6 +44,12 @@
     align-items: center;
     border-bottom: 1px solid #ccc;
     justify-content: flex-start;
+
+    -webkit-animation: fadein 1s; /* Safari, Chrome and Opera > 12.1 */
+    -moz-animation: fadein 1s; /* Firefox < 16 */
+    -ms-animation: fadein 1s; /* Internet Explorer */
+    -o-animation: fadein 1s; /* Opera < 12.1 */
+    animation: fadein 1s;
   }
 
   &__row:last-child {
@@ -95,6 +101,12 @@
     font-size: $font-size_sm;
     background-color: white;
     border-radius: $border_radius_block;
+
+    -webkit-animation: fadein 1s; /* Safari, Chrome and Opera > 12.1 */
+    -moz-animation: fadein 1s; /* Firefox < 16 */
+    -ms-animation: fadein 1s; /* Internet Explorer */
+    -o-animation: fadein 1s; /* Opera < 12.1 */
+    animation: fadein 1s;
   }
 
   &__player {
@@ -129,6 +141,15 @@
 
   &__duration {
     font-size: $font-size_sm;
+  }
+
+  @keyframes fadein {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 }
 
