@@ -86,6 +86,11 @@
     height: 2rem;
   }
 
+  &__btn:disabled {
+    border: 1px solid $color_brand_gray-10;
+    color: $color_brand_gray-10;
+  }
+
   &__track {
     box-sizing: border-box;
     display: grid;
