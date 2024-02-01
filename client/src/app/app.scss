@@ -60,14 +60,56 @@
     padding: 0 1rem 0 0;
   }
 
-  &__header {
+  &__playlist-header {
+    display: grid;
+    grid-template-areas: "Name . . EstimeteLength";
+    grid-template-columns: auto auto 1fr 20%;
+    align-items: center;
+    justify-content: space-between;
+    column-gap: 1rem;
+    margin-top: 4rem;
+    margin-bottom: 2rem;
+    //font-weight: bold;
+    //list-style-type: none;
+  }
+
+  &__title {
+    grid-area: Name;
+    font-size: $font-size_h4;
     font-weight: bold;
-    list-style-type: none;
   }
 
   &__details {
     font-size: $font-size_xs;
     display: flex;
     align-items: center;
+  }
+
+  &__duration {
+    grid-area: EstimeteLength;
+    display: flex;
+    justify-content: flex-end;
+    font-size: $font-size_h4;
+  }
+
+  &__controls {
+    display: grid;
+    align-items: center;
+    column-gap: 1rem;
+  }
+
+  &__controls_top {
+    position: fixed;
+    top: 0;
+    left: 18rem;
+    right: 3rem;
+    padding: 1rem 0;
+
+    grid-template-columns: auto 1fr auto auto;
+    background-color: white;
+  }
+
+  &__controls_down {
+    grid-template-columns: auto auto 1fr auto;
   }
 }
