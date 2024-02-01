@@ -1,13 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { useForm, UseFormRegister, FieldValues, Path } from "react-hook-form";
+import {
+  useForm,
+  UseFormRegister,
+  FieldValues,
+  Path,
+  useFieldArray,
+  Control,
+  useWatch,
+} from "react-hook-form";
 import { Btn } from "../btn/btn";
 import { Stats } from "../../types";
 
 import "./group.scss";
 
 const operators = [
-  { name: "And", value: "AND" },
-  { name: "Or", value: "OR" },
+  { name: "any", value: "AND" },
+  { name: "all", value: "OR" },
 ];
 const filterNames = ["Year", "Genre", "Any", "All"];
 const yearConditions = [
@@ -18,12 +26,14 @@ const yearConditions = [
 ];
 const genreConditions = ["contains", "does not contain"];
 
-interface FormInputs {
+interface FormValues {
   operator: string;
-  name: string;
-  genreRule?: string;
-  yearRule?: string;
-  validOptions: string;
+  filter: {
+    name: string;
+    genreRule?: string;
+    yearRule?: string;
+    validOptions?: string;
+  }[];
 }
 
 interface GroupProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -35,21 +45,156 @@ interface GroupProps extends React.HTMLAttributes<HTMLDivElement> {
   isPlaying: boolean;
 }
 
+function GenreSelect({
+  control,
+  index,
+  register,
+}: {
+  control: Control<FormValues>;
+  index: number;
+  register: any;
+}) {
+  const output = useWatch({
+    name: "filter",
+    control,
+    //defaultValue: { name: "Genre"},
+  });
+
+  return output[index]?.name === "Genre" ? (
+    <select
+      {...register(`filter.${index}.genreRule`)}
+      defaultValue={genreConditions[0]}
+    >
+      {genreConditions.map((el) => (
+        <option key={el} value={el}>
+          {el}
+        </option>
+      ))}
+    </select>
+  ) : null;
+}
+
+function YearSelect({
+  control,
+  index,
+  register,
+}: {
+  control: Control<FormValues>;
+  index: number;
+  register: any;
+}) {
+  const output = useWatch({
+    name: "filter",
+    control,
+    //defaultValue: { name: "Genre"},
+  });
+
+  return output[index]?.name === "Year" ? (
+    <select
+      {...register(`filter.${index}.yearRule`)}
+      defaultValue={yearConditions[0]}
+    >
+      {yearConditions.map((el) => (
+        <option key={el} value={el}>
+          {el}
+        </option>
+      ))}
+    </select>
+  ) : null;
+}
+
+function ValidYearOptionsSelect({
+  control,
+  index,
+  register,
+  options,
+}: {
+  control: Control<FormValues>;
+  index: number;
+  register: any;
+  options: number[];
+}) {
+  const output = useWatch({
+    name: "filter",
+    control,
+    //defaultValue: { name: "Genre"},
+  });
+
+  return output[index]?.name === "Year" ? (
+    <select
+      {...register(`filter.${index}.validOptions`)}
+      defaultValue={options[0]}
+    >
+      {options.map((el) => (
+        <option key={el} value={el}>
+          {el}
+        </option>
+      ))}
+    </select>
+  ) : null;
+}
+
+function ValidGenreOptionsSelect({
+  control,
+  index,
+  register,
+  options,
+}: {
+  control: Control<FormValues>;
+  index: number;
+  register: any;
+  options: Stats[];
+}) {
+  const output = useWatch({
+    name: "filter",
+    control,
+    //defaultValue: { name: "Genre"},
+  });
+
+  return output[index]?.name === "Genre" ? (
+    <select
+      {...register(`filter.${index}.validOptions`)}
+      defaultValue={options[0].name}
+    >
+      {options.map((el) => (
+        <option key={el.id} value={el.id}>
+          {el.name}
+        </option>
+      ))}
+    </select>
+  ) : null;
+}
+
+let renderCount = 0;
+
 export function Group(props: GroupProps) {
   const {
+    control,
     register,
     handleSubmit,
     watch,
     resetField,
     reset,
+    setValue,
     formState: { errors },
-  } = useForm<FormInputs>({
-    defaultValues: {
-      operator: "AND",
-      name: "Genre",
-    },
+  } = useForm<FormValues>({
+    defaultValues: { operator: "AND", filter: [{ name: "Genre" }] },
+    mode: "onSubmit",
+    shouldUnregister: false,
   });
-  const watchInputs = watch();
+  // const watchInputs = watch();
+
+  const { fields, append, prepend, remove, swap, move, insert } = useFieldArray(
+    {
+      control,
+      name: "filter",
+    }
+  );
+
+  function onSubmit(data: FormValues) {
+    console.log("[onSubmit]", data);
+    // console.log("---", watchInputs);
+  }
 
   React.useEffect(() => {
     const subscription = watch((value: any, { name, type }: any) => {
@@ -63,19 +208,16 @@ export function Group(props: GroupProps) {
       );
 
       if (name === "name") {
-        resetField("yearRule");
-        resetField("genreRule");
-        resetField("validOptions");
+        //resetField("yearRule");
+        //resetField("genreRule");
+        //resetField("validOptions");
       }
     });
 
     return () => subscription.unsubscribe();
   }, [watch]);
 
-  function onSubmit(data: unknown) {
-    console.log("[onSubmit]", data);
-    console.log("---", watchInputs);
-  }
+  console.log(renderCount++);
 
   return (
     <>
@@ -86,6 +228,7 @@ export function Group(props: GroupProps) {
         </header>
 
         <form
+          noValidate
           onSubmit={handleSubmit(onSubmit)}
           id="filter-form"
           className={`group__form ${props.className || ""}`}
@@ -102,78 +245,65 @@ export function Group(props: GroupProps) {
             <div>of the following rules:</div>
           </div>
 
-          <div className="group__row group__row_filter">
-            <div className="group__row-controls">
-              <select {...register("name")}>
-                {...filterNames.map((el) => (
-                  <option key={el} value={el}>
-                    {el}
-                  </option>
-                ))}
-              </select>
+          {fields.map((filter, index) => {
+            return (
+              <div key={filter.id} className="group__row group__row_filter">
+                <div className="group__row-controls">
+                  <select {...register(`filter.${index}.name`)}>
+                    {...filterNames.map((el) => (
+                      <option key={el} value={el}>
+                        {el}
+                      </option>
+                    ))}
+                  </select>
 
-              {watchInputs.name === "Genre" && (
-                <select
-                  {...register("genreRule")}
-                  defaultValue={genreConditions[0]}
-                >
-                  {genreConditions.map((el) => (
-                    <option key={el} value={el}>
-                      {el}
-                    </option>
-                  ))}
-                </select>
-              )}
+                  <GenreSelect
+                    control={control}
+                    register={register}
+                    index={index}
+                  />
 
-              {watchInputs.name === "Year" && (
-                <select
-                  {...register("yearRule")}
-                  defaultValue={yearConditions[0]}
-                >
-                  {yearConditions.map((el) => (
-                    <option key={el} value={el}>
-                      {el}
-                    </option>
-                  ))}
-                </select>
-              )}
+                  <YearSelect
+                    control={control}
+                    register={register}
+                    index={index}
+                  />
 
-              {watchInputs.name === "Genre" && (
-                <select
-                  {...register("validOptions")}
-                  defaultValue={props.stats.genres[0].name}
-                >
-                  {props.stats.genres.map((el) => (
-                    <option key={el.name} value={el.name}>
-                      {el.name}
-                    </option>
-                  ))}
-                </select>
-              )}
+                  <ValidYearOptionsSelect
+                    control={control}
+                    register={register}
+                    index={index}
+                    options={props.stats.years.map((y) => y.name)}
+                  />
 
-              {watchInputs.name === "Year" && (
-                <select
-                  {...register("validOptions")}
-                  defaultValue={props.stats.years[0].name}
-                >
-                  {props.stats.years.map((el) => (
-                    <option key={el.name} value={el.name}>
-                      {el.name}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </div>
+                  <ValidGenreOptionsSelect
+                    control={control}
+                    register={register}
+                    index={index}
+                    options={props.stats.genres}
+                  />
+                </div>
 
-            <div className="group__btns">
-              <span className="btn btn_theme_transparent-black group__btn">
-                +
-              </span>
-              <span className="btn btn_theme_transparent-black group__btn">
-                −
-              </span>
-            </div>
-          </div>
+                <div className="group__btns">
+                  <button
+                    type="button"
+                    onClick={() => append([{ name: "Genre" }])}
+                    className="btn btn_theme_transparent-black group__btn"
+                  >
+                    +
+                  </button>
+                  <button
+                    disabled={fields.length === 1}
+                    type="button"
+                    onClick={() => remove(index)}
+                    className="btn btn_theme_transparent-black group__btn"
+                  >
+                    −
+                  </button>
+                </div>
+              </div>
+            );
+          })}
         </form>
 
         <div className="group__playlist">
