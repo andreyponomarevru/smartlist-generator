@@ -108,31 +108,38 @@ function ValueSelect(props: SelectProps<Stats[]>) {
 
 function FilterSelect(props: SelectProps<OptionsList>) {
   const defaultValue = props.optionsList.year.name;
-  const filterWatch = useWatch({ name: "filters", control: props.control });
+  const filtersWatch = useWatch({ name: "filters", control: props.control });
 
   React.useEffect(() => {
     if (
-      filterWatch[props.index]?.name === "any" ||
-      filterWatch[props.index]?.name === "all"
+      filtersWatch[props.index]?.name === "any" ||
+      filtersWatch[props.index]?.name === "all"
     ) {
       if (props.unregister) {
         props.unregister(`filters.${props.index}.value`);
         props.unregister(`filters.${props.index}.condition`);
       }
     }
-  }, [filterWatch[props.index]?.name]);
+  }, [filtersWatch[props.index]?.name]);
 
   return (
-    <select
-      {...props.register(`filters.${props.index}.name`)}
-      defaultValue={defaultValue}
-    >
-      {...Object.values(FILTER_NAMES).map((el) => (
-        <option key={el.value} value={el.value}>
-          {el.name}
-        </option>
-      ))}
-    </select>
+    <>
+      <select
+        {...props.register(`filters.${props.index}.name`)}
+        defaultValue={defaultValue}
+      >
+        {...Object.values(FILTER_NAMES).map((el) => (
+          <option key={el.value} value={el.value}>
+            {el.name}
+          </option>
+        ))}
+      </select>
+
+      {filtersWatch[props.index]?.name === "any" ||
+      filtersWatch[props.index]?.name === "all"
+        ? "of the following are true"
+        : null}
+    </>
   );
 }
 
@@ -187,7 +194,7 @@ export function Group(props: GroupProps) {
     props.handleSubmit(data);
   }
 
-  React.useEffect(() => {}, [inputsWatch.filters]);
+  //React.useEffect(() => {}, [inputsWatch.filters]);
 
   console.log(renderCount++);
 
@@ -326,3 +333,68 @@ export function Group(props: GroupProps) {
     </div>
   );
 }
+
+const arr = [
+  {
+    name: "genre",
+    rule: "contains",
+    value: 29,
+  },
+  {
+    name: "genre",
+    rule: "does not contain",
+    value: 4,
+  },
+  {
+    name: "genre",
+    rule: "contains",
+    value: 18,
+  },
+  {
+    name: "year",
+    rule: "greater than or equal",
+    value: 1996,
+  },
+  {
+    name: "year",
+    rule: "is",
+    value: 2023,
+  },
+  {
+    name: "year",
+    rule: "greater than or equal",
+    value: 2001,
+  },
+  {
+    name: "year",
+    rule: "is",
+    value: 2017,
+  },
+];
+
+function buildQuery(
+  arr: {
+    name: string;
+    rule: string;
+    value: number | string;
+  }[]
+) {
+  const withUniqueYearRules = uniqWith(arr, (a, b) => {
+    if (a.name === "year") return a.name === b.name && a.rule === b.rule;
+    else return false;
+  });
+
+  const withAggregatedGenres = uniqWith(withUniqueYearRules, (a, b) => {
+    if (a.name === "genre") {
+      if (a.rule === b.rule) {
+        a.value = b.value = [].concat(a.value as any, b.value as any) as any;
+        return true;
+      } else return false;
+    } else return true;
+  });
+  console.log("!!!!!!!", withAggregatedGenres);
+
+  return withAggregatedGenres;
+}
+
+buildQuery(arr);
