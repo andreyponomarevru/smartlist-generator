@@ -17,6 +17,7 @@
   -ms-animation: fadein 1s; /* Internet Explorer */
   -o-animation: fadein 1s; /* Opera < 12.1 */
   animation: fadein 1s;
+  background-color: white;
 
   &__header {
     display: grid;
@@ -91,7 +92,6 @@
 
   &__btn {
     font-weight: bold;
-    height: 2rem;
   }
 
   &__btn:disabled {
@@ -171,9 +171,9 @@
   flex-flow: row nowrap;
   align-items: center;
   justify-content: center;
-  border: 1px solid #ccc;
+  border: 1px solid $color_green-10;
   border-radius: $border_radius_btn;
-  color: #ccc;
+  color: $color_green-10;
   font-weight: bold;
   font-size: $font-size_sm;
   padding: 0.5rem;
@@ -183,8 +183,8 @@
     box-shadow 0.2s ease;
 
   &:hover {
-    border-color: black;
-    color: black;
+    border-color: $color_green-70;
+    color: $color_green-70;
     cursor: pointer;
   }
 }
