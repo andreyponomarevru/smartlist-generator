@@ -3,7 +3,7 @@
 .stats {
   display: flex;
   flex-flow: column nowrap;
-  row-gap: 0.5rem;
+  row-gap: 1rem;
   border-radius: $border_radius_block;
 
   &__header {
@@ -24,7 +24,7 @@
     overflow-y: scroll;
     padding: 0 1.5em 0 1.5rem;
     display: grid;
-    row-gap: 0.3rem;
+    row-gap: 0.5rem;
   }
 
   &__row {
