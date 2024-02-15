@@ -1,0 +1,60 @@
+@import "../../global.scss";
+
+.track {
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: auto 0.6fr 0.4fr 3rem auto;
+  color: $color_gray_darkest;
+  padding: 0.5rem 1rem;
+  align-items: center;
+  column-gap: 1rem;
+  box-shadow: 0px 0px 1rem $color_gray-lighten;
+  overflow: hidden;
+  font-size: $font-size_sm;
+  background-color: white;
+  border-radius: $border_radius_block;
+  text-overflow: ellipsis;
+
+  &__controls {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    column-gap: 1rem;
+    justify-content: flex-end;
+  }
+
+  &__artist-and-title {
+    display: flex;
+    flex-flow: column nowrap;
+  }
+
+  &__artists {
+    font-size: 0.75rem;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  &__title {
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  &__genres {
+    display: flex;
+    column-gap: 0.3rem;
+    align-items: center;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  &__genre {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.6rem 0.5rem 0.6rem;
+    line-height: 1;
+    border-radius: 0.7rem;
+    background-color: $color_gray-lighten;
+  }
+
+  &__duration {
+    font-size: $font-size_xs;
+  }
+}
