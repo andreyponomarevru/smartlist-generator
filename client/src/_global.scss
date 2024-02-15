@@ -54,7 +54,11 @@ $color_green-90: #162021;
 $color_green-80: #202a2b;
 $color_green-70: #364242;
 $color_green-60: #515e5f;
-$color_green-10: #dee1e1;
+$color_green-50: #687d73;
+$color_green-40: #82978c;
+$color_green-30: #9eaea6;
+$color_green-20: #bac5bf;
+$color_green-10: #d5dcd9;
 $color_green-0: #f3f5f4;
 
 $color_grass: #d7f4d7;
@@ -76,7 +80,7 @@ $color_gray_darkest: #1a1a1a;
 $color_black: black;
 
 $color_pink: #ff66cc;
-$color_bleu: #66b3ff;
+$color_bleu: #2288ee;
 
 $color_success: #e4ffe4;
 $color_warning: #f3c50c;
@@ -159,7 +163,7 @@ $content-max-width: 20rem;
 }
 
 .link {
-  color: black;
+  color: $color_bleu;
   text-decoration: none;
 
   &:hover {
@@ -175,6 +179,7 @@ $content-max-width: 20rem;
   padding: 0.5rem 0.7rem;
   box-sizing: border-box;
 
+  font-size: $font-size_sm;
   line-height: 1;
   text-decoration: none;
   white-space: nowrap;
@@ -186,6 +191,7 @@ $content-max-width: 20rem;
   transition: transform 0.2s ease, background-color 0.2s ease,
     box-shadow 0.2s ease;
   border: 1px solid transparent;
+  height: 2rem;
 
   cursor: pointer;
 
@@ -199,10 +205,10 @@ $content-max-width: 20rem;
 
   &_theme_black {
     color: white;
-    background-color: $color_green-90;
+    background-color: $color_green-80;
 
     &:hover {
-      background-color: $color_green-70;
+      background-color: $color_gray;
     }
   }
 
@@ -224,12 +230,22 @@ $content-max-width: 20rem;
     }
   }
 
-  &_theme_transparent-black {
-    border-color: $color_gray-darken;
+  &_theme_transparent-white {
+    color: white;
+    border: 1px solid $color_brand_gray-20;
     background-color: transparent;
 
     &:hover {
-      background-color: $color_gray-lightest;
+      background-color: $color_brand_gray-40;
+    }
+  }
+
+  &_theme_transparent-black {
+    border: 1px solid #ccc;
+    background-color: transparent;
+
+    &:hover {
+      background-color: #eee;
     }
   }
 
