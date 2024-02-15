@@ -2,11 +2,10 @@
 ### Project-specific ###
 ########################
 
-PRIVATE-NOTES.md
+.dev
 volume/
 redis_data/
 mongodb/data
-ui/
 
 ################
 ### Postgres ###
