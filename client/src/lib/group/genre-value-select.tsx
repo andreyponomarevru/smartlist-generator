@@ -19,17 +19,15 @@ export function GenreValueSelect(props: SelectProps<number>) {
     <Controller
       name={`filters.${props.index}.value`}
       control={props.control}
-      render={({ field }) => {
-        return (
-          <Select
-            {...field}
-            closeMenuOnSelect={false}
-            isMulti={true}
-            options={props.options}
-            defaultValue={props.defaultValue}
-          />
-        );
-      }}
+      render={({ field }) => (
+        <Select
+          {...field}
+          closeMenuOnSelect={false}
+          isMulti={true}
+          options={props.options}
+          defaultValue={props.defaultValue}
+        />
+      )}
     />
   ) : null;
 }

@@ -1,109 +1,64 @@
-import React, { useEffect, useState } from "react";
-import { RouterProvider } from "react-router-dom";
+import React from "react";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
+import Select from "react-select";
+
+import {
+  FILTER_NAMES,
+  GENRE_CONDITIONS,
+  YEAR_CONDITIONS,
+  OPERATORS,
+} from "../config/constants";
+import { ConditionSelect } from "../lib/group/condition-select";
+import { YearValueSelect } from "../lib//group/year-value-select";
+import { GenreValueSelect } from "../lib//group/genre-value-select";
+import { State, useEditableText } from "../hooks/use-editable-text";
 import { ErrorBoundary } from "../lib/error-boundary/error-boundary";
 import { API_ROOT_URL } from "../config/env";
 import { useFetch } from "../hooks/use-fetch";
-import { GetStatsRes, APIResponse, FormValues, GetTrackRes } from "../types";
-import { Loader } from "../lib/loader/loader";
-import { Message } from "../lib/message/message";
-import { Stats } from "../lib/stats/stats";
+import {
+  GetStatsRes,
+  TrackMeta,
+  Stats,
+  FormValues,
+  OptionsList,
+} from "../types";
 import { Btn } from "../lib/btn/btn";
-import { toHoursMinSec } from "../utils/misc";
 import { Group } from "../lib/group/group";
-import { buildQuery } from "../utils/misc";
+import {
+  exportFiltersTemplate,
+  exportPlaylistAsJSON,
+  exportPlaylistAsM3U,
+  toHoursMinSec,
+} from "../utils/misc";
 import { Sidebar } from "../lib/sidebar/sidebar";
+import { EditableText } from "../lib/editable-text/editable-text";
+import { Track } from "../lib/track/track";
+import { Player } from "../lib/player/player";
+import { usePlaylist } from "../hooks/use-playlist";
+import { usePlayer } from "../hooks/use-player";
 
 import "./app.scss";
 
 export function App() {
   const { state: yearsRes, fetchNow: fetchYears } = useFetch<GetStatsRes>();
   const { state: genresRes, fetchNow: fetchGenres } = useFetch<GetStatsRes>();
-  useEffect(() => {
+  React.useEffect(() => {
     fetchYears(`${API_ROOT_URL}/lib/stats/years`);
     fetchGenres(`${API_ROOT_URL}/lib/stats/genres`);
   }, []);
 
-  // Move code below to hook with reducer
-  const [groups, setGroups] = useState<any>([
-    {
-      name: new Date().toLocaleTimeString(),
-      tracks: [],
-    },
-  ]);
-  function handleAddGroup(index: number) {
-    const groupsCopy = [...groups];
-    groupsCopy.splice(index + 1, 0, {
-      name: new Date().toLocaleTimeString(),
-      tracks: [],
-    });
-    setGroups(groupsCopy);
-  }
-  function handleDeleteGroup(index: number) {
-    const groupsCopy = [...groups];
-    groupsCopy.splice(index, 1);
-    setGroups(groupsCopy);
-  }
-  function handleResetBtnClick() {
-    setGroups([{ name: new Date().toLocaleTimeString(), tracks: [] }]);
-  }
+  const { playlist, groups, tracks } = usePlaylist();
+  const { handlePlay } = usePlayer();
 
   //
-
-  const { state: trackRes, fetchNow: fetchTrack } = useFetch<GetTrackRes>();
-  function handleSubmit(data: FormValues) {
-    console.log("app.tsx [handleSubmit]", data);
-    const searchQuery = {
-      operator: data.operator.value,
-      filters: buildQuery(data.filters),
-      excludeTracks: [],
-    };
-    console.log("trackSearchQuery = ", searchQuery);
-
-    fetchTrack(`${API_ROOT_URL}/tracks`, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        accept: "application/json",
-      },
-      body: JSON.stringify(searchQuery),
-    });
-  }
-  React.useEffect(() => {
-    if (trackRes.response?.body?.results) {
-      setGroups([
-        { name: groups.name, tracks: [...trackRes.response.body.results] },
-      ]);
-    }
-
-    return () => {
-      console.log("groups", groups);
-    };
-  }, [trackRes]);
-
-  //
-
-  // Move into usePlyer hook
-
-  const [playingIndex, setPlayingIndex] = useState(0);
-
-  function handlePlayBtnClick() {
-    //setIsPlaying((s) => !s);
-  }
-
-  /*const { state, fetchNow, resetState } = useFetch<
-    GetTrackFromSubplaylistAPIResponse
-  >();*/
-
-  function handleRollBtnClick() {
-    /*fetchNow(
-      `${API_ROOT_URL}/lib/subplaylists?id=1&limit=2&exclude=1&exclude=2&exclude=3`
-    );*/
-  }
 
   return (
     <ErrorBoundary>
       <main className="app">
-        <Sidebar stats={{ years: yearsRes, genres: genresRes }} />
+        <Sidebar
+          className="app__sidebar"
+          stats={{ years: yearsRes, genres: genresRes }}
+        />
 
         <div className="app__main">
           <div className="app__header">
@@ -112,86 +67,113 @@ export function App() {
             </a>
             <div className="app__controls app__controls_top">
               <Btn
-                onClick={handleResetBtnClick}
+                onClick={groups.handleReset}
                 className="app__btn"
                 name="Reset"
-                theme="transparent-red"
+                theme="transparent-white"
               />
               <div></div>
+              <label htmlFor="importblacklisted">
+                <input
+                  id="importblacklisted"
+                  type="file"
+                  onChange={tracks.handleImportBlacklisted}
+                  hidden
+                />
+                <div className="app__btn btn btn_theme_transparent-white">
+                  Import blacklisted tracks
+                </div>
+              </label>
               <Btn
                 className="app__btn"
-                name="Import blacklisted tracks"
-                theme="transparent-black"
-              />
-              <Btn
-                className="app__btn"
-                name="Import JSON playlist template"
-                theme="transparent-black"
+                name="Import JSON filters template"
+                theme="transparent-white"
               />
             </div>
           </div>
 
           <header className="app__playlist-header">
-            <div className="app__title">
-              Playlist {new Date().toDateString()}
-            </div>
+            <EditableText className="app__playlist-name" text={playlist.name} />
+
             <div className="app__duration">
               {toHoursMinSec(
-                groups.reduce(
-                  (accum: any, current: any) =>
-                    accum +
-                    current.tracks.reduce(
-                      (accum: any, current: any) => accum + current.duration,
-                      0
-                    ),
-                  0
-                )
+                Object.values(playlist.tracks)
+                  .flat()
+                  .reduce((total, track) => track.duration + total, 0)
               )}
             </div>
           </header>
 
-          {yearsRes.response?.body?.results && genresRes.response?.body?.results
-            ? groups.map((group: any, index: number) => {
-                return (
-                  <Group
-                    key={index}
-                    stats={{
-                      years: yearsRes.response?.body?.results!,
-                      genres: genresRes.response?.body?.results!,
-                    }}
-                    name={group.name}
-                    tracks={group.tracks}
-                    isDeleteGroupBtnDisabled={groups.length === 1}
-                    onPlayBtnClick={handlePlayBtnClick}
-                    isPlaying={false /*playingIndex === */}
-                    handleSubmit={handleSubmit}
-                    handleAddGroup={() => handleAddGroup(index)}
-                    handleDeleteGroup={() => handleDeleteGroup(index)}
-                  />
-                );
-              })
-            : []}
+          {playlist.groups.length === 0 && (
+            <button
+              className="btn btn_theme_transparent-black add-section-btn"
+              onClick={() => groups.handleAdd(0)}
+            >
+              Add new section
+            </button>
+          )}
+
+          {playlist.groups.map((groupId, index) => {
+            return (
+              <Group
+                groupId={groupId}
+                key={groupId}
+                name={playlist.groupNames[`${groupId}`]}
+                onAddGroup={() => groups.handleAdd(index + 1)}
+                onDeleteGroup={() => groups.handleDestroy(groupId)}
+                onRenameGroup={groups.handleRename}
+                onToggle={() => groups.toggleIsGroupOpen(groupId)}
+                isOpenGroupId={playlist.isGroupOpen}
+                onGetTrack={tracks.handleAdd}
+                years={yearsRes}
+                genres={genresRes}
+              >
+                {playlist.tracks[`${groupId}`].map((track: TrackMeta) => {
+                  return (
+                    <Track
+                      {...track}
+                      key={`${track.trackId}-${track.duration}`}
+                      onRemoveTrack={() =>
+                        tracks.handleRemove(groupId, track.trackId)
+                      }
+                      onReplaceTrack={() =>
+                        tracks.handleReplace(groupId, track.trackId)
+                      }
+                    />
+                  );
+                })}
+              </Group>
+            );
+          })}
 
           <nav className="app__controls app__controls_bottom">
             <Btn
               className="app__btn"
               name="Export playlist as M3U"
               theme="transparent-black"
+              onClick={() =>
+                exportPlaylistAsM3U(playlist.name.state.text, playlist.tracks)
+              }
             />
             <Btn
               className="app__btn"
               name="Export playlist as JSON"
               theme="transparent-black"
+              onClick={() =>
+                exportPlaylistAsJSON(playlist.name.state.text, playlist.tracks)
+              }
             />
             <div></div>
             <Btn
               className="app__btn"
-              name="Export filters as JSON template"
+              name="Export JSON filters template"
               theme="transparent-black"
+              onClick={exportFiltersTemplate}
             />
           </nav>
         </div>
       </main>
+      <Player isPlaying={false /*playingIndex === */} onPlay={handlePlay} />
     </ErrorBoundary>
   );
 }

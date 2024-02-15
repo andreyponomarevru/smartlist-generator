@@ -18,15 +18,13 @@ export function ConditionSelect(props: SelectProps<string>) {
     <Controller
       name={`filters.${props.index}.condition`}
       control={props.control}
-      render={({ field }) => {
-        return (
-          <Select
-            {...field}
-            options={props.options}
-            defaultValue={props.defaultValue}
-          />
-        );
-      }}
+      render={({ field }) => (
+        <Select
+          {...field}
+          options={props.options}
+          defaultValue={props.defaultValue}
+        />
+      )}
     />
   ) : null;
 }

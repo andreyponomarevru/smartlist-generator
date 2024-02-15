@@ -5,49 +5,62 @@
   grid-template-areas: "Sidebar Playlists";
   grid-template-columns: 15rem 1fr;
 
+  min-width: 840px;
+  max-width: 1440px;
+  margin: 0 auto;
+
+  &__sidebar {
+    position: fixed;
+    top: 0;
+    overflow-y: scroll;
+  }
+
   &__main {
     grid-area: Playlists;
     display: flex;
     flex-flow: column nowrap;
-    padding: 2rem;
-    margin: 1rem;
+    padding: 2rem 0 2rem 2rem;
+    margin: 1rem 1.5rem 1rem 1rem;
+    row-gap: 1rem;
+  }
+
+  &__title:hover &__edit-name-btn {
+    display: inline-block;
   }
 
   &__logo {
     font-weight: bold;
-    font-size: 1rem;
     text-decoration: none;
-    color: white;
     padding: 0 0 0 1.5rem;
-    background-color: $color_green-70;
     height: 100%;
-    border-bottom: 1px solid $color_green-80;
     padding: 1rem 1.5rem 1rem 1.5rem;
+    font-size: $font-size_h6;
+    background-color: black;
+    color: white;
+    border-radius: 0 0 0 $border_radius_btn;
   }
 
-  &__logo:hover {
-    color: $color_sand-10;
-  }
-
-  &__btn {
-    font-size: $font-size_sm;
+  &__logo:visited {
+    color: white;
   }
 
   &__playlist-header {
     display: grid;
     grid-template-areas: "Name . . EstimeteLength";
-    grid-template-columns: auto auto 20%;
+    grid-template-columns: 1fr 20%;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     column-gap: 1rem;
     margin-top: 4rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
   }
 
-  &__title {
+  &__playlist-name {
     grid-area: Name;
-    font-size: $font-size_h4;
-    font-weight: bold;
+
+    & .editable-text__name {
+      font-size: $font-size_h2;
+    }
   }
 
   &__duration {
@@ -55,6 +68,7 @@
     display: flex;
     justify-content: flex-end;
     font-size: $font-size_h4;
+    justify-self: flex-end;
   }
 
   &__header {
@@ -68,6 +82,10 @@
     right: 0;
     z-index: $zindex-fixed;
     background-color: white;
+
+    min-width: 840px;
+    max-width: 1440px;
+    margin: 0 auto;
   }
 
   &__controls {
@@ -79,10 +97,13 @@
   &__controls_top {
     grid-template-columns: auto 1fr auto auto;
     border-bottom: 1px solid $color_green-10;
-    padding: 1rem 3rem 1rem 3rem;
+    padding: 1rem 1.5rem 1rem 3rem;
+    background-color: black;
+    border-radius: 0 0 $border_radius_btn 0;
   }
 
   &__controls_bottom {
     grid-template-columns: auto auto 1fr auto;
+    margin-bottom: 3rem;
   }
 }

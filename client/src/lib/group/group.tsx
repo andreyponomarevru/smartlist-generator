@@ -1,254 +1,306 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   useForm,
-  UseFormRegister,
-  FieldValues,
   useFieldArray,
-  Control,
-  useWatch,
-  UseFormResetField,
-  UseFormUnregister,
   Controller,
+  FormState,
+  Control,
+  UseFormRegister,
+  UseFormHandleSubmit,
+  UseFormResetField,
+  UseFormReset,
+  UseFormSetValue,
+  UseFormWatch,
+  UseFieldArrayRemove,
+  UseFieldArrayInsert,
 } from "react-hook-form";
-import Select, { StylesConfig } from "react-select";
-import uniqWith from "lodash/uniqWith";
-import mergeWith from "lodash/mergeWith";
-import { Btn } from "../btn/btn";
-import { Stats, FormValues, TrackMeta, OptionsList } from "../../types";
-import { Player } from "../player/player";
+import Select from "react-select";
+
+import {
+  Stats,
+  FormValues,
+  TrackMeta,
+  OptionsList,
+  GetStatsRes,
+  GetTrackRes,
+  APIResponse,
+} from "../../types";
 import {
   FILTER_NAMES,
   GENRE_CONDITIONS,
   YEAR_CONDITIONS,
   OPERATORS,
-  DEFAULT_INPUTS,
 } from "../../config/constants";
 import { ConditionSelect } from "./condition-select";
-import { ValueSelect } from "./value-select";
+import { YearValueSelect } from "./year-value-select";
+import { GenreValueSelect } from "./genre-value-select";
+import { State, useEditableText } from "../../hooks/use-editable-text";
+import { EditableText } from "../../lib/editable-text/editable-text";
 
 import "./group.scss";
 
 interface GroupProps extends React.HTMLAttributes<HTMLDivElement> {
-  stats: { years: Stats[]; genres: Stats[] };
+  groupId: number;
   name: string;
-  tracks: TrackMeta[];
-  isDeleteGroupBtnDisabled: boolean;
-
-  onPlayBtnClick: () => void;
-  isPlaying: boolean;
-  handleSubmit: (data: FormValues) => void;
-  handleAddGroup: () => void;
-  handleDeleteGroup: () => void;
+  years: APIResponse<GetStatsRes>;
+  genres: APIResponse<GetStatsRes>;
+  isOpenGroupId: Record<string, boolean>;
+  onToggle: () => void;
+  onAddGroup: () => void;
+  onDeleteGroup: () => void;
+  onRenameGroup: (groupId: number, newName: string) => void;
+  onGetTrack: (groupId: number, formValues: FormValues) => void;
+  /*
+  defaultValues: FormValues;
+  formState: FormState<FormValues>;
+  control: Control<FormValues, any>;
+  register: UseFormRegister<FormValues>;
+  handleSubmit: UseFormHandleSubmit<FormValues, undefined>;
+  resetField: UseFormResetField<FormValues>;
+  reset: UseFormReset<FormValues>;
+  setValue: UseFormSetValue<FormValues>;
+  watch: UseFormWatch<FormValues>;
+  fields: Record<"id", string>[];
+  remove: UseFieldArrayRemove;
+  insert: UseFieldArrayInsert<FormValues, string>;*/
 }
 
 let renderCount = 0;
 
 export function Group(props: GroupProps) {
-  const genres: OptionsList<number>[] = [...props.stats.genres]
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .map((g) => ({ value: g.id as number, label: g.name }));
+  // console.log(renderCount++);
 
-  const years: OptionsList<number>[] = [...props.stats.years]
-    .sort((a, b) => parseInt(b.name) - parseInt(a.name))
-    .map((y) => ({ value: parseInt(y.name), label: String(y.name) }));
+  const groupName = useEditableText(props.name);
+  React.useEffect(() => {
+    props.onRenameGroup(props.groupId, groupName.state.text);
+  }, [groupName.state.text]);
+
+  //
 
   const defaultValues: FormValues = {
     operator: OPERATORS[0],
     filters: [
       {
-        name: DEFAULT_INPUTS.filterName,
-        condition: DEFAULT_INPUTS.genre.condition,
-        value: genres[0],
+        name: FILTER_NAMES[1],
+        condition: GENRE_CONDITIONS[0],
+        value: [],
       },
     ],
   };
 
   const {
+    formState,
     control,
     register,
-    unregister,
     handleSubmit,
-    watch,
     resetField,
     reset,
     setValue,
-    formState: { errors },
+    watch,
   } = useForm<FormValues>({
     defaultValues,
     mode: "onSubmit",
     shouldUnregister: false,
   });
-  const inputsWatch = watch();
 
   const { fields, remove, insert } = useFieldArray({
     control,
     name: "filters",
   });
 
-  const operatorWatch = useWatch({ name: "operator", control });
+  const watchedFields = watch();
+  React.useEffect(() => {
+    console.log(watchedFields);
+    localStorage.setItem("filters", JSON.stringify({ filters: watchedFields }));
+  }, [watchedFields]);
 
-  function onSubmit(data: FormValues) {
-    console.log("[onSubmit]", data);
-    props.handleSubmit(data);
+  const [stats, setStats] = React.useState<
+    Record<string, OptionsList<number>[]>
+  >({ years: [], genres: [] });
+  React.useEffect(() => {
+    if (!props.genres.response?.body?.results) return;
+    if (!props.years.response?.body?.results) return;
+
+    const genres: OptionsList<number>[] = [
+      ...props.genres.response?.body?.results,
+    ]
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((g) => ({ value: g.id as number, label: g.name }));
+
+    const years: OptionsList<number>[] = [
+      ...props.years.response?.body?.results!,
+    ]
+      .sort((a, b) => parseInt(b.name) - parseInt(a.name))
+      .map((y) => ({ value: parseInt(y.name), label: String(y.name) }));
+
+    setStats({ genres, years });
+  }, [props.genres.response]);
+
+  // If (form has been changed) reset all tracks
+  const [isFiltersChanged, setIsFiltersChanged] = React.useState(false);
+  React.useEffect(() => {
+    if (formState.isDirty) {
+      setIsFiltersChanged(true);
+      // props.onFiltersChange(props.groupId);
+    } else {
+      setIsFiltersChanged(false);
+    }
+  }, [formState]);
+
+  React.useEffect(() => {
+    if (isFiltersChanged) {
+      reset(undefined, { keepValues: true, keepDirty: false });
+    }
+  }, [formState]);
+
+  function onSubmit(groupId: number, formValues: FormValues) {
+    props.onGetTrack(groupId, formValues);
   }
 
-  //React.useEffect(() => {}, [inputsWatch.filters]);
-
-  console.log(renderCount++);
-
   return (
-    <div>
+    <>
       <div className={`group ${props.className || ""}`}>
         <header className="group__header">
-          <span className="group__name">{props.name}</span>
+          <EditableText className="group__name" text={groupName} />
           <button
-            onClick={props.handleDeleteGroup}
-            className={`btn btn_theme_transparent-red group__btn ${
-              props.isDeleteGroupBtnDisabled ? "btn_disabled" : ""
-            }`}
-            disabled={props.isDeleteGroupBtnDisabled}
+            onClick={props.onDeleteGroup}
+            className="btn btn_theme_transparent-black"
           >
             <span>Delete</span>
           </button>
+          <div className="group__toggle-group-btn" onClick={props.onToggle}>
+            {props.isOpenGroupId[`${props.groupId}`] ? "–" : "+"}
+          </div>
         </header>
 
-        <form
-          noValidate
-          onSubmit={handleSubmit(onSubmit)}
-          id="filter-form"
-          className={`group__form ${props.className || ""}`}
-        >
-          <div className="group__row">
-            <label htmlFor="filter-form">Match</label>
+        {props.isOpenGroupId[`${props.groupId}`] && (
+          <div className="group__body">
+            <form
+              noValidate
+              onSubmit={handleSubmit((e) => onSubmit(props.groupId, e))}
+              id={`filter-form-${props.groupId}`}
+              className={`group__form ${props.className || ""}`}
+            >
+              <div className="group__row">
+                <label htmlFor={`filter-form-${props.groupId}`}>Match</label>
 
-            <Controller
-              name="operator"
-              control={control}
-              render={({ field }) => {
-                return (
-                  <Select
-                    {...field}
-                    options={OPERATORS}
-                    defaultValue={OPERATORS[0]}
-                  />
-                );
-              }}
-            />
-            <div>of the following rules:</div>
-          </div>
-
-          {fields.map((filter, index) => {
-            return (
-              <div key={filter.id} className="group__row group__row_filter">
-                <div className="group__row-controls">
-                  <Controller
-                    name={`filters.${index}.name`}
-                    control={control}
-                    render={({ field }) => {
-                      return (
-                        <Select
-                          {...field}
-                          options={FILTER_NAMES}
-                          defaultValue={DEFAULT_INPUTS.filterName}
-                        />
-                      );
-                    }}
-                  />
-                  <ConditionSelect
-                    name="genre"
-                    control={control}
-                    register={register}
-                    index={index}
-                    resetField={resetField}
-                    options={GENRE_CONDITIONS}
-                    defaultValue={DEFAULT_INPUTS.genre.condition}
-                    setValue={setValue}
-                  />
-                  <ConditionSelect
-                    name="year"
-                    control={control}
-                    register={register}
-                    index={index}
-                    resetField={resetField}
-                    options={YEAR_CONDITIONS}
-                    defaultValue={DEFAULT_INPUTS.year.condition}
-                    setValue={setValue}
-                  />
-
-                  <ValueSelect
-                    name="genre"
-                    control={control}
-                    register={register}
-                    index={index}
-                    resetField={resetField}
-                    options={genres}
-                    defaultValue={genres[0]}
-                    setValue={setValue}
-                  />
-                  <ValueSelect
-                    name="year"
-                    control={control}
-                    register={register}
-                    index={index}
-                    resetField={resetField}
-                    options={years}
-                    defaultValue={years[0]}
-                    setValue={setValue}
-                  />
-                </div>
-
-                <div className="group__btns">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      insert(index + 1, [{ name: FILTER_NAMES[1] }])
-                    }
-                    className="btn btn_theme_transparent-black group__btn"
-                  >
-                    +
-                  </button>
-                  <button
-                    disabled={fields.length === 1}
-                    type="button"
-                    onClick={() => remove(index)}
-                    className="btn btn_theme_transparent-black group__btn"
-                  >
-                    −
-                  </button>
-                </div>
+                <Controller
+                  name="operator"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      options={OPERATORS}
+                      defaultValue={defaultValues.operator}
+                    />
+                  )}
+                />
+                <div>of the following rules:</div>
               </div>
-            );
-          })}
-        </form>
 
-        <div className="group__playlist">
-          {props.tracks.length === 0 ? (
+              {fields.map((filter, index) => {
+                return (
+                  <div key={filter.id} className="group__row group__row_filter">
+                    <div className="group__row-controls">
+                      <Controller
+                        name={`filters.${index}.name`}
+                        control={control}
+                        render={({ field }) => {
+                          return (
+                            <Select
+                              {...field}
+                              options={FILTER_NAMES}
+                              defaultValue={defaultValues.filters[0].name}
+                            />
+                          );
+                        }}
+                      />
+                      <ConditionSelect
+                        name="genre"
+                        control={control}
+                        register={register}
+                        index={index}
+                        resetField={resetField}
+                        options={GENRE_CONDITIONS}
+                        defaultValue={GENRE_CONDITIONS[1]}
+                        setValue={setValue}
+                      />
+                      <ConditionSelect
+                        name="year"
+                        control={control}
+                        register={register}
+                        index={index}
+                        resetField={resetField}
+                        options={YEAR_CONDITIONS}
+                        defaultValue={YEAR_CONDITIONS[0]}
+                        setValue={setValue}
+                      />
+                      <GenreValueSelect
+                        name="genre"
+                        control={control}
+                        register={register}
+                        index={index}
+                        resetField={resetField}
+                        options={stats.genres}
+                        defaultValue={stats.genres[0]}
+                        setValue={setValue}
+                      />
+                      <YearValueSelect
+                        name="year"
+                        control={control}
+                        register={register}
+                        index={index}
+                        resetField={resetField}
+                        options={stats.years}
+                        defaultValue={stats.years[0]}
+                        setValue={setValue}
+                      />
+                    </div>
+
+                    <div className="group__btns">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          insert(index + 1, [
+                            { name: defaultValues.filters[0].name },
+                          ]);
+                        }}
+                        className="btn btn_theme_transparent-black group__btn"
+                      >
+                        +
+                      </button>
+                      <button
+                        disabled={fields.length === 1}
+                        type="button"
+                        onClick={() => remove(index)}
+                        className="btn btn_theme_transparent-black group__btn"
+                      >
+                        −
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </form>
+            <ul className="group__playlist">{props.children}</ul>
             <button
               type="submit"
-              form="filter-form"
+              form={`filter-form-${props.groupId}`}
               disabled={false}
-              className="btn btn_theme_black group__btn"
+              className="btn btn_theme_black group__find-track-btn"
             >
-              +
+              Find a track
             </button>
-          ) : null}
-
-          {props.tracks.map((track: TrackMeta) => {
-            return (
-              <Player
-                {...track}
-                key={track.trackId}
-                isPlaying={props.isPlaying}
-                onPlayBtnClick={props.onPlayBtnClick}
-              />
-            );
-          })}
-        </div>
+          </div>
+        )}
       </div>
 
-      <div onClick={props.handleAddGroup} className="add-section-btn">
+      <button
+        className="btn btn_theme_transparent-black add-section-btn"
+        onClick={props.onAddGroup}
+      >
         Add new section
-      </div>
-    </div>
+      </button>
+    </>
   );
 }
