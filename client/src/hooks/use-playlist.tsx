@@ -142,11 +142,11 @@ function playlistReducer(state: State, action: Action): State {
 export function usePlaylist() {
   const initialState: State = {
     name: `Playlist ${new Date().toDateString()}`,
-    groups: [], //[0],
-    groupNames: {}, //{ "0": new Date().toLocaleTimeString() },
-    tracks: {}, //{ "0": [] },
+    groups: [],
+    groupNames: {},
+    tracks: {},
     blacklistedTracks: [],
-    isGroupOpen: {}, //{ ["0"]: true },
+    isGroupOpen: {},
   };
 
   const [state, dispatch] = React.useReducer(playlistReducer, initialState);
