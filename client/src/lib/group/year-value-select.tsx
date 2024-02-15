@@ -19,17 +19,15 @@ export function YearValueSelect(props: SelectProps<number>) {
     <Controller
       name={`filters.${props.index}.value`}
       control={props.control}
-      render={({ field }) => {
-        return (
-          <Select
-            {...field}
-            closeMenuOnSelect={true}
-            isMulti={false}
-            options={props.options}
-            defaultValue={props.defaultValue}
-          />
-        );
-      }}
+      render={({ field }) => (
+        <Select
+          {...field}
+          closeMenuOnSelect={true}
+          isMulti={false}
+          options={props.options}
+          defaultValue={props.defaultValue}
+        />
+      )}
     />
   ) : null;
 }

@@ -3,29 +3,41 @@
 .group {
   display: flex;
   flex-flow: column nowrap;
-  row-gap: 1rem;
+  row-gap: 0.5rem;
   align-content: flex-start;
   border-radius: $border_radius_block;
   width: 100%;
-  box-shadow: 0px 0px 1rem #ccc;
-  padding: 1rem 1.5rem;
-  margin-bottom: 1rem;
+  box-shadow: 0px 0px 1rem $color_gray-lighten;
   font-size: $font-size_sm;
-
-  -webkit-animation: fadein 1s; /* Safari, Chrome and Opera > 12.1 */
-  -moz-animation: fadein 1s; /* Firefox < 16 */
-  -ms-animation: fadein 1s; /* Internet Explorer */
-  -o-animation: fadein 1s; /* Opera < 12.1 */
-  animation: fadein 1s;
   background-color: white;
 
   &__header {
     display: grid;
-    grid-template-columns: 1fr auto;
+    column-gap: 1rem;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem 1rem 1.5rem;
+  }
+
+  &__body {
+    display: flex;
+    flex-flow: column nowrap;
+    row-gap: 1rem;
+    padding: 0 1.5rem 1rem 1.5rem;
   }
 
   &__name {
-    font-size: $font-size_h4;
+    grid-area: Name;
+
+    & .editable-text__name {
+      font-size: $font-size_h5;
+      font-weight: bold;
+    }
+  }
+
+  &__edit-name-btn {
+    font-size: $font-size_sm;
   }
 
   &__form {
@@ -33,13 +45,8 @@
     flex-flow: column nowrap;
     column-gap: 1rem;
     align-items: center;
-    border-bottom: 1px solid #ccc;
-    padding: 0 0 0.5rem 0;
-
     border-radius: $border_radius_block;
-
-    box-shadow: 0px 0px 1rem #ccc;
-    padding: 1rem 1.5rem;
+    padding: 0;
   }
 
   &__row {
@@ -52,12 +59,6 @@
     align-items: center;
     border-bottom: 1px solid #ccc;
     justify-content: flex-start;
-
-    -webkit-animation: fadein 1s; /* Safari, Chrome and Opera > 12.1 */
-    -moz-animation: fadein 1s; /* Firefox < 16 */
-    -ms-animation: fadein 1s; /* Internet Explorer */
-    -o-animation: fadein 1s; /* Opera < 12.1 */
-    animation: fadein 1s;
   }
 
   &__row:last-child {
@@ -91,6 +92,15 @@
   }
 
   &__btn {
+  }
+
+  &__toggle-group-btn {
+    font-size: 2rem;
+    cursor: pointer;
+    width: 2rem;
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
     font-weight: bold;
   }
 
@@ -99,92 +109,25 @@
     color: $color_brand_gray-10;
   }
 
-  &__track {
-    box-sizing: border-box;
-    display: grid;
-    grid-template-columns: auto 20% 15% 1fr auto auto auto;
-    color: $color_gray_darkest;
-    scrollbar-width: none;
-    padding: 0.5rem 1rem;
-    align-items: center;
-    justify-content: space-between;
-    column-gap: 1rem;
-    box-shadow: 0px 0px 1rem #ccc;
-    overflow: hidden;
-    font-size: $font-size_sm;
-    background-color: white;
-    border-radius: $border_radius_block;
-
-    -webkit-animation: fadein 1s; /* Safari, Chrome and Opera > 12.1 */
-    -moz-animation: fadein 1s; /* Firefox < 16 */
-    -ms-animation: fadein 1s; /* Internet Explorer */
-    -o-animation: fadein 1s; /* Opera < 12.1 */
-    animation: fadein 1s;
+  &__find-track-btn {
+    align-self: start;
   }
 
-  &__player {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    align-items: center;
-    justify-content: space-between;
-    column-gap: 1rem;
-    width: 100%;
-    padding: 0 1rem;
-  }
-
-  &__toggle-play-btn {
+  &__new-group-form {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: black;
-    color: white;
-    height: 2rem;
-    width: 2rem;
-    font-size: $font-size_sm;
-    border-radius: 50%;
-    overflow: hidden;
-    font-weight: bold;
-  }
-
-  &__progressbar {
-    background-color: $color_brand_gray-0;
-    border-radius: 1rem;
-    height: 0.5rem;
-  }
-
-  &__duration {
-    font-size: $font-size_xs;
-  }
-
-  @keyframes fadein {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
+    flex-flow: row nowrap;
+    column-gap: 1rem;
   }
 }
 
 .add-section-btn {
   display: flex;
   flex-flow: row nowrap;
+  column-gap: 1rem;
   align-items: center;
   justify-content: center;
-  border: 1px solid $color_green-10;
-  border-radius: $border_radius_btn;
-  color: $color_green-10;
-  font-weight: bold;
   font-size: $font-size_sm;
-  padding: 0.5rem;
-  width: 100%;
-  margin-bottom: 2rem;
+  padding: 1rem 0;
   transition: transform 0.2s ease, border 0.2s ease, color 0.2s ease,
     box-shadow 0.2s ease;
-
-  &:hover {
-    border-color: $color_green-70;
-    color: $color_green-70;
-    cursor: pointer;
-  }
 }
