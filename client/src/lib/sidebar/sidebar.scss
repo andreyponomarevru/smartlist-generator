@@ -2,26 +2,26 @@
 
 .sidebar {
   grid-area: Sidebar;
-  position: fixed;
-  left: 0;
-  top: 0;
-  overflow-y: scroll;
-  row-gap: 1rem;
+  row-gap: 2rem;
   width: 15rem;
   display: grid;
-  align-content: space-between;
+  align-content: flex-start;
   height: 100%;
-  background-color: $color_green-70;
   margin: 1rem 0 1rem 0;
-  color: $color_gray-lighten;
   padding: 4rem 0 1rem 0;
+
+  &__general-stats {
+    display: flex;
+    flex-flow: column nowrap;
+    row-gap: 1rem;
+  }
 
   &__stats_name {
     font-size: $font-size_sm;
   }
 
   &__stats_value {
-    font-size: $font-size_xs;
+    font-size: $font-size_sm;
     display: flex;
     align-items: center;
   }
