@@ -77,10 +77,10 @@ function playlistReducer(state: State, action: Action): State {
       return {
         ...state,
         groups: [],
-        groupNames: {}, //{ "0": new Date().toLocaleTimeString() },
-        tracks: {}, //{ "0": [] },
+        groupNames: {},
+        tracks: {},
         blacklistedTracks: state.blacklistedTracks,
-        isGroupOpen: {}, //{ "0": true },
+        isGroupOpen: {},
       };
     }
     case "RENAME_GROUP": {
@@ -115,11 +115,11 @@ function playlistReducer(state: State, action: Action): State {
     case "IMPORT_BLACKLISTED_TRACKS": {
       return {
         ...state,
-        groups: [], //[0],
-        groupNames: {}, //{ "0": new Date().toLocaleTimeString() },
-        tracks: {}, //{ "0": [] },
+        groups: [],
+        groupNames: {},
+        tracks: {},
         blacklistedTracks: action.payload.trackIds,
-        isGroupOpen: {}, //{ "0": true },
+        isGroupOpen: {},
       };
     }
     case "TOGGLE_IS_GROUP_OPEN": {
