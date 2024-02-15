@@ -7,8 +7,8 @@ import { useEditableText } from "./use-editable-text";
 type State = {
   name: string;
   groups: number[];
-  groupNames: { [key: string]: string };
-  tracks: { [key: string]: TrackMeta[] };
+  groupNames: Record<string, string>;
+  tracks: Record<string, TrackMeta[]>;
   blacklistedTracks: number[];
   isGroupOpen: Record<string, boolean>;
 };
@@ -20,9 +20,12 @@ type Action =
   | { type: "RENAME_GROUP"; payload: { groupId: number; newName: string } }
   | { type: "RESET_TRACKS"; payload: { groupId: number } }
   | { type: "REMOVE_TRACK"; payload: { groupId: number; trackId: number } }
-  | { type: "REPLACE_TRACK" }
+  | {
+      type: "REPLACE_TRACK";
+      payload: { groupId: number; trackId: number; newTrack: TrackMeta[] };
+    }
   | { type: "IMPORT_BLACKLISTED_TRACKS"; payload: { trackIds: number[] } }
-  | { type: "TOGGLE_IS_GROUP_OPEN"; payload: { groupId: number } };
+  | { type: "OPEN_GROUP"; payload: { groupId: number } };
 
 let counter = 0;
 
@@ -42,6 +45,7 @@ function playlistReducer(state: State, action: Action): State {
           [`${newGroupId}`]: new Date().toLocaleTimeString(),
         },
         tracks: { ...state.tracks, [`${newGroupId}`]: [] },
+        isGroupOpen: { ...state.isGroupOpen, [`${newGroupId}`]: true },
       };
     }
     case "ADD_TRACK": {
@@ -111,7 +115,27 @@ function playlistReducer(state: State, action: Action): State {
         },
       };
     }
-    // case "REPLACE_TRACK": {}
+    case "REPLACE_TRACK": {
+      let removedIndex = state.tracks[`${action.payload.groupId}`].findIndex(
+        (track) => track.trackId === action.payload.trackId
+      );
+      const filtered = state.tracks[`${action.payload.groupId}`].filter(
+        (track) => track.trackId !== action.payload.trackId
+      );
+      const updatedTracks = [
+        ...filtered.slice(0, removedIndex),
+        ...action.payload.newTrack,
+        ...filtered.slice(removedIndex),
+      ];
+
+      return {
+        ...state,
+        tracks: {
+          ...state.tracks,
+          [`${action.payload.groupId}`]: updatedTracks,
+        },
+      };
+    }
     case "IMPORT_BLACKLISTED_TRACKS": {
       return {
         ...state,
@@ -122,7 +146,7 @@ function playlistReducer(state: State, action: Action): State {
         isGroupOpen: {},
       };
     }
-    case "TOGGLE_IS_GROUP_OPEN": {
+    case "OPEN_GROUP": {
       return {
         ...state,
         isGroupOpen: {
@@ -174,17 +198,7 @@ export function usePlaylist() {
 
   //
 
-  function handleRemoveTrack(groupId: number, trackId: number) {
-    dispatch({ type: "REMOVE_TRACK", payload: { groupId, trackId } });
-  }
-
-  function handleResetTracks(groupId: number) {
-    dispatch({ type: "RESET_TRACKS", payload: { groupId } });
-  }
-
-  function handleReplaceTrack(groupId: number, trackId: number) {}
-
-  function handleAddTrack(groupId: number, formValues: FormValues) {
+  async function getTrack(formValues: FormValues) {
     const searchQuery = JSON.stringify({
       operator: formValues.operator.value,
       filters: buildQuery(formValues.filters),
@@ -196,15 +210,43 @@ export function usePlaylist() {
       ],
     });
 
-    fetch(`${API_ROOT_URL}/tracks`, {
+    return await fetch(`${API_ROOT_URL}/tracks`, {
       method: "POST",
       headers: {
         "content-type": "application/json",
         accept: "application/json",
       },
       body: searchQuery,
-    })
-      .then((r) => r.json())
+    }).then((r) => r.json());
+  }
+
+  function handleRemoveTrack(groupId: number, trackId: number) {
+    dispatch({ type: "REMOVE_TRACK", payload: { groupId, trackId } });
+  }
+
+  function handleResetTracks(groupId: number) {
+    dispatch({ type: "RESET_TRACKS", payload: { groupId } });
+  }
+
+  async function handleReplaceTrack(
+    groupId: number,
+    trackId: number,
+    formValues: FormValues
+  ) {
+    await getTrack(formValues)
+      .then((r: GetTrackRes) => {
+        dispatch({
+          type: "REPLACE_TRACK",
+          payload: { groupId, trackId, newTrack: r.results },
+        });
+      })
+      .catch(console.error);
+  }
+
+  async function handleAddTrack(groupId: number, formValues: FormValues) {
+    localStorage.setItem(`filter${groupId}`, JSON.stringify(formValues));
+
+    await getTrack(formValues)
       .then((r: GetTrackRes) => {
         dispatch({
           type: "ADD_TRACK",
@@ -240,7 +282,7 @@ export function usePlaylist() {
   //
 
   function toggleIsGroupOpen(groupId: number) {
-    dispatch({ type: "TOGGLE_IS_GROUP_OPEN", payload: { groupId } });
+    dispatch({ type: "OPEN_GROUP", payload: { groupId } });
   }
 
   return {
