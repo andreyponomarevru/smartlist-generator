@@ -32,7 +32,7 @@ function editableTextReducer(state: State, action: Action): State {
   }
 }
 
-export function useEditableText(initialText: string, handler?: any) {
+export function useEditableText(initialText: string) {
   const initialState: State = {
     isFormVisible: false,
     text: initialText,
@@ -54,8 +54,11 @@ export function useEditableText(initialText: string, handler?: any) {
   }
 
   function handleSave() {
-    if (state.inputValue) dispatch({ type: "SAVE_INPUT" });
-    else dispatch({ type: "CANCEL_INPUT" });
+    if (state.inputValue) {
+      dispatch({ type: "SAVE_INPUT" });
+    } else {
+      dispatch({ type: "CANCEL_INPUT" });
+    }
   }
 
   return {
