@@ -1,6 +1,10 @@
 import React from "react";
 import { TrackMeta, FormValues, APIResponse, GetTrackRes } from "../types";
-import { API_ROOT_URL, LOCAL_MUSIC_LIB_DIR } from "../config/env";
+import {
+  API_ROOT_URL,
+  LOCAL_MUSIC_LIB_DIR,
+  MUSIC_LIB_DIR,
+} from "../config/env";
 import { buildQuery } from "../utils/misc";
 import { useEditableText } from "./use-editable-text";
 
@@ -317,20 +321,30 @@ export function usePlaylist() {
   ) {
     const fileReader = new FileReader();
     fileReader.readAsText((e.target as HTMLInputElement).files![0], "UTF-8");
-    fileReader.onload = function (e) {
+    fileReader.onload = async function (e) {
       if (e.target?.result && typeof e.target?.result === "string") {
-        const filePaths = Object.values<{ [key: string]: TrackMeta }>(
-          JSON.parse(e.target?.result)
-        )
+        const filePaths = JSON.parse(e.target?.result)
           .flat()
-          .map((t) => t.filePath);
+          .map(
+            (t: string) =>
+              `${MUSIC_LIB_DIR}${t.replace(LOCAL_MUSIC_LIB_DIR, "")}`
+          );
 
-        // ... fetch request to API sending array of paths and getting an aray of trackIds ...
-
-        /*dispatch({
-        type: "IMPORT_BLACKLISTED_TRACKS",
-        payload: { trackIds: e.target?.result ? [e.target?.result]  : [] } },
-      });*/
+        await fetch(`${API_ROOT_URL}/tracks/ids`, {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            accept: "application/json",
+          },
+          body: JSON.stringify({ filePaths }),
+        })
+          .then((r) => r.json())
+          .then((r: { results: number[] }) => {
+            dispatch({
+              type: "IMPORT_BLACKLISTED_TRACKS",
+              payload: { trackIds: r.results },
+            });
+          });
       }
     };
   }
