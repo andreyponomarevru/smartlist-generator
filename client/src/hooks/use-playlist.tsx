@@ -1,6 +1,6 @@
 import React from "react";
 import { TrackMeta, FormValues, APIResponse, GetTrackRes } from "../types";
-import { API_ROOT_URL } from "../config/env";
+import { API_ROOT_URL, LOCAL_MUSIC_LIB_DIR } from "../config/env";
 import { buildQuery } from "../utils/misc";
 import { useEditableText } from "./use-editable-text";
 
@@ -250,7 +250,7 @@ export function usePlaylist() {
 
   //
 
-  async function getTrack(formValues: FormValues) {
+  async function getTrack(formValues: FormValues): Promise<TrackMeta[]> {
     const searchQuery = JSON.stringify({
       operator: formValues.operator.value,
       filters: buildQuery(formValues.filters),
@@ -269,7 +269,16 @@ export function usePlaylist() {
         accept: "application/json",
       },
       body: searchQuery,
-    }).then((r) => r.json());
+    })
+      .then((r) => r.json())
+      .then((r: GetTrackRes) => {
+        return r.results.map((t) => ({
+          ...t,
+          filePath: [LOCAL_MUSIC_LIB_DIR, t.filePath]
+            .join("")
+            .replace("/tracks", ""),
+        }));
+      });
   }
 
   function handleRemoveTrack(groupId: number, trackId: number) {
@@ -286,24 +295,19 @@ export function usePlaylist() {
     formValues: FormValues
   ) {
     await getTrack(formValues)
-      .then((r: GetTrackRes) => {
+      .then((tracks) => {
         dispatch({
           type: "REPLACE_TRACK",
-          payload: { groupId, trackId, newTrack: r.results },
+          payload: { groupId, trackId, newTrack: tracks },
         });
       })
       .catch(console.error);
   }
 
   async function handleAddTrack(groupId: number, formValues: FormValues) {
-    localStorage.setItem(`filter${groupId}`, JSON.stringify(formValues));
-
     await getTrack(formValues)
-      .then((r: GetTrackRes) => {
-        dispatch({
-          type: "ADD_TRACK",
-          payload: { groupId, tracks: r.results },
-        });
+      .then((r) => {
+        dispatch({ type: "ADD_TRACK", payload: { groupId, tracks: r } });
       })
       .catch(console.error);
   }

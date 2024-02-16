@@ -1,27 +1,9 @@
 import React from "react";
-import { useForm, useFieldArray, Controller } from "react-hook-form";
-import Select from "react-select";
 
-import {
-  FILTER_NAMES,
-  GENRE_CONDITIONS,
-  YEAR_CONDITIONS,
-  OPERATORS,
-} from "../config/constants";
-import { ConditionSelect } from "../lib/group/condition-select";
-import { YearValueSelect } from "../lib//group/year-value-select";
-import { GenreValueSelect } from "../lib//group/genre-value-select";
-import { State, useEditableText } from "../hooks/use-editable-text";
 import { ErrorBoundary } from "../lib/error-boundary/error-boundary";
 import { API_ROOT_URL } from "../config/env";
 import { useFetch } from "../hooks/use-fetch";
-import {
-  GetStatsRes,
-  TrackMeta,
-  Stats,
-  FormValues,
-  OptionsList,
-} from "../types";
+import { GetStatsRes } from "../types";
 import { Btn } from "../lib/btn/btn";
 import { Group } from "../lib/group/group";
 import {
@@ -32,7 +14,6 @@ import {
 } from "../utils/misc";
 import { Sidebar } from "../lib/sidebar/sidebar";
 import { EditableText } from "../lib/editable-text/editable-text";
-import { Track } from "../lib/track/track";
 import { Player } from "../lib/player/player";
 import { usePlaylist } from "../hooks/use-playlist";
 import { usePlayer } from "../hooks/use-player";
