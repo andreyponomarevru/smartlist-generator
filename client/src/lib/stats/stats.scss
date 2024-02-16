@@ -3,7 +3,6 @@
 .stats {
   display: flex;
   flex-flow: column nowrap;
-  row-gap: 1rem;
   border-radius: $border_radius_block;
 
   &__header {
@@ -13,13 +12,12 @@
     font-weight: bold;
     font-size: $font-size_sm;
     padding-right: 1rem;
-    background-color: $color_green-80;
     padding: 0.5rem 1.5em 0.5rem 1.5rem;
   }
 
   &__list {
     height: 100%;
-    max-height: 12rem;
+    max-height: 11rem;
     font-size: $font-size_sm;
     overflow-y: scroll;
     padding: 0 1.5em 0 1.5rem;

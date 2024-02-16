@@ -37,12 +37,12 @@ function dataFetchReducer<T>(state: State<T>, action: Action<T>): State<T> {
       return { isLoading: false, error: null, response: null };
     }
     default: {
-      throw new Error(`Unknown action`);
+      throw new Error(`Unknown action ${action}`);
     }
   }
 }
 
-function useFetch<ResponseBody>() {
+export function useFetch<ResponseBody>() {
   const initialState: State<ResponseBody> = {
     isLoading: false,
     error: null,
@@ -115,5 +115,3 @@ function useFetch<ResponseBody>() {
 
   return { state, resetState, fetchNow };
 }
-
-export { useFetch };

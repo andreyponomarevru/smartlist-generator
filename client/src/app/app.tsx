@@ -50,8 +50,6 @@ export function App() {
   const { playlist, groups, tracks } = usePlaylist();
   const { handlePlay } = usePlayer();
 
-  //
-
   return (
     <ErrorBoundary>
       <main className="app">
@@ -123,26 +121,18 @@ export function App() {
                 onDeleteGroup={() => groups.handleDestroy(groupId)}
                 onRenameGroup={groups.handleRename}
                 onToggle={() => groups.toggleIsGroupOpen(groupId)}
-                isOpenGroupId={playlist.isGroupOpen}
+                onRemoveTrack={tracks.handleRemove}
+                onReplaceTrack={tracks.handleReplace}
                 onGetTrack={tracks.handleAdd}
+                onGroupReorderUp={() => groups.handleReorder(index, "UP")}
+                onGroupReorderDown={() => groups.handleReorder(index, "DOWN")}
+                onFiltersChange={tracks.handleReset}
+                isOpenGroupId={playlist.isGroupOpen}
                 years={yearsRes}
                 genres={genresRes}
-              >
-                {playlist.tracks[`${groupId}`].map((track: TrackMeta) => {
-                  return (
-                    <Track
-                      {...track}
-                      key={`${track.trackId}-${track.duration}`}
-                      onRemoveTrack={() =>
-                        tracks.handleRemove(groupId, track.trackId)
-                      }
-                      onReplaceTrack={() =>
-                        tracks.handleReplace(groupId, track.trackId)
-                      }
-                    />
-                  );
-                })}
-              </Group>
+                tracks={playlist.tracks}
+                onReorderTrack={tracks.handleReorder}
+              />
             );
           })}
 

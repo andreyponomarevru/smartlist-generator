@@ -1,40 +1,48 @@
-import { GENRES } from "./config/constants";
+import {
+  UseFormRegister,
+  Control,
+  UseFormResetField,
+  UseFormUnregister,
+  UseFormSetValue,
+} from "react-hook-form";
 
 export type TrackMeta = {
+  //position: number;
   year: number;
   artist: string[];
   title: string;
-  length: string;
-};
-
-export type NewPlaylist = {
-  id: number;
-  name: string;
+  duration: number;
+  genre: string[];
+  genreId: number[];
+  trackId: number;
+  filePath: string;
 };
 
 //
 // Forms
 //
 
-export type SignInForm = { emailOrUsername: string; password: string };
-export type RegisterForm = {
-  email: string;
-  username: string;
-  password: string;
+export type OptionsList<Value> = {
+  label: string;
+  value: Value;
 };
-export type Credentials = {
-  password: string;
-  username?: string;
-  email?: string;
-};
+
+export interface FormValues {
+  operator: { label: string; value: string };
+  filters: {
+    name: { label: string; value: string };
+    condition?: { label: string; value: string };
+    value?: OptionsList<number> | OptionsList<number>[];
+  }[];
+}
 
 //
 // API
 //
 
-export type ParsedResponse<T> = {
+export type ParsedResponse<Body> = {
   status: number;
-  body: T | null;
+  body: Body | null;
 };
 
 export interface APIResponse<Results> {
@@ -44,9 +52,21 @@ export interface APIResponse<Results> {
 }
 
 export type APIError = { status: number; moreInfo: string; message: string };
-export type GetAllPlaylistsResponse = {
-  results: { id: number; name: string }[];
-};
-export type GetStatsResponse = {
-  results: { id: number; name: string; count: number }[];
+
+export type Stats = { id?: number; name: string; count: number };
+
+export type GetStatsRes = { results: Stats[] };
+
+export type GetTrackRes = { results: TrackMeta[] };
+
+export type SelectProps<OptionsValue> = {
+  name?: string;
+  control: Control<FormValues>;
+  index: number;
+  register: UseFormRegister<FormValues>;
+  unregister?: UseFormUnregister<FormValues>;
+  resetField: UseFormResetField<FormValues>;
+  options: OptionsList<OptionsValue>[];
+  defaultValue: OptionsList<OptionsValue>;
+  setValue: UseFormSetValue<FormValues>;
 };
