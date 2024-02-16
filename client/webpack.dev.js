@@ -16,17 +16,25 @@ const CopyPlugin = require("copy-webpack-plugin");
 // Load env vars specified in docker-compose.yml into process.env
 const dotenv = require("dotenv").config();
 
-const { API_ROOT_URL, PORT, NODE_ENV } = process.env;
-console.log("Env vars: ", API_ROOT_URL, PORT, NODE_ENV);
-
 //
 // Plugins
 //
+
+const {
+  API_ROOT_URL,
+  PORT,
+  NODE_ENV,
+  MUSIC_LIB_DIR,
+  LOCAL_MUSIC_LIB_DIR,
+} = process.env;
+console.log("Env vars: ", API_ROOT_URL, PORT, NODE_ENV);
 
 const injectEnvVarsIntoReactPlugin = new webpack.DefinePlugin({
   "process.env": {
     // Quotation markes arount variable are required!
     API_ROOT_URL: `"${API_ROOT_URL}"`,
+    MUSIC_LIB_DIR: `"${MUSIC_LIB_DIR}"`,
+    LOCAL_MUSIC_LIB_DIR: `"${LOCAL_MUSIC_LIB_DIR}"`,
     NODE_ENV: `"${NODE_ENV}"`,
   },
 });
