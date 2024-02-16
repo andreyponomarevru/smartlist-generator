@@ -1,19 +1,5 @@
 import React from "react";
-import {
-  useForm,
-  useFieldArray,
-  Controller,
-  FormState,
-  Control,
-  UseFormRegister,
-  UseFormHandleSubmit,
-  UseFormResetField,
-  UseFormReset,
-  UseFormSetValue,
-  UseFormWatch,
-  UseFieldArrayRemove,
-  UseFieldArrayInsert,
-} from "react-hook-form";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
 import Select from "react-select";
 
 import {
@@ -36,8 +22,8 @@ import { YearValueSelect } from "./year-value-select";
 import { GenreValueSelect } from "./genre-value-select";
 import { useEditableText } from "../../hooks/use-editable-text";
 import { EditableText } from "../../lib/editable-text/editable-text";
-import { Track } from "../track/track";
 import { Btn } from "../btn/btn";
+import { toHoursMinSec } from "../../utils/misc";
 
 import "./group.scss";
 
@@ -52,14 +38,20 @@ interface GroupProps extends React.HTMLAttributes<HTMLDivElement> {
   onDeleteGroup: () => void;
   onRenameGroup: (groupId: number, newName: string) => void;
   onGetTrack: (groupId: number, formValues: FormValues) => void;
-  onFiltersChange: (groupId: number) => void;
-
-  tracks: Record<string, TrackMeta[]>;
   onRemoveTrack: (groupId: number, trackId: number) => void;
   onReplaceTrack: (
     groupId: number,
     trackId: number,
     formValues: FormValues
+  ) => void;
+  onFiltersChange: (groupId: number) => void;
+  onGroupReorderUp: () => void;
+  onGroupReorderDown: () => void;
+  tracks: Record<string, TrackMeta[]>;
+  onReorderTrack: (
+    index: number,
+    direction: "UP" | "DOWN",
+    groupId: number
   ) => void;
 }
 
@@ -176,6 +168,41 @@ export function Group(props: GroupProps) {
           >
             <span>Delete</span>
           </button>
+
+          <div
+            className="btn btn_theme_transparent-black"
+            onClick={props.onGroupReorderUp}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 3.704 3.704"
+            >
+              <path
+                d="m1.852.776 1.852 2.088H0Z"
+                className="group__sort-btn-icon"
+              />
+            </svg>
+          </div>
+
+          <div
+            className="btn btn_theme_transparent-black"
+            onClick={props.onGroupReorderDown}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 3.704 3.704"
+            >
+              <path
+                d="M1.852 2.864 3.704.776H0Z"
+                className="group__sort-btn-icon"
+              />
+            </svg>
+          </div>
+
           <div className="group__toggle-group-btn" onClick={props.onToggle}>
             {props.isOpenGroupId[`${props.groupId}`] ? "–" : "+"}
           </div>
@@ -294,39 +321,105 @@ export function Group(props: GroupProps) {
             })}
           </form>
           <ul className="group__playlist">
-            {props.tracks[`${props.groupId}`].map((track: TrackMeta) => {
+            {props.tracks[`${props.groupId}`].map((track: TrackMeta, index) => {
               return (
-                <Track {...track} key={`${track.trackId}-${track.duration}`}>
-                  <button
-                    name="b"
-                    onClick={handleSubmit((e) =>
-                      props.onReplaceTrack(props.groupId, track.trackId, e)
-                    )}
-                    type="submit"
-                    form={`filter-form-${props.groupId}`}
-                    disabled={false}
-                    className="btn btn_theme_black track__btn"
-                  >
-                    Pick another
-                  </button>
-                  <span
-                    onClick={() =>
-                      props.onRemoveTrack(props.groupId, track.trackId)
-                    }
-                    className="btn btn_theme_black track__btn"
-                  >
-                    −
+                <li key={track.trackId} className="track">
+                  <div className="track__controls">
+                    <button
+                      className="btn btn_theme_black"
+                      onClick={() =>
+                        props.onReorderTrack(index, "UP", props.groupId)
+                      }
+                      disabled={
+                        index === 0 ||
+                        props.tracks[`${props.groupId}`].length === 1
+                      }
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="12"
+                        height="12"
+                        viewBox="0 0 3.704 3.704"
+                      >
+                        <path
+                          d="m1.852.776 1.852 2.088H0Z"
+                          className="track__sort-btn-icon"
+                        />
+                      </svg>
+                    </button>
+                    <button
+                      className="btn btn_theme_black"
+                      onClick={() =>
+                        props.onReorderTrack(index, "DOWN", props.groupId)
+                      }
+                      disabled={
+                        props.tracks[`${props.groupId}`].length - 1 === index ||
+                        props.tracks[`${props.groupId}`].length === 1
+                      }
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="12"
+                        height="12"
+                        viewBox="0 0 3.704 3.704"
+                      >
+                        <path
+                          d="M1.852 2.864 3.704.776H0Z"
+                          className="track__sort-btn-icon"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+
+                  <span className="track__year">{track.year}</span>
+                  <span className="track__artist-and-title">
+                    <span className="track__artists">
+                      {track.artist.join(", ")}
+                    </span>
+                    <span className="track__title">{track.title}</span>
                   </span>
-                  <button
-                    name="a"
-                    type="submit"
-                    form={`filter-form-${props.groupId}`}
-                    disabled={false}
-                    className="btn btn_theme_black track__btn"
-                  >
-                    +
-                  </button>
-                </Track>
+                  <span className="track__genres">
+                    {track.genre.map((name) => (
+                      <span key={name} className="track__genre">
+                        {name}
+                      </span>
+                    ))}
+                  </span>
+                  <span className="track__duration">
+                    {toHoursMinSec(track.duration)}
+                  </span>
+                  <div className="track__controls">
+                    <button
+                      name="b"
+                      onClick={handleSubmit((e) =>
+                        props.onReplaceTrack(props.groupId, track.trackId, e)
+                      )}
+                      type="submit"
+                      form={`filter-form-${props.groupId}`}
+                      disabled={false}
+                      className="btn btn_theme_black track__btn"
+                    >
+                      Pick another
+                    </button>
+                    <span
+                      onClick={() =>
+                        props.onRemoveTrack(props.groupId, track.trackId)
+                      }
+                      className="btn btn_theme_black track__btn"
+                    >
+                      −
+                    </span>
+                    <button
+                      name="a"
+                      type="submit"
+                      form={`filter-form-${props.groupId}`}
+                      disabled={false}
+                      className="btn btn_theme_black track__btn"
+                    >
+                      +
+                    </button>
+                  </div>
+                </li>
               );
             })}
           </ul>

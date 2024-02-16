@@ -124,11 +124,14 @@ export function App() {
                 onRemoveTrack={tracks.handleRemove}
                 onReplaceTrack={tracks.handleReplace}
                 onGetTrack={tracks.handleAdd}
+                onGroupReorderUp={() => groups.handleReorder(index, "UP")}
+                onGroupReorderDown={() => groups.handleReorder(index, "DOWN")}
                 onFiltersChange={tracks.handleReset}
                 isOpenGroupId={playlist.isGroupOpen}
                 years={yearsRes}
                 genres={genresRes}
                 tracks={playlist.tracks}
+                onReorderTrack={tracks.handleReorder}
               />
             );
           })}

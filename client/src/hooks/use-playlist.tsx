@@ -14,18 +14,26 @@ type State = {
 };
 type Action =
   | { type: "ADD_GROUP_AFTER"; payload: { insertAt: number } }
-  | { type: "ADD_TRACK"; payload: { groupId: number; tracks: TrackMeta[] } }
   | { type: "DESTROY_GROUP"; payload: { groupId: number } }
   | { type: "RESET_GROUPS" }
   | { type: "RENAME_GROUP"; payload: { groupId: number; newName: string } }
-  | { type: "RESET_TRACKS"; payload: { groupId: number } }
+  | {
+      type: "REORDER_GROUP";
+      payload: { index: number; direction: "UP" | "DOWN" };
+    }
+  | { type: "OPEN_GROUP"; payload: { groupId: number } }
+  | { type: "ADD_TRACK"; payload: { groupId: number; tracks: TrackMeta[] } }
   | { type: "REMOVE_TRACK"; payload: { groupId: number; trackId: number } }
+  | { type: "RESET_TRACKS"; payload: { groupId: number } }
   | {
       type: "REPLACE_TRACK";
       payload: { groupId: number; trackId: number; newTrack: TrackMeta[] };
     }
-  | { type: "IMPORT_BLACKLISTED_TRACKS"; payload: { trackIds: number[] } }
-  | { type: "OPEN_GROUP"; payload: { groupId: number } };
+  | {
+      type: "REORDER_TRACK";
+      payload: { index: number; direction: "UP" | "DOWN"; groupId: number };
+    }
+  | { type: "IMPORT_BLACKLISTED_TRACKS"; payload: { trackIds: number[] } };
 
 let counter = 0;
 
@@ -153,6 +161,50 @@ function playlistReducer(state: State, action: Action): State {
           ...state.isGroupOpen,
           [`${action.payload.groupId}`]: !state.isGroupOpen[
             `${action.payload.groupId}`
+          ],
+        },
+      };
+    }
+    case "REORDER_GROUP": {
+      const oldIndex = action.payload.index;
+      const newIndex = oldIndex + (action.payload.direction === "UP" ? -1 : 1);
+
+      const movedItem = state.groups.find(
+        (item, index) => index === oldIndex
+      ) as number;
+      const remainingItems = state.groups.filter(
+        (item, index) => index !== oldIndex
+      );
+
+      return {
+        ...state,
+        groups: [
+          ...remainingItems.slice(0, newIndex),
+          movedItem,
+          ...remainingItems.slice(newIndex),
+        ],
+      };
+    }
+    case "REORDER_TRACK": {
+      const oldIndex = action.payload.index;
+      const newIndex = oldIndex + (action.payload.direction === "UP" ? -1 : 1);
+
+      const movedItem = state.tracks[`${action.payload.groupId}`].find(
+        (item, index) => index === oldIndex
+      ) as TrackMeta;
+      const remainingItems = state.tracks[`${action.payload.groupId}`].filter(
+        (item, index) => index !== oldIndex
+      );
+
+      console.log("oldIndex", oldIndex, "newIndex", newIndex);
+      return {
+        ...state,
+        tracks: {
+          ...state.tracks,
+          [`${action.payload.groupId}`]: [
+            ...remainingItems.slice(0, newIndex),
+            movedItem,
+            ...remainingItems.slice(newIndex),
           ],
         },
       };
@@ -285,6 +337,18 @@ export function usePlaylist() {
     dispatch({ type: "OPEN_GROUP", payload: { groupId } });
   }
 
+  function reorderGroup(index: number, direction: "UP" | "DOWN") {
+    dispatch({ type: "REORDER_GROUP", payload: { index, direction } });
+  }
+
+  function reorderTrack(
+    index: number,
+    direction: "UP" | "DOWN",
+    groupId: number
+  ) {
+    dispatch({ type: "REORDER_TRACK", payload: { index, direction, groupId } });
+  }
+
   return {
     playlist: { ...state, name: playlistName },
     groups: {
@@ -293,6 +357,7 @@ export function usePlaylist() {
       handleRename: handleRenameGroup,
       handleReset: handleResetGroups,
       toggleIsGroupOpen,
+      handleReorder: reorderGroup,
     },
     tracks: {
       handleAdd: handleAddTrack,
@@ -300,6 +365,7 @@ export function usePlaylist() {
       handleReplace: handleReplaceTrack,
       handleReset: handleResetTracks,
       handleImportBlacklisted: handleImportBlacklistedTracks,
+      handleReorder: reorderTrack,
     },
   };
 }
