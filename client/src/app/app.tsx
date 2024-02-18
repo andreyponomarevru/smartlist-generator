@@ -1,4 +1,5 @@
 import React from "react";
+import { IoMdVolumeHigh, IoMdVolumeOff, IoMdVolumeLow } from "react-icons/io";
 
 import { ErrorBoundary } from "../lib/error-boundary/error-boundary";
 import { API_ROOT_URL } from "../config/env";
@@ -14,9 +15,9 @@ import {
 } from "../utils/misc";
 import { Sidebar } from "../lib/sidebar/sidebar";
 import { EditableText } from "../lib/editable-text/editable-text";
-import { Player } from "../lib/player/player";
 import { usePlaylist } from "../hooks/use-playlist";
 import { usePlayer } from "../hooks/use-player";
+import { Controls } from "./controls/controls";
 
 import "./app.scss";
 
@@ -29,7 +30,8 @@ export function App() {
   }, []);
 
   const { playlist, groups, tracks } = usePlaylist();
-  const { handlePlay } = usePlayer();
+
+  const player = usePlayer(playlist.tracks);
 
   return (
     <ErrorBoundary>
@@ -113,6 +115,7 @@ export function App() {
                 genres={genresRes}
                 tracks={playlist.tracks}
                 onReorderTrack={tracks.handleReorder}
+                setPlayingIndex={player.setPlayingIndex}
               />
             );
           })}
@@ -144,7 +147,73 @@ export function App() {
           </nav>
         </div>
       </main>
-      <Player isPlaying={false /*playingIndex === */} onPlay={handlePlay} />
+      <div className={`player ${player.activeTrack ? "" : "player_disabled"}`}>
+        <Controls
+          className="player__artwork"
+          audioRef={player.audioRef}
+          progressBarRef={player.progressBarRef}
+          isPlaying={player.isPlaying}
+          setIsPlaying={player.setIsPlaying}
+          togglePlayPause={player.togglePlayPause}
+          duration={player.duration}
+          setTimeProgress={player.setTimeProgress}
+          setPlayingTrackIndex={player.setPlayingIndex}
+          handleNext={player.handleNext}
+          handlePrevious={player.handlePrevious}
+        />
+        <div className="player__meta">
+          <p className="player__artist">
+            {player.activeTrack?.artist.join(", ")}
+          </p>
+          <p>&nbsp;—&nbsp;</p>
+          <p className="player__title">{player.activeTrack?.title}</p>
+          <p>&middot;</p>
+          <p className="player__year">{player.activeTrack?.year}</p>
+          <audio
+            src={player.src}
+            ref={player.audioRef}
+            onLoadedMetadata={player.onLoadedMetadata}
+            onEnded={player.handleNext}
+          />
+        </div>
+        <div className="player__progressbar">
+          <span className="player__time player__time_current">
+            {player.formatTime(player.timeProgress)}
+          </span>
+          <input
+            type="range"
+            ref={player.progressBarRef}
+            defaultValue="0"
+            onChange={player.handleProgressChange}
+            className="player__line"
+          />
+          <span className="player__time player__time_total">
+            {player.formatTime(player.duration)}
+          </span>
+          <div className="player__volume">
+            <button onClick={() => player.setIsMuted((prev) => !prev)}>
+              {player.isMuted || player.volume < 5 ? (
+                <IoMdVolumeOff style={{ fill: "white" }} />
+              ) : player.volume < 40 ? (
+                <IoMdVolumeLow style={{ fill: "white" }} />
+              ) : (
+                <IoMdVolumeHigh style={{ fill: "white" }} />
+              )}
+            </button>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              value={player.volume}
+              onChange={(e) => player.setVolume(Number(e.target.value))}
+              style={{
+                background: `linear-gradient(to right, #f50 ${player.volume}%, #ccc ${player.volume}%)`,
+              }}
+              className="player__volume-bar"
+            />
+          </div>
+        </div>
+      </div>
     </ErrorBoundary>
   );
 }
