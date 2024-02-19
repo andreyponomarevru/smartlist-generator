@@ -2,16 +2,6 @@
 -- MUSIC DATABASE
 --
 
-CREATE TABLE IF NOT EXISTS playlist (
-  PRIMARY KEY (playlist_id),
-  playlist_id    integer            GENERATED ALWAYS AS IDENTITY,
-  name           varchar(255)       NOT NULL,
-                                    UNIQUE (name),
-                                    CHECK (name != '')
-);
-
-
-
 CREATE TABLE IF NOT EXISTS track (
   PRIMARY KEY (track_id),
   track_id         integer          GENERATED ALWAYS AS IDENTITY,
@@ -25,23 +15,6 @@ CREATE TABLE IF NOT EXISTS track (
 );
 CREATE INDEX track_title_idx ON track (lower(title) varchar_pattern_ops);
 CREATE INDEX track_year_idx ON track(year);
-
-
-
-CREATE TABLE IF NOT EXISTS track_playlist (
-  PRIMARY KEY (track_id, playlist_id, position),
-  track_id          integer            NOT NULL,
-  playlist_id       integer            NOT NULL,
-  position          integer            NOT NULL,
-                                       UNIQUE(playlist_id, position),
-
-  FOREIGN KEY (track_id) REFERENCES track (track_id)
-    ON UPDATE NO ACTION
-    ON DELETE NO ACTION,
-  FOREIGN KEY (playlist_id) REFERENCES playlist (playlist_id)
-    ON UPDATE NO ACTION
-    ON DELETE CASCADE
-);
 
 
 
