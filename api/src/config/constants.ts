@@ -1,19 +1,5 @@
 import { HttpError } from "../utils/error";
 
-export const SUBPLAYLISTS = [
-  "Opener",
-  "Dub",
-  "Beatless Ambient",
-  "Ambient Downtempo",
-  "Jungle Breakbeat",
-  "Electro",
-  "Indie Soul Psy Rock",
-  "Dance",
-  "World Music",
-  "Any Old",
-  "Closer",
-] as const;
-
 export const GENRES = [
   "2-Step",
   "Garage House",
@@ -39,7 +25,7 @@ export const GENRES = [
   "Indie",
   "Jungle",
   "Opener",
-  "Psychedelic Rock",
+  "Rock",
   "Psytrance",
   "Sample",
   "Soul",
@@ -51,18 +37,7 @@ export const GENRES = [
   "[Soundtrack]",
 ] as const;
 
-export const SORT_BY = [
-  "year",
-  "artist",
-  "title",
-  "track_artist",
-  "track_title",
-];
-export const PER_PAGE_NUMS = [25, 50, 100, 250];
-export const SORT_ORDER = ["desc", "asc"];
-
 export const DEFAULT_COVER_URL = ".";
-export const PLAYLIST_LENGTH = 12;
 
 export const DATABASE_ERROR_CODES: {
   [key: string]: { httpStatusCode: number; response: HttpError };

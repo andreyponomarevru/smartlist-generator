@@ -11,25 +11,45 @@ import {
   exportFiltersTemplate,
   exportPlaylistAsJSON,
   exportPlaylistAsM3U,
-  toHoursMinSec,
 } from "../utils/misc";
 import { Sidebar } from "../lib/sidebar/sidebar";
 import { EditableText } from "../lib/editable-text/editable-text";
 import { usePlaylist } from "../hooks/use-playlist";
 import { usePlayer } from "../hooks/use-player";
 import { Controls } from "./controls/controls";
+import { toHourMinSec } from "../utils/misc";
 
 import "./app.scss";
 
 export function App() {
-  const { state: yearsRes, fetchNow: fetchYears } = useFetch<GetStatsRes>();
-  const { state: genresRes, fetchNow: fetchGenres } = useFetch<GetStatsRes>();
-  React.useEffect(() => {
-    fetchYears(`${API_ROOT_URL}/lib/stats/years`);
-    fetchGenres(`${API_ROOT_URL}/lib/stats/genres`);
-  }, []);
-
   const { playlist, groups, tracks } = usePlaylist();
+
+  const {
+    state: yearsRes,
+    fetchNow: fetchYears,
+    resetState: resetYearsRes,
+  } = useFetch<GetStatsRes>();
+  const {
+    state: genresRes,
+    fetchNow: fetchGenres,
+    resetState: resetGenresRes,
+  } = useFetch<GetStatsRes>();
+
+  React.useEffect(() => {
+    const excluded =
+      playlist.excludedTracks.length > 0
+        ? `?excluded=${playlist.excludedTracks.join("&excluded=")}`
+        : "";
+    if (yearsRes.response) resetYearsRes();
+    if (genresRes.response) resetGenresRes();
+    fetchYears(`${API_ROOT_URL}/lib/stats/years${excluded}`);
+    fetchGenres(`${API_ROOT_URL}/lib/stats/genres${excluded}`);
+    console.log(playlist.excludedTracks);
+  }, [playlist.excludedTracks]);
+
+  React.useEffect(() => {
+    console.log(genresRes.response?.body?.results);
+  }, [yearsRes, genresRes]);
 
   const player = usePlayer(playlist.tracks);
 
@@ -65,11 +85,6 @@ export function App() {
                   Import blacklisted tracks
                 </div>
               </label>
-              <Btn
-                className="app__btn"
-                name="Import JSON filters template"
-                theme="transparent-white"
-              />
             </div>
           </div>
 
@@ -77,7 +92,7 @@ export function App() {
             <EditableText className="app__playlist-name" text={playlist.name} />
 
             <div className="app__duration">
-              {toHoursMinSec(
+              {toHourMinSec(
                 Object.values(playlist.tracks)
                   .flat()
                   .reduce((total, track) => track.duration + total, 0)
@@ -86,12 +101,20 @@ export function App() {
           </header>
 
           {playlist.groups.length === 0 && (
-            <button
-              className="btn btn_theme_transparent-black add-section-btn"
-              onClick={() => groups.handleAdd(0)}
-            >
-              Add new section
-            </button>
+            <div className="group__add-section-btns">
+              <button
+                className="btn btn_theme_transparent-black add-section-btn"
+                onClick={() => groups.handleAdd(0)}
+              >
+                Add new section (using saved filters)
+              </button>
+              <button
+                className="btn btn_theme_transparent-black add-section-btn"
+                onClick={() => groups.handleAdd(0)}
+              >
+                Add new section (creating a new filter)
+              </button>
+            </div>
           )}
 
           {playlist.groups.map((groupId, index) => {
@@ -121,29 +144,29 @@ export function App() {
           })}
 
           <nav className="app__controls app__controls_bottom">
-            <Btn
-              className="app__btn"
-              name="Export playlist as M3U"
-              theme="transparent-black"
+            <button
               onClick={() =>
-                exportPlaylistAsM3U(playlist.name.state.text, playlist.tracks)
+                exportPlaylistAsM3U(
+                  playlist.name.state.text,
+                  playlist.tracks,
+                  playlist.groups
+                )
               }
-            />
-            <Btn
-              className="app__btn"
-              name="Export playlist as JSON"
-              theme="transparent-black"
+              className="app__btn btn btn_theme_transparent-black"
+              disabled={Object.values(playlist.tracks).flat().length === 0}
+            >
+              Export playlist as M3U
+            </button>
+            <button
               onClick={() =>
                 exportPlaylistAsJSON(playlist.name.state.text, playlist.tracks)
               }
-            />
+              className="app__btn btn btn_theme_transparent-black"
+              disabled={Object.values(playlist.tracks).flat().length === 0}
+            >
+              Export playlist as JSON
+            </button>
             <div></div>
-            <Btn
-              className="app__btn"
-              name="Export JSON filters template"
-              theme="transparent-black"
-              onClick={exportFiltersTemplate}
-            />
           </nav>
         </div>
       </main>
@@ -167,7 +190,7 @@ export function App() {
           </p>
           <p>&nbsp;—&nbsp;</p>
           <p className="player__title">{player.activeTrack?.title}</p>
-          <p>&middot;</p>
+          <p>&nbsp;&middot;&nbsp;</p>
           <p className="player__year">{player.activeTrack?.year}</p>
           <audio
             src={player.src}
@@ -178,7 +201,7 @@ export function App() {
         </div>
         <div className="player__progressbar">
           <span className="player__time player__time_current">
-            {player.formatTime(player.timeProgress)}
+            {toHourMinSec(player.timeProgress)}
           </span>
           <input
             type="range"
@@ -188,7 +211,7 @@ export function App() {
             className="player__line"
           />
           <span className="player__time player__time_total">
-            {player.formatTime(player.duration)}
+            {toHourMinSec(player.duration)}
           </span>
           <div className="player__volume">
             <button onClick={() => player.setIsMuted((prev) => !prev)}>

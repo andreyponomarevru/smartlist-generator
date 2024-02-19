@@ -1,7 +1,7 @@
 import { connectDB } from "../../config/postgres";
 import { logDBError } from "../../utils/utilities";
 
-export async function countTracksByGenre() {
+export async function countTracksByGenre(excludedTracks: number[]) {
   const pool = await connectDB();
 
   try {
@@ -10,13 +10,19 @@ export async function countTracksByGenre() {
       name: string;
       count: number;
     }>({
-      text:
-        "SELECT \
-          ge.genre_id, ge.name, COUNT(*)::integer \
-        FROM genre AS ge \
-          INNER JOIN track_genre AS tr_ge ON tr_ge.genre_id = ge.genre_id \
-        GROUP BY ge.genre_id\
-        ORDER BY count DESC;",
+      text: `
+        SELECT 
+          ge.genre_id, ge.name, COUNT(*)::integer
+        FROM genre AS ge
+          INNER JOIN track_genre AS tr_ge ON tr_ge.genre_id = ge.genre_id
+        ${
+          excludedTracks.length > 0
+            ? "WHERE tr_ge.track_id != ALL($1::int[])"
+            : ""
+        }  
+        GROUP BY ge.genre_id
+        ORDER BY count DESC;`,
+      values: excludedTracks.length > 0 ? [excludedTracks] : [],
     });
 
     return response.rows.length === 0
@@ -34,7 +40,7 @@ export async function countTracksByGenre() {
   }
 }
 
-export async function countTracksByYear() {
+export async function countTracksByYear(excludedTracks: number[]) {
   const pool = await connectDB();
 
   try {
@@ -43,11 +49,17 @@ export async function countTracksByYear() {
       year: number;
       count: number;
     }>({
-      text: `\
-        SELECT year, COUNT(year)::integer 
-        FROM track AS tr 
+      text: `
+        SELECT 
+          year, COUNT(year)::integer 
+        FROM 
+          track AS tr 
+        ${
+          excludedTracks.length > 0 ? "WHERE tr.track_id != ALL($1::int[])" : ""
+        }
         GROUP BY year 
         ORDER BY count DESC;`,
+      values: excludedTracks.length > 0 ? [excludedTracks] : [],
     });
 
     return response.rows.length === 0

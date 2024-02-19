@@ -1,6 +1,6 @@
 import { FormValues, TrackMeta } from "../types";
 
-export function toHoursMinSec(sec: number) {
+export function toHourMinSec(sec: number) {
   let hms = new Date(sec * 1000).toISOString().substr(11, 8).split(":");
   if (hms[0] !== "00") return hms.join(":");
   else return hms.slice(1).join(":");
@@ -38,7 +38,8 @@ export function exportPlaylistAsJSON(
   playlistName: string,
   tracks: Record<string, TrackMeta[]>
 ) {
-  const str = `data:text/json;chatset=utf-8,${encodeURIComponent(
+  const link = document.createElement("a");
+  link.href = `data:text/json;chatset=utf-8,${encodeURIComponent(
     JSON.stringify(
       Object.values(tracks)
         .flat()
@@ -47,24 +48,23 @@ export function exportPlaylistAsJSON(
       2
     )
   )}`;
-
-  const link = document.createElement("a");
-  link.href = str;
   link.download = `${playlistName}.json`;
   link.click();
 }
 
 export function exportPlaylistAsM3U(
   playlistName: string,
-  tracks: Record<string, TrackMeta[]>
+  tracks: Record<string, TrackMeta[]>,
+  groupIds: number[]
 ) {
-  const m3u = `#EXTM3U\n#PLAYLIST:${playlistName}\n\n${Object.values(tracks)
-    .flat()
-    .map((t) => `file://${encodeRFC3986URIComponent(t.filePath)}`)
-    .join("\n")}`;
-  const str = `data:text/json;chatset=utf-8,${encodeURIComponent(m3u)}`;
   const link = document.createElement("a");
-  link.href = str;
+  link.href = `data:text/json;chatset=utf-8,${encodeURIComponent(
+    `#EXTM3U\n#PLAYLIST:${playlistName}\n\n${groupIds
+      .map((groupId) => tracks[`${groupId}`])
+      .flat()
+      .map((t) => `file://${encodeRFC3986URIComponent(t.filePath)}`)
+      .join("\n")}`
+  )}`;
   link.download = `${playlistName}.m3u`;
   link.click();
 }

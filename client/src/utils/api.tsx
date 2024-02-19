@@ -17,7 +17,7 @@ async function parseResponse<T>(
 ): Promise<ParsedResponse<T>> {
   const contentType = response.headers.get("content-type");
 
-  console.log("[parseResponse] ", response);
+  // console.log("[parseResponse] ", response);
 
   if (contentType && contentType.indexOf("application/json") !== -1) {
     if (response.ok) {

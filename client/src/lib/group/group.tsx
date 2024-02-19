@@ -3,12 +3,10 @@ import { useForm, useFieldArray, Controller } from "react-hook-form";
 import Select from "react-select";
 
 import {
-  Stats,
   FormValues,
   TrackMeta,
   OptionsList,
   GetStatsRes,
-  GetTrackRes,
   APIResponse,
 } from "../../types";
 import {
@@ -22,8 +20,7 @@ import { YearValueSelect } from "./year-value-select";
 import { GenreValueSelect } from "./genre-value-select";
 import { useEditableText } from "../../hooks/use-editable-text";
 import { EditableText } from "../../lib/editable-text/editable-text";
-import { Btn } from "../btn/btn";
-import { toHoursMinSec } from "../../utils/misc";
+import { toHourMinSec } from "../../utils/misc";
 
 import "./group.scss";
 
@@ -47,6 +44,13 @@ interface GroupProps extends React.HTMLAttributes<HTMLDivElement> {
   onFiltersChange: (groupId: number) => void;
   onGroupReorderUp: () => void;
   onGroupReorderDown: () => void;
+  setPlayingIndex: ({
+    groupId,
+    index,
+  }: {
+    groupId: number;
+    index: number;
+  }) => void;
   tracks: Record<string, TrackMeta[]>;
   onReorderTrack: (
     index: number,
@@ -97,12 +101,6 @@ export function Group(props: GroupProps) {
     control,
     name: "filters",
   });
-
-  const watchedFields = watch();
-  React.useEffect(() => {
-    console.log(watchedFields);
-    localStorage.setItem("filters", JSON.stringify({ filters: watchedFields }));
-  }, [watchedFields]);
 
   const [stats, setStats] = React.useState<
     Record<string, OptionsList<number>[]>
@@ -169,7 +167,7 @@ export function Group(props: GroupProps) {
             <span>Delete</span>
           </button>
 
-          <div
+          <button
             className="btn btn_theme_transparent-black"
             onClick={props.onGroupReorderUp}
           >
@@ -184,9 +182,9 @@ export function Group(props: GroupProps) {
                 className="group__sort-btn-icon"
               />
             </svg>
-          </div>
+          </button>
 
-          <div
+          <button
             className="btn btn_theme_transparent-black"
             onClick={props.onGroupReorderDown}
           >
@@ -201,7 +199,7 @@ export function Group(props: GroupProps) {
                 className="group__sort-btn-icon"
               />
             </svg>
-          </div>
+          </button>
 
           <div className="group__toggle-group-btn" onClick={props.onToggle}>
             {props.isOpenGroupId[`${props.groupId}`] ? "–" : "+"}
@@ -297,6 +295,14 @@ export function Group(props: GroupProps) {
 
                   <div className="group__btns">
                     <button
+                      disabled={fields.length === 1}
+                      type="button"
+                      onClick={() => remove(index)}
+                      className="btn btn_theme_transparent-black group__btn"
+                    >
+                      −
+                    </button>
+                    <button
                       type="button"
                       onClick={() => {
                         insert(index + 1, [
@@ -307,23 +313,32 @@ export function Group(props: GroupProps) {
                     >
                       +
                     </button>
-                    <button
-                      disabled={fields.length === 1}
-                      type="button"
-                      onClick={() => remove(index)}
-                      className="btn btn_theme_transparent-black group__btn"
-                    >
-                      −
-                    </button>
                   </div>
                 </div>
               );
             })}
           </form>
-          <ul className="group__playlist">
+          <ul
+            className="group__playlist"
+            onClick={() => {
+              console.log("FUCKING PROPAGATION IN PARENT");
+            }}
+          >
             {props.tracks[`${props.groupId}`].map((track: TrackMeta, index) => {
               return (
-                <li key={track.trackId} className="track">
+                <li
+                  key={track.trackId}
+                  className="track"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if ((e.target as HTMLLIElement).nodeName === "SPAN") {
+                      props.setPlayingIndex({
+                        groupId: props.groupId,
+                        index,
+                      });
+                    }
+                  }}
+                >
                   <div className="track__controls">
                     <button
                       className="btn btn_theme_black"
@@ -386,7 +401,7 @@ export function Group(props: GroupProps) {
                     ))}
                   </span>
                   <span className="track__duration">
-                    {toHoursMinSec(track.duration)}
+                    {toHourMinSec(track.duration)}
                   </span>
                   <div className="track__controls">
                     <button
@@ -436,13 +451,20 @@ export function Group(props: GroupProps) {
           ) : null}
         </div>
       </div>
-
-      <button
-        className="btn btn_theme_transparent-black add-section-btn"
-        onClick={props.onAddGroup}
-      >
-        Add new section
-      </button>
+      <div className="group__add-section-btns">
+        <button
+          className="btn btn_theme_transparent-black add-section-btn"
+          onClick={props.onAddGroup}
+        >
+          Add new section (using saved filters)
+        </button>
+        <button
+          className="btn btn_theme_transparent-black add-section-btn"
+          onClick={props.onAddGroup}
+        >
+          Add new section (creating a new filter)
+        </button>
+      </div>
     </>
   );
 }
