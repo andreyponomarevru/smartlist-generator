@@ -13,7 +13,7 @@ type State = {
   groups: number[];
   groupNames: Record<string, string>;
   tracks: Record<string, TrackMeta[]>;
-  blacklistedTracks: number[];
+  excludedTracks: number[];
   isGroupOpen: Record<string, boolean>;
 };
 type Action =
@@ -61,14 +61,16 @@ function playlistReducer(state: State, action: Action): State {
       };
     }
     case "ADD_TRACK": {
+      const updatedTracks = [
+        ...(state.tracks[`${action.payload.groupId}`] || []),
+        ...(action.payload.tracks || []),
+      ];
+
       return {
         ...state,
         tracks: {
           ...state.tracks,
-          [`${action.payload.groupId}`]: [
-            ...(state.tracks[`${action.payload.groupId}`] || []),
-            ...(action.payload.tracks || []),
-          ],
+          [`${action.payload.groupId}`]: updatedTracks,
         },
       };
     }
@@ -95,7 +97,7 @@ function playlistReducer(state: State, action: Action): State {
         groups: [],
         groupNames: {},
         tracks: {},
-        blacklistedTracks: state.blacklistedTracks,
+        excludedTracks: state.excludedTracks,
         isGroupOpen: {},
       };
     }
@@ -154,7 +156,7 @@ function playlistReducer(state: State, action: Action): State {
         groups: [],
         groupNames: {},
         tracks: {},
-        blacklistedTracks: action.payload.trackIds,
+        excludedTracks: action.payload.trackIds,
         isGroupOpen: {},
       };
     }
@@ -225,7 +227,7 @@ export function usePlaylist() {
     groups: [],
     groupNames: {},
     tracks: {},
-    blacklistedTracks: [],
+    excludedTracks: [],
     isGroupOpen: {},
   };
 
@@ -262,7 +264,7 @@ export function usePlaylist() {
         ...Object.values(state.tracks)
           .flat()
           .map((t) => t.trackId),
-        ...state.blacklistedTracks,
+        ...state.excludedTracks,
       ],
     });
 

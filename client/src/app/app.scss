@@ -95,7 +95,7 @@
   }
 
   &__controls_top {
-    grid-template-columns: auto 1fr auto auto;
+    grid-template-columns: auto 1fr auto;
     border-bottom: 1px solid $color_green-10;
     padding: 1rem 1.5rem 1rem 3rem;
     background-color: black;
@@ -103,7 +103,7 @@
   }
 
   &__controls_bottom {
-    grid-template-columns: auto auto 1fr auto;
+    grid-template-columns: auto auto 1fr;
     margin-bottom: 3rem;
   }
 }
@@ -124,6 +124,7 @@
   padding: 0.5rem 1.5rem;
   background-color: black;
   border-radius: $border_radius_btn $border_radius_btn 0 0;
+  font-size: 1.5rem;
 
   left: 50%;
   margin-left: -720px;
@@ -144,13 +145,12 @@
 
   &__meta {
     grid-area: meta;
-    font-size: $font-size_sm;
     display: flex;
     flex-flow: row nowrap;
     justify-content: center;
     align-items: center;
-    column-gap: 0.5rem;
     color: white;
+    font-size: 0.75rem;
   }
 
   &__artist {
@@ -197,19 +197,17 @@
   &__volume button {
     border: none;
     background-color: transparent;
-    margin-right: 8px;
     cursor: pointer;
+    line-height: 0;
   }
 
   &__volume {
     display: flex;
     column-gap: 0.5rem;
     align-items: center;
-    justify-content: center;
   }
 
   &__volume button {
-    margin-bottom: 3px;
   }
 
   &__time {
@@ -312,6 +310,7 @@ input[type="range"]::-moz-range-thumb {
   border: transparent;
   position: relative;
 }
+
 // dragging thumb - firefox
 input[type="range"]:active::-moz-range-thumb {
   transform: scale(1.2);

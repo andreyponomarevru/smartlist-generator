@@ -119,6 +119,12 @@
     flex-flow: row nowrap;
     column-gap: 1rem;
   }
+
+  &__add-section-btns {
+    display: grid;
+    grid-template-columns: 0.5fr 0.5fr;
+    column-gap: 1rem;
+  }
 }
 
 .add-section-btn {
@@ -147,6 +153,7 @@
   background-color: white;
   border-radius: $border_radius_block;
   text-overflow: ellipsis;
+  cursor: pointer;
 
   &__controls {
     display: flex;

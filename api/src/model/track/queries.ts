@@ -1,14 +1,17 @@
+import path from "path";
 import { connectDB } from "../../config/postgres";
 import { schemaCreateTrack } from "./validation-schemas";
 import { TrackMetadataParser, logDBError } from "../../utils/utilities";
 import { SearchParams, buildSQLQuery } from "../../utils/query-builder";
 import { FoundTrackDBResponse, FoundTrack } from "../../types";
+import { LOCAL_MUSIC_LIB_DIR } from "../../config/env";
 
 export async function create(filePath: string): Promise<void> {
   const trackMetadataParser = new TrackMetadataParser(filePath);
   const newTrack = await schemaCreateTrack.validateAsync(
     await trackMetadataParser.parseAudioFile(),
   );
+  console.log(newTrack);
 
   const pool = await connectDB();
   const client = await pool.connect();
@@ -150,7 +153,16 @@ export async function findTrack(
     return response.rows.length === 0
       ? []
       : response.rows.map(
-          ({ artist, duration, genre, genre_id, title, track_id, year }) => {
+          ({
+            artist,
+            duration,
+            genre,
+            genre_id,
+            title,
+            track_id,
+            year,
+            file_path,
+          }) => {
             return {
               artist,
               duration: parseFloat(duration),
@@ -159,9 +171,28 @@ export async function findTrack(
               title,
               trackId: track_id,
               year,
+              filePath: file_path,
             };
           },
         );
+  } catch (err) {
+    logDBError("Can't find tracks", err);
+    throw err;
+  }
+}
+
+export async function findTrackIdsByFilePaths(
+  filePaths: string[],
+): Promise<number[]> {
+  const pool = await connectDB();
+
+  try {
+    const sql = `SELECT track_id FROM track WHERE file_path = ANY($1);`;
+    const response = await pool.query<FoundTrackDBResponse>(sql, [filePaths]);
+
+    return response.rows.length === 0
+      ? []
+      : response.rows.map(({ track_id }) => track_id);
   } catch (err) {
     logDBError("Can't find tracks", err);
     throw err;

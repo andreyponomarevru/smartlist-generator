@@ -1,5 +1,6 @@
 import Joi from "joi";
 import { SearchParams } from "../utils/query-builder";
+import { Filter } from "../types";
 
 const schemaTrackId = Joi.number()
   .positive()
@@ -26,18 +27,6 @@ const playlistName = Joi.string().min(1).max(255).required().messages({
   "number.max": `"name" max length is 255 symbols`,
   "any.required": `"name" is required`,
 });
-
-const schemaLimit = Joi.number()
-  .integer()
-  .positive()
-  .min(1)
-  .required()
-  .messages({
-    "number.base": `"limit" must be a type of 'number'`,
-    "number.integer": `"limit" must be an integer`,
-    "number.min": `"limit" minimum value is "1"`,
-    "any.required": `"limit" is required`,
-  });
 
 export const schemaIdParam = Joi.object<{ id: number }>({
   id: schemaId,
@@ -69,9 +58,9 @@ export const schemaUpdateTracksInPlaylist = Joi.object<{
     .required(),
 });
 
-const schemaFilter = Joi.object({
+const schemaFilter = Joi.object<Filter>({
   name: Joi.string().valid("year", "genre"),
-  rule: Joi.string().valid(
+  condition: Joi.string().valid(
     "is",
     "is not",
     "greater than or equal",
@@ -84,11 +73,11 @@ const schemaFilter = Joi.object({
   value: Joi.alternatives(Joi.number(), Joi.array().items(Joi.number())),
 });
 
-export let schemaFindTrackReqBody = Joi.object<SearchParams>({
-  operator: Joi.string().valid("AND", "OR"),
+export const schemaFindTrackReqBody = Joi.object<SearchParams>({
+  operator: Joi.string().valid("and", "or"),
   filters: Joi.alternatives(
     Joi.object({
-      operator: Joi.string().valid("AND", "OR"),
+      operator: Joi.string().valid("and", "or"),
       filters: Joi.array().items(schemaFilter),
     }),
     Joi.array().items(schemaFilter),
@@ -98,3 +87,13 @@ export let schemaFindTrackReqBody = Joi.object<SearchParams>({
     .min(0)
     .required(),
 });
+
+export const schemaFindTrackIdsByFilePathsReqBody = Joi.object<{
+  filePaths: string[];
+}>({
+  filePaths: Joi.array().items(Joi.string()),
+});
+
+export const getStats = Joi.object<{ excluded: number[] }>({
+  excluded: Joi.array().items(Joi.number().positive().min(1)).single(),
+}).optional();

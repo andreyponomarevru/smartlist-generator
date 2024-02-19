@@ -3,7 +3,6 @@ import { traverseDirs } from "../utils/utilities";
 import { MUSIC_LIB_DIR } from "../config/env";
 import * as tracksModel from "../model/track/index";
 import * as libModel from "../model/lib/queries";
-import { SUBPLAYLISTS } from "../config/constants";
 
 const router = express.Router();
 
@@ -60,15 +59,14 @@ export async function validateLib(
       },
     };
 
-    /*
-    if (validationResults && !isRunning) {
-      res.json({
-        createdDateTime,
-        status: "succeeded",
-        results: validationResults,
-      });
-      return;
-    }*/
+    //if (validationResults && !isRunning) {
+    res.json({
+      createdDateTime,
+      status: "succeeded",
+      results: validationResults,
+    });
+    //return;
+    //}
   } catch (err) {
     next(err);
   }

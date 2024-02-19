@@ -20,20 +20,28 @@ export interface ValidatedTrack {
 }
 
 export type FoundTrackDBResponse = {
-  artist: string;
+  artist: string[];
   duration: string;
   genre: string[];
   genre_id: number[];
   title: string;
   track_id: number;
   year: number;
+  file_path: string;
 };
 export type FoundTrack = {
-  artist: string;
+  artist: string[];
   duration: number;
   genre: string[];
   genreId: number[];
   title: string;
   trackId: number;
   year: number;
+  filePath: string;
+};
+
+export type Filter = {
+  name: string;
+  condition: string;
+  value: number | number[];
 };
