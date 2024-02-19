@@ -190,6 +190,7 @@ export async function readTracks(
             title,
             track_id,
             year,
+            file_path,
           }) => {
             return {
               artist: artist,
@@ -200,6 +201,7 @@ export async function readTracks(
               title: title,
               trackId: track_id,
               year: year,
+              filePath: file_path,
             };
           },
         );
