@@ -1,4 +1,4 @@
-export type Filter = { name: string; rule: string; value: number | number[] };
+import { Filter } from "../types";
 
 export type SearchParams = {
   operator: string;
@@ -6,10 +6,10 @@ export type SearchParams = {
   excludeTracks: number[];
 };
 
-function parseFilter({ name, rule, value }: Filter) {
+function parseFilter({ name, condition, value }: Filter) {
   switch (name) {
     case "year": {
-      switch (rule) {
+      switch (condition) {
         case "is":
           return `track.year = ${value}`;
         case "is not":
@@ -19,14 +19,14 @@ function parseFilter({ name, rule, value }: Filter) {
         case "less than or equal":
           return `track.year <= ${value}`;
         default:
-          throw new Error(`Unknown rule ${rule}`);
+          throw new Error(`Unknown condition ${condition}`);
       }
     }
     case "genre": {
       if (!Array.isArray(value)) {
         throw new Error(`Unknown value ${value}. Should be an array.`);
       }
-      switch (rule) {
+      switch (condition) {
         case "contains any": {
           return `track_genre.genre_id IN (${value.join(", ")})`;
         }
@@ -64,7 +64,7 @@ function parseFilter({ name, rule, value }: Filter) {
               `;
         }
         default: {
-          throw new Error(`[genre] Unknown rule name "${rule}"`);
+          throw new Error(`[genre] Unknown condition name "${condition}"`);
         }
       }
     }
@@ -102,6 +102,7 @@ export function buildSQLQuery({
       tr.title,
       tr.duration,
       tr.year,
+      tr.file_path,
       array_agg(DISTINCT ar.name) AS artist,
       array_agg(DISTINCT ge.genre_id) AS genre_id,
       array_agg(DISTINCT ge.name) AS genre
