@@ -9,7 +9,7 @@ services:
     volumes:
       - ./api/src:/node/src
       - ./api/tsconfig.json:/api/tsconfig.json
-      - /mnt/CE64EB6A64EB53AD/music-lib/inbox-listened/chillout_psy_tagged:/tracks
+      - /mnt/CE64EB6A64EB53AD/music-lib/tracks:/tracks
 
     expose:
       - "8080"
@@ -19,6 +19,7 @@ services:
     env_file:
       - ./api/.env
       - ./postgres/.env
+      - ./.common.env
 
   postgres:
     container_name: postgres
