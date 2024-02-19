@@ -1,0 +1,38 @@
+@import "../../global.scss";
+
+.message {
+  padding: 1rem;
+  border-radius: $border_radius_block;
+
+  text-align: center;
+
+  a {
+    color: white;
+    text-decoration: none;
+  }
+
+  &_warning {
+    color: black;
+    background-color: #ffdbdb;
+  }
+
+  &_success {
+    color: white;
+    background-color: $color_success;
+  }
+
+  &_info {
+    color: white;
+    background-color: $color_info;
+  }
+
+  &_danger {
+    color: $color_gray-darken;
+    background-color: $color_danger;
+  }
+
+  &_disabled {
+    color: #eee;
+    background-color: $color_disabled;
+  }
+}
