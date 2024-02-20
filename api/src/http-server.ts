@@ -9,7 +9,6 @@ import { handle404Error } from "./middlewares/handle-404-error";
 import { handleErrors } from "./middlewares/handle-errors";
 import { router as tracksRouter } from "./controller/tracks";
 import { router as libRouter } from "./controller/lib";
-import { router as playlistRouter } from "./controller/playlists";
 import { router as statsRouter } from "./controller/stats";
 
 //
@@ -32,7 +31,6 @@ expressApp.use(express.static(path.join(__dirname, "public")));
 expressApp.use("/", libRouter);
 expressApp.use("/", tracksRouter);
 expressApp.use("/", statsRouter);
-expressApp.use("/", playlistRouter);
 // If request doesn't match the routes above, it is past to 404 error handler
 expressApp.use(handle404Error);
 expressApp.use(handleErrors);
