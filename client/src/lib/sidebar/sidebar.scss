@@ -19,6 +19,9 @@
 
   &__stats_name {
     font-size: $font-size_sm;
+    display: flex;
+    column-gap: 0.5rem;
+    align-items: center;
   }
 
   &__stats_value {

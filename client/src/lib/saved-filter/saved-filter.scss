@@ -1,0 +1,50 @@
+@import "../../global.scss";
+
+.saved-filter {
+  display: grid;
+  grid-template-columns: 12% 2rem 1fr 2rem;
+  align-items: flex-start;
+  background-color: $color_gray-lighten;
+  align-content: flex-start;
+  padding: 0.5rem 1rem;
+  border-radius: $border_radius_btn;
+  font-size: 0.75rem;
+  column-gap: 1rem;
+  font-size: $font-size_sm;
+  width: 100%;
+  text-overflow: ellipsis;
+
+  &__name {
+    font-weight: bold;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__body {
+    display: flex;
+    flex-flow: column nowrap;
+    row-gap: 0rem;
+  }
+
+  &__row {
+    display: grid;
+    grid-template-columns: 6% 20% 74%;
+    column-gap: 1rem;
+    row-gap: 0.6rem;
+  }
+
+  &__delete-btn {
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    line-height: 0;
+    font-size: 1.5rem;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+  }
+
+  &__delete-btn:hover {
+    background-color: white;
+  }
+}

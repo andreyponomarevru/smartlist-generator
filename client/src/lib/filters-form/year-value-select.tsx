@@ -25,7 +25,6 @@ export function YearValueSelect(props: SelectProps<number>) {
           closeMenuOnSelect={true}
           isMulti={false}
           options={props.options}
-          defaultValue={props.defaultValue}
         />
       )}
     />

@@ -25,7 +25,6 @@ export function GenreValueSelect(props: SelectProps<number>) {
           closeMenuOnSelect={false}
           isMulti={true}
           options={props.options}
-          defaultValue={props.defaultValue}
         />
       )}
     />
