@@ -6,8 +6,6 @@ import {
   IoPauseSharp,
 } from "react-icons/io5";
 
-import { TrackMeta } from "../../types";
-
 import "./controls.scss";
 
 interface ControlsProps extends React.HTMLAttributes<HTMLDivElement> {

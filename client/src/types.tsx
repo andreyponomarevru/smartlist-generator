@@ -7,7 +7,6 @@ import {
 } from "react-hook-form";
 
 export type TrackMeta = {
-  //position: number;
   year: number;
   artist: string[];
   title: string;
@@ -63,10 +62,7 @@ export type SelectProps<OptionsValue> = {
   name?: string;
   control: Control<FormValues>;
   index: number;
-  register: UseFormRegister<FormValues>;
-  unregister?: UseFormUnregister<FormValues>;
   resetField: UseFormResetField<FormValues>;
   options: OptionsList<OptionsValue>[];
-  defaultValue: OptionsList<OptionsValue>;
-  setValue: UseFormSetValue<FormValues>;
+  defaultValue?: OptionsList<OptionsValue>;
 };

@@ -1,16 +1,30 @@
 import React from "react";
-import { IoMdVolumeHigh, IoMdVolumeOff, IoMdVolumeLow } from "react-icons/io";
+import {
+  IoMdVolumeHigh,
+  IoMdVolumeOff,
+  IoMdVolumeLow,
+  IoIosClose,
+} from "react-icons/io";
+import {
+  FaDownload,
+  FaFileImport,
+  FaUndo,
+  FaFileAlt,
+  FaFilter,
+} from "react-icons/fa";
+import { v4 as uuid } from "uuid";
 
 import { ErrorBoundary } from "../lib/error-boundary/error-boundary";
 import { API_ROOT_URL } from "../config/env";
 import { useFetch } from "../hooks/use-fetch";
-import { GetStatsRes } from "../types";
+import { GetStatsRes, FormValues, Stats } from "../types";
 import { Btn } from "../lib/btn/btn";
 import { Group } from "../lib/group/group";
 import {
   exportFiltersTemplate,
   exportPlaylistAsJSON,
   exportPlaylistAsM3U,
+  buildQuery,
 } from "../utils/misc";
 import { Sidebar } from "../lib/sidebar/sidebar";
 import { EditableText } from "../lib/editable-text/editable-text";
@@ -18,11 +32,28 @@ import { usePlaylist } from "../hooks/use-playlist";
 import { usePlayer } from "../hooks/use-player";
 import { Controls } from "./controls/controls";
 import { toHourMinSec } from "../utils/misc";
+import { useFilters } from "../hooks/use-filters";
+import { SavedFilter } from "../lib/saved-filter/saved-filter";
+import { useLocalStorage } from "../hooks/use-local-storage";
 
 import "./app.scss";
 
 export function App() {
   const { playlist, groups, tracks } = usePlaylist();
+
+  React.useEffect(() => {
+    console.log(playlist.groupModes);
+  }, [playlist]);
+
+  //
+
+  const filters = useFilters();
+
+  React.useEffect(() => {
+    console.log("filters: ", filters.state);
+  }, [filters]);
+
+  //
 
   const {
     state: yearsRes,
@@ -47,9 +78,7 @@ export function App() {
     console.log(playlist.excludedTracks);
   }, [playlist.excludedTracks]);
 
-  React.useEffect(() => {
-    console.log(genresRes.response?.body?.results);
-  }, [yearsRes, genresRes]);
+  //
 
   const player = usePlayer(playlist.tracks);
 
@@ -62,17 +91,47 @@ export function App() {
         />
 
         <div className="app__main">
+          <div className="app__saved-filters">
+            <header className="app__saved-filters-header">Saved filters</header>
+            {filters.state.ids.map((id) => (
+              <SavedFilter
+                key={
+                  id + JSON.stringify(filters.state.names[`${id}`]) + Date.now()
+                }
+                name={filters.state.names[id]}
+                filtersGroup={filters.state.settings[`${id}`]}
+                handleDelete={() => filters.delete(id)}
+              />
+            ))}
+            <div>
+              <button
+                onClick={() =>
+                  exportPlaylistAsJSON(
+                    playlist.name.state.text,
+                    playlist.tracks
+                  )
+                }
+                className="app__btn btn btn_theme_transparent-black"
+                disabled={true}
+              >
+                <span>Export as JSON</span>
+                <FaDownload />
+              </button>
+            </div>
+          </div>
+
           <div className="app__header">
             <a className="app__logo" href="/">
               Smartlist Generator
             </a>
             <div className="app__controls app__controls_top">
-              <Btn
+              <button
                 onClick={groups.handleReset}
-                className="app__btn"
-                name="Reset"
-                theme="transparent-white"
-              />
+                className="app__btn btn btn_theme_transparent-white"
+              >
+                <span>Reset</span>
+                <FaUndo />
+              </button>
               <div></div>
               <label htmlFor="importblacklisted">
                 <input
@@ -82,7 +141,8 @@ export function App() {
                   hidden
                 />
                 <div className="app__btn btn btn_theme_transparent-white">
-                  Import blacklisted tracks
+                  <span>Import blacklisted tracks</span>
+                  <FaFileImport />
                 </div>
               </label>
             </div>
@@ -101,47 +161,56 @@ export function App() {
           </header>
 
           {playlist.groups.length === 0 && (
-            <div className="group__add-section-btns">
+            <div className="app__btns">
               <button
                 className="btn btn_theme_transparent-black add-section-btn"
-                onClick={() => groups.handleAdd(0)}
+                onClick={() => groups.handleAdd(0, "template")}
               >
-                Add new section (using saved filters)
+                <span>Add new section (using saved filters)</span>
+                <FaFileAlt />
               </button>
               <button
                 className="btn btn_theme_transparent-black add-section-btn"
-                onClick={() => groups.handleAdd(0)}
+                onClick={() => groups.handleAdd(0, "new-filter")}
               >
-                Add new section (creating a new filter)
+                <span>Add new section (creating a new filter)</span>
+                <FaFilter />
               </button>
             </div>
           )}
 
-          {playlist.groups.map((groupId, index) => {
-            return (
-              <Group
-                groupId={groupId}
-                key={groupId}
-                name={playlist.groupNames[`${groupId}`]}
-                onAddGroup={() => groups.handleAdd(index + 1)}
-                onDeleteGroup={() => groups.handleDestroy(groupId)}
-                onRenameGroup={groups.handleRename}
-                onToggle={() => groups.toggleIsGroupOpen(groupId)}
-                onRemoveTrack={tracks.handleRemove}
-                onReplaceTrack={tracks.handleReplace}
-                onGetTrack={tracks.handleAdd}
-                onGroupReorderUp={() => groups.handleReorder(index, "UP")}
-                onGroupReorderDown={() => groups.handleReorder(index, "DOWN")}
-                onFiltersChange={tracks.handleReset}
-                isOpenGroupId={playlist.isGroupOpen}
-                years={yearsRes}
-                genres={genresRes}
-                tracks={playlist.tracks}
-                onReorderTrack={tracks.handleReorder}
-                setPlayingIndex={player.setPlayingIndex}
-              />
-            );
-          })}
+          {playlist.groups.map((groupId, index) => (
+            <Group
+              mode={playlist.groupModes[`${groupId}`]}
+              groupId={groupId}
+              key={groupId}
+              name={playlist.groupNames[`${groupId}`]}
+              onAddGroupWithTemplate={() =>
+                groups.handleAdd(index + 1, "template")
+              }
+              onAddGroupWithNewFilter={() =>
+                groups.handleAdd(index + 1, "new-filter")
+              }
+              onDeleteGroup={() => groups.handleDestroy(groupId)}
+              onRenameGroup={groups.handleRename}
+              onToggle={() => groups.toggleIsGroupOpen(groupId)}
+              onRemoveTrack={tracks.handleRemove}
+              onReplaceTrack={tracks.handleReplace}
+              onGetTrack={tracks.handleAdd}
+              onGroupReorderUp={() => groups.handleReorder(index, "UP")}
+              onGroupReorderDown={() => groups.handleReorder(index, "DOWN")}
+              onFiltersChange={tracks.handleReset}
+              isOpenGroupId={playlist.isGroupOpen}
+              years={yearsRes}
+              genres={genresRes}
+              tracks={playlist.tracks}
+              onReorderTrack={tracks.handleReorder}
+              setPlayingIndex={player.setPlayingIndex}
+              saveFilter={filters.save}
+              deleteFilter={filters.delete}
+              filters={filters.state}
+            />
+          ))}
 
           <nav className="app__controls app__controls_bottom">
             <button
@@ -155,7 +224,8 @@ export function App() {
               className="app__btn btn btn_theme_transparent-black"
               disabled={Object.values(playlist.tracks).flat().length === 0}
             >
-              Export playlist as M3U
+              <span>Export as M3U</span>
+              <FaDownload />
             </button>
             <button
               onClick={() =>
@@ -164,7 +234,8 @@ export function App() {
               className="app__btn btn btn_theme_transparent-black"
               disabled={Object.values(playlist.tracks).flat().length === 0}
             >
-              Export playlist as JSON
+              <span>Export as JSON</span>
+              <FaDownload />
             </button>
             <div></div>
           </nav>

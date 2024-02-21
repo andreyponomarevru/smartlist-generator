@@ -1,4 +1,6 @@
 import React from "react";
+import { FaDatabase } from "react-icons/fa";
+
 import { APIResponse, GetStatsRes } from "../../types";
 import { Stats } from "../stats/stats";
 
@@ -17,7 +19,8 @@ export function Sidebar(props: SidebarProps) {
       <ul className="sidebar__general-stats">
         <li className="sidebar__row">
           <span className="sidebar__stats sidebar__stats_name">
-            Database created on {new Date().toDateString()}
+            <FaDatabase />
+            <span>init. on {new Date().toDateString()}</span>
           </span>
         </li>
         <li className="sidebar__row">

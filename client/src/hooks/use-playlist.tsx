@@ -8,16 +8,19 @@ import {
 import { buildQuery } from "../utils/misc";
 import { useEditableText } from "./use-editable-text";
 
+type Mode = "new-filter" | "template";
+
 type State = {
   name: string;
   groups: number[];
   groupNames: Record<string, string>;
+  groupModes: Record<string, Mode>;
   tracks: Record<string, TrackMeta[]>;
   excludedTracks: number[];
   isGroupOpen: Record<string, boolean>;
 };
 type Action =
-  | { type: "ADD_GROUP_AFTER"; payload: { insertAt: number } }
+  | { type: "ADD_GROUP"; payload: { insertAt: number; mode: Mode } }
   | { type: "DESTROY_GROUP"; payload: { groupId: number } }
   | { type: "RESET_GROUPS" }
   | { type: "RENAME_GROUP"; payload: { groupId: number; newName: string } }
@@ -43,7 +46,7 @@ let counter = 0;
 
 function playlistReducer(state: State, action: Action): State {
   switch (action.type) {
-    case "ADD_GROUP_AFTER": {
+    case "ADD_GROUP": {
       const newGroupId = ++counter;
       return {
         ...state,
@@ -55,6 +58,10 @@ function playlistReducer(state: State, action: Action): State {
         groupNames: {
           ...state.groupNames,
           [`${newGroupId}`]: new Date().toLocaleTimeString(),
+        },
+        groupModes: {
+          ...state.groupModes,
+          [`${newGroupId}`]: action.payload.mode,
         },
         tracks: { ...state.tracks, [`${newGroupId}`]: [] },
         isGroupOpen: { ...state.isGroupOpen, [`${newGroupId}`]: true },
@@ -88,7 +95,7 @@ function playlistReducer(state: State, action: Action): State {
         ...state,
         groups: state.groups.filter((id) => id !== action.payload.groupId),
         groupNames: updatedGroupNames,
-        tracks: { ...updatedTracks },
+        tracks: updatedTracks,
       };
     }
     case "RESET_GROUPS": {
@@ -96,6 +103,7 @@ function playlistReducer(state: State, action: Action): State {
         ...state,
         groups: [],
         groupNames: {},
+        groupModes: {},
         tracks: {},
         excludedTracks: state.excludedTracks,
         isGroupOpen: {},
@@ -201,8 +209,6 @@ function playlistReducer(state: State, action: Action): State {
       const remainingItems = state.tracks[`${action.payload.groupId}`].filter(
         (item, index) => index !== oldIndex
       );
-
-      console.log("oldIndex", oldIndex, "newIndex", newIndex);
       return {
         ...state,
         tracks: {
@@ -226,6 +232,7 @@ export function usePlaylist() {
     name: `Playlist ${new Date().toDateString()}`,
     groups: [],
     groupNames: {},
+    groupModes: {},
     tracks: {},
     excludedTracks: [],
     isGroupOpen: {},
@@ -235,8 +242,8 @@ export function usePlaylist() {
 
   const playlistName = useEditableText(state.name);
 
-  function handleAddGroup(insertAt: number) {
-    dispatch({ type: "ADD_GROUP_AFTER", payload: { insertAt } });
+  function handleAddGroup(insertAt: number, mode: Mode) {
+    dispatch({ type: "ADD_GROUP", payload: { insertAt, mode } });
   }
 
   function handleDestroyGroup(groupId: number) {

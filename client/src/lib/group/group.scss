@@ -11,6 +11,12 @@
   font-size: $font-size_sm;
   background-color: white;
 
+  &__btns {
+    display: flex;
+    column-gap: 1rem;
+    align-self: center;
+  }
+
   &__header {
     display: grid;
     column-gap: 1rem;
@@ -31,6 +37,10 @@
     display: none;
   }
 
+  &__tabs {
+    align-self: flex-start;
+  }
+
   &__name {
     grid-area: Name;
 
@@ -40,8 +50,21 @@
     }
   }
 
+  &__save-filter-btn {
+    align-self: flex-start;
+  }
+
+  &__btns-group {
+    display: flex;
+    column-gap: 1rem;
+  }
+
   &__edit-name-btn {
     font-size: $font-size_sm;
+  }
+
+  &__active-tab {
+    background-color: red;
   }
 
   &__form {
@@ -51,33 +74,6 @@
     align-items: center;
     border-radius: $border_radius_block;
     padding: 0;
-  }
-
-  &__row {
-    display: grid;
-    width: 100%;
-    grid-template-columns: auto auto auto;
-    align-items: center;
-    padding: 0.5rem 0;
-    column-gap: 1rem;
-    align-items: center;
-    border-bottom: 1px solid #ccc;
-    justify-content: flex-start;
-  }
-
-  &__row:last-child {
-    border-bottom: none;
-  }
-
-  &__row-controls {
-    display: flex;
-    column-gap: 1rem;
-    align-items: center;
-  }
-
-  &__row_filter {
-    display: flex;
-    justify-content: space-between;
   }
 
   &__playlist {
@@ -90,13 +86,8 @@
     padding-bottom: 0;
   }
 
-  &__btns {
-    display: flex;
-    column-gap: 1rem;
-  }
-
   &__toggle-group-btn {
-    font-size: 2rem;
+    font-size: 1rem;
     cursor: pointer;
     width: 2rem;
     display: flex;
@@ -105,13 +96,8 @@
     font-weight: bold;
   }
 
-  &__btn:disabled {
-    border: 1px solid $color_brand_gray-10;
-    color: $color_brand_gray-10;
-  }
-
   &__find-track-btn {
-    align-self: start;
+    align-self: flex-end;
   }
 
   &__new-group-form {
@@ -130,7 +116,7 @@
 .add-section-btn {
   display: flex;
   flex-flow: row nowrap;
-  column-gap: 1rem;
+  column-gap: 0.5rem;
   align-items: center;
   justify-content: center;
   font-size: $font-size_sm;
@@ -139,66 +125,17 @@
     box-shadow 0.2s ease;
 }
 
-.track {
-  box-sizing: border-box;
+.filter-templates-form {
   display: grid;
-  grid-template-columns: auto auto 0.6fr 0.4fr 3rem auto;
-  color: $color_gray_darkest;
-  padding: 0.5rem 1rem;
-  align-items: center;
-  column-gap: 1rem;
-  box-shadow: 0px 0px 1rem $color_gray-lighten;
-  overflow: hidden;
-  font-size: $font-size_sm;
-  background-color: white;
-  border-radius: $border_radius_block;
-  text-overflow: ellipsis;
-  cursor: pointer;
+  grid-template-columns: 1fr;
+  row-gap: 1rem;
+  justify-items: flex-start;
 
-  &__controls {
-    display: flex;
-    flex-flow: row nowrap;
-    column-gap: 0.5rem;
-    justify-content: flex-end;
+  &__find-track-btn {
+    justify-self: flex-end;
   }
 
-  &__artist-and-title {
-    display: flex;
-    flex-flow: column nowrap;
-  }
-
-  &__artists {
-    font-size: 0.75rem;
-    text-overflow: ellipsis;
-    overflow: hidden;
-  }
-
-  &__title {
-    text-overflow: ellipsis;
-    overflow: hidden;
-  }
-
-  &__genres {
-    display: flex;
-    column-gap: 0.3rem;
-    align-items: center;
-    text-overflow: ellipsis;
-    overflow: hidden;
-  }
-
-  &__genre {
-    font-size: 0.75rem;
-    padding: 0.4rem 0.6rem 0.5rem 0.6rem;
-    line-height: 1;
-    border-radius: 0.7rem;
-    background-color: $color_gray-lighten;
-  }
-
-  &__duration {
-    font-size: $font-size_xs;
-  }
-
-  &__sort-btn-icon {
-    fill: white;
+  &__select {
+    min-width: 15rem;
   }
 }
