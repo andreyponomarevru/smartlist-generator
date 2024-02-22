@@ -32,6 +32,7 @@ import { Filter } from "../../hooks/use-filters";
 import { Playlist } from "../playlist/playlist";
 import { FiltersFormMemoized } from "../filters-form/filters-form";
 import { defaultValues, OPERATORS } from "../../config/constants";
+import { Stats as StatsType } from "../../types";
 
 import "./group.scss";
 
@@ -39,8 +40,8 @@ interface GroupProps extends React.HTMLAttributes<HTMLDivElement> {
   groupId: number;
   name: string;
   mode: string;
-  years: APIResponse<GetStatsRes>;
-  genres: APIResponse<GetStatsRes>;
+  years?: StatsType[];
+  genres?: StatsType[];
   isOpenGroupId: Record<string, boolean>;
   onToggle: () => void;
   onAddGroupWithTemplate: () => void;
@@ -131,23 +132,18 @@ export function Group(props: GroupProps) {
 
   const [stats, setStats] = React.useState<Stats>({ years: [], genres: [] });
   React.useEffect(() => {
-    if (!props.genres.response?.body?.results) return;
-    if (!props.years.response?.body?.results) return;
+    if (!props.genres || !props.years) return;
 
-    const genres: OptionsList<number>[] = [
-      ...props.genres.response?.body?.results,
-    ]
+    const genres: OptionsList<number>[] = [...props.genres]
       .sort((a, b) => a.name.localeCompare(b.name))
       .map((g) => ({ value: g.id as number, label: g.name }));
 
-    const years: OptionsList<number>[] = [
-      ...props.years.response?.body?.results!,
-    ]
+    const years: OptionsList<number>[] = [...props.years]
       .sort((a, b) => parseInt(b.name) - parseInt(a.name))
       .map((y) => ({ value: parseInt(y.name), label: String(y.name) }));
 
     setStats({ genres, years });
-  }, [props.genres.response]);
+  }, [props.genres, props.years]);
 
   //
   // Reset "filter constructor" mode's state on form update

@@ -58,6 +58,8 @@ export type GetStatsRes = { results: Stats[] };
 
 export type GetTrackRes = { results: TrackMeta[] };
 
+export type FindTrackIdsRes = { results: number[] };
+
 export type SelectProps<OptionsValue> = {
   name?: string;
   control: Control<FormValues>;
@@ -65,4 +67,14 @@ export type SelectProps<OptionsValue> = {
   resetField: UseFormResetField<FormValues>;
   options: OptionsList<OptionsValue>[];
   defaultValue?: OptionsList<OptionsValue>;
+};
+
+export type SearchQuery = {
+  operator: string;
+  filters: {
+    value: number | (number | undefined)[] | undefined;
+    name: string;
+    condition?: string;
+  }[];
+  excludeTracks: number[];
 };

@@ -14,16 +14,11 @@ import {
 } from "react-icons/fa";
 
 import { ErrorBoundary } from "../lib/error-boundary/error-boundary";
-import { API_ROOT_URL } from "../config/env";
-import { useFetch } from "../hooks/use-fetch";
-import { GetStatsRes, FormValues, Stats } from "../types";
-import { Btn } from "../lib/btn/btn";
 import { Group } from "../lib/group/group";
 import {
   exportFiltersTemplate,
   exportPlaylistAsJSON,
   exportPlaylistAsM3U,
-  buildQuery,
 } from "../utils/misc";
 import { Sidebar } from "../lib/sidebar/sidebar";
 import { EditableText } from "../lib/editable-text/editable-text";
@@ -33,63 +28,70 @@ import { Controls } from "./controls/controls";
 import { toHourMinSec } from "../utils/misc";
 import { useFilters } from "../hooks/use-filters";
 import { SavedFilter } from "../lib/saved-filter/saved-filter";
-import { useLocalStorage } from "../hooks/use-local-storage";
+import { useStats } from "../hooks/api/use-stats";
+import { Loader } from "../lib/loader/loader";
+import { Message } from "../lib/message/message";
 
 import "./app.scss";
 
 export function App() {
   const { playlist, groups, tracks } = usePlaylist();
-
-  React.useEffect(() => {
-    console.log(playlist.groupModes);
-  }, [playlist]);
-
-  //
-
   const filters = useFilters();
-
-  React.useEffect(() => {
-    console.log("filters: ", filters.state);
-  }, [filters]);
-
-  //
-
-  const {
-    state: yearsRes,
-    fetchNow: fetchYears,
-    resetState: resetYearsRes,
-  } = useFetch<GetStatsRes>();
-  const {
-    state: genresRes,
-    fetchNow: fetchGenres,
-    resetState: resetGenresRes,
-  } = useFetch<GetStatsRes>();
-
-  React.useEffect(() => {
-    const excluded =
-      playlist.excludedTracks.length > 0
-        ? `?excluded=${playlist.excludedTracks.join("&excluded=")}`
-        : "";
-    if (yearsRes.response) resetYearsRes();
-    if (genresRes.response) resetGenresRes();
-    fetchYears(`${API_ROOT_URL}/lib/stats/years${excluded}`);
-    fetchGenres(`${API_ROOT_URL}/lib/stats/genres${excluded}`);
-    console.log(playlist.excludedTracks);
-  }, [playlist.excludedTracks]);
+  const statsQuery = useStats(playlist.excludedTracks);
 
   //
 
   const player = usePlayer(playlist.tracks);
+
+  if (statsQuery.isLoading) return <Loader for="page" color="pink" />;
+
+  if (statsQuery.error) {
+    return (
+      <Message type="danger">
+        Something went wrong while loading stats :(
+      </Message>
+    );
+  }
 
   return (
     <ErrorBoundary>
       <main className="app">
         <Sidebar
           className="app__sidebar"
-          stats={{ years: yearsRes, genres: genresRes }}
+          stats={{
+            years: statsQuery.data?.years.results,
+            genres: statsQuery.data?.genres.results,
+          }}
         />
-
         <div className="app__main">
+          <div className="app__header">
+            <a className="app__logo" href="/">
+              Smartlist Generator
+            </a>
+            <div className="app__controls app__controls_top">
+              <button
+                onClick={groups.handleReset}
+                className="app__btn btn btn_theme_transparent-white"
+              >
+                <span>Reset</span>
+                <FaUndo />
+              </button>
+              <div></div>
+              <label htmlFor="importblacklisted">
+                <input
+                  id="importblacklisted"
+                  type="file"
+                  onChange={tracks.handleImportBlacklisted}
+                  hidden
+                />
+                <div className="app__btn btn btn_theme_transparent-white">
+                  <span>Import blacklisted tracks</span>
+                  <FaFileImport />
+                </div>
+              </label>
+            </div>
+          </div>
+
           <div className="app__saved-filters">
             <header className="app__saved-filters-header">Saved filters</header>
             {filters.state.ids.map((id) => (
@@ -116,34 +118,6 @@ export function App() {
                 <span>Export as JSON</span>
                 <FaDownload />
               </button>
-            </div>
-          </div>
-
-          <div className="app__header">
-            <a className="app__logo" href="/">
-              Smartlist Generator
-            </a>
-            <div className="app__controls app__controls_top">
-              <button
-                onClick={groups.handleReset}
-                className="app__btn btn btn_theme_transparent-white"
-              >
-                <span>Reset</span>
-                <FaUndo />
-              </button>
-              <div></div>
-              <label htmlFor="importblacklisted">
-                <input
-                  id="importblacklisted"
-                  type="file"
-                  onChange={tracks.handleImportBlacklisted}
-                  hidden
-                />
-                <div className="app__btn btn btn_theme_transparent-white">
-                  <span>Import blacklisted tracks</span>
-                  <FaFileImport />
-                </div>
-              </label>
             </div>
           </div>
 
@@ -200,8 +174,8 @@ export function App() {
               onGroupReorderDown={() => groups.handleReorder(index, "DOWN")}
               onFiltersChange={tracks.handleReset}
               isOpenGroupId={playlist.isGroupOpen}
-              years={yearsRes}
-              genres={genresRes}
+              years={statsQuery.data?.years.results}
+              genres={statsQuery.data?.genres.results}
               tracks={playlist.tracks}
               onReorderTrack={tracks.handleReorder}
               setPlayingIndex={player.setPlayingIndex}
