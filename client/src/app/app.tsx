@@ -12,7 +12,6 @@ import {
   FaFileAlt,
   FaFilter,
 } from "react-icons/fa";
-import { v4 as uuid } from "uuid";
 
 import { ErrorBoundary } from "../lib/error-boundary/error-boundary";
 import { API_ROOT_URL } from "../config/env";
