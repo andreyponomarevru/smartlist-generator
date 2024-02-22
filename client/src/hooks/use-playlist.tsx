@@ -1,12 +1,20 @@
 import React from "react";
-import { TrackMeta, FormValues, APIResponse, GetTrackRes } from "../types";
+import {
+  TrackMeta,
+  FormValues,
+  APIResponse,
+  GetTrackRes,
+  SearchQuery,
+} from "../types";
 import {
   API_ROOT_URL,
   LOCAL_MUSIC_LIB_DIR,
   MUSIC_LIB_DIR,
 } from "../config/env";
-import { buildQuery } from "../utils/misc";
+import { buildSearchQuery } from "../utils/misc";
 import { useEditableText } from "./use-editable-text";
+import { useTrack } from "./api/use-track";
+import { useTrackIds } from "./api/use-track-ids";
 
 type Mode = "new-filter" | "template";
 
@@ -159,6 +167,9 @@ function playlistReducer(state: State, action: Action): State {
       };
     }
     case "IMPORT_BLACKLISTED_TRACKS": {
+      console.log("*** REDUCER *** IMPORT_BLACKLISTED_TRACKS");
+      console.log(action.payload.trackIds);
+
       return {
         ...state,
         groups: [],
@@ -166,6 +177,7 @@ function playlistReducer(state: State, action: Action): State {
         tracks: {},
         excludedTracks: action.payload.trackIds,
         isGroupOpen: {},
+        groupModes: {},
       };
     }
     case "OPEN_GROUP": {
@@ -239,8 +251,9 @@ export function usePlaylist() {
   };
 
   const [state, dispatch] = React.useReducer(playlistReducer, initialState);
-
   const playlistName = useEditableText(state.name);
+  const trackQuery = useTrack();
+  const trackIdsQuery = useTrackIds();
 
   function handleAddGroup(insertAt: number, mode: Mode) {
     dispatch({ type: "ADD_GROUP", payload: { insertAt, mode } });
@@ -263,37 +276,6 @@ export function usePlaylist() {
 
   //
 
-  async function getTrack(formValues: FormValues): Promise<TrackMeta[]> {
-    const searchQuery = JSON.stringify({
-      operator: formValues.operator.value,
-      filters: buildQuery(formValues.filters),
-      excludeTracks: [
-        ...Object.values(state.tracks)
-          .flat()
-          .map((t) => t.trackId),
-        ...state.excludedTracks,
-      ],
-    });
-
-    return await fetch(`${API_ROOT_URL}/tracks`, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        accept: "application/json",
-      },
-      body: searchQuery,
-    })
-      .then((r) => r.json())
-      .then((r: GetTrackRes) => {
-        return r.results.map((t) => ({
-          ...t,
-          filePath: [LOCAL_MUSIC_LIB_DIR, t.filePath]
-            .join("")
-            .replace("/tracks", ""),
-        }));
-      });
-  }
-
   function handleRemoveTrack(groupId: number, trackId: number) {
     dispatch({ type: "REMOVE_TRACK", payload: { groupId, trackId } });
   }
@@ -307,22 +289,38 @@ export function usePlaylist() {
     trackId: number,
     formValues: FormValues
   ) {
-    await getTrack(formValues)
-      .then((tracks) => {
-        dispatch({
-          type: "REPLACE_TRACK",
-          payload: { groupId, trackId, newTrack: tracks },
-        });
-      })
-      .catch(console.error);
+    try {
+      const track = await trackQuery.mutateAsync(
+        buildSearchQuery(formValues, [
+          ...Object.values(state.tracks)
+            .flat()
+            .map((t) => t.trackId),
+          ...state.excludedTracks,
+        ])
+      );
+      dispatch({
+        type: "REPLACE_TRACK",
+        payload: { groupId, trackId, newTrack: track },
+      });
+    } catch (err) {
+      console.error(trackQuery.error);
+    }
   }
 
   async function handleAddTrack(groupId: number, formValues: FormValues) {
-    await getTrack(formValues)
-      .then((r) => {
-        dispatch({ type: "ADD_TRACK", payload: { groupId, tracks: r } });
-      })
-      .catch(console.error);
+    try {
+      const track = await trackQuery.mutateAsync(
+        buildSearchQuery(formValues, [
+          ...Object.values(state.tracks)
+            .flat()
+            .map((t) => t.trackId),
+          ...state.excludedTracks,
+        ])
+      );
+      dispatch({ type: "ADD_TRACK", payload: { groupId, tracks: track } });
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   function handleImportBlacklistedTracks(
@@ -330,30 +328,21 @@ export function usePlaylist() {
   ) {
     const fileReader = new FileReader();
     fileReader.readAsText((e.target as HTMLInputElement).files![0], "UTF-8");
+
     fileReader.onload = async function (e) {
       if (e.target?.result && typeof e.target?.result === "string") {
-        const filePaths = JSON.parse(e.target?.result)
-          .flat()
-          .map(
-            (t: string) =>
-              `${MUSIC_LIB_DIR}${t.replace(LOCAL_MUSIC_LIB_DIR, "")}`
-          );
+        const filePaths = JSON.parse(e.target?.result).map((t: string) => {
+          return `${MUSIC_LIB_DIR}${t.replace(LOCAL_MUSIC_LIB_DIR, "")}`;
+        });
 
-        await fetch(`${API_ROOT_URL}/tracks/ids`, {
-          method: "POST",
-          headers: {
-            "content-type": "application/json",
-            accept: "application/json",
-          },
-          body: JSON.stringify({ filePaths }),
-        })
-          .then((r) => r.json())
-          .then((r: { results: number[] }) => {
+        await trackIdsQuery.mutateAsync(filePaths, {
+          onSuccess: (data, variables, context) => {
             dispatch({
               type: "IMPORT_BLACKLISTED_TRACKS",
-              payload: { trackIds: r.results },
+              payload: { trackIds: data },
             });
-          });
+          },
+        });
       }
     };
   }
