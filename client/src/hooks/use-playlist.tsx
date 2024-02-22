@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  TrackMeta,
-  FormValues,
-  APIResponse,
-  GetTrackRes,
-  SearchQuery,
-} from "../types";
+import { TrackMeta, FormValues, APIResponse, GetTrackRes } from "../types";
 import {
   API_ROOT_URL,
   LOCAL_MUSIC_LIB_DIR,
@@ -167,9 +161,6 @@ function playlistReducer(state: State, action: Action): State {
       };
     }
     case "IMPORT_BLACKLISTED_TRACKS": {
-      console.log("*** REDUCER *** IMPORT_BLACKLISTED_TRACKS");
-      console.log(action.payload.trackIds);
-
       return {
         ...state,
         groups: [],
