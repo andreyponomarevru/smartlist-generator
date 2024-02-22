@@ -1,5 +1,7 @@
 import * as React from "react";
 
+import { FaPen } from "react-icons/fa";
+
 import { State } from "../../hooks/use-editable-text";
 
 import "./editable-text.scss";
@@ -51,7 +53,9 @@ export function EditableText(props: EditableTextProps) {
           onClick={props.text.handleEdit}
         >
           <span className={`editable-text__name`}>{props.text.state.text}</span>
-          <span className="editable-text__edit-btn">Edit</span>
+          <span className="editable-text__edit-btn">
+            <FaPen />
+          </span>
         </span>
       )}
     </div>

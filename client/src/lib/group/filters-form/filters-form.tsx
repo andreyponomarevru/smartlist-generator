@@ -12,17 +12,17 @@ import {
 import Select from "react-select";
 import { FaPlus, FaMinus } from "react-icons/fa";
 
-import { FormValues, OptionsList } from "../../types";
+import { FormValues, OptionsList } from "../../../types";
 import {
   FILTER_NAMES,
   GENRE_CONDITIONS,
   YEAR_CONDITIONS,
   OPERATORS,
-} from "../../config/constants";
+} from "../../../config/constants";
 import { ConditionSelect } from "./condition-select";
 import { YearValueSelect } from "./year-value-select";
 import { GenreValueSelect } from "./genre-value-select";
-import { defaultValues } from "../../config/constants";
+import { defaultValues } from "../../../config/constants";
 
 import "./filters-form.scss";
 
@@ -152,7 +152,7 @@ function FiltersForm(props: FiltersFormProps) {
         type="submit"
         form={`filter-form-${props.groupId}`}
         disabled={false}
-        className="btn btn_theme_black group__find-track-btn"
+        className="btn btn_theme_black filters-form__find-track-btn"
       >
         Find a track
       </button>

@@ -74,7 +74,7 @@ export function App() {
                 className="app__btn btn btn_theme_transparent-white"
               >
                 <span>Reset</span>
-                <FaUndo />
+                <FaUndo className="icon" />
               </button>
               <div></div>
               <label htmlFor="importblacklisted">
@@ -86,14 +86,16 @@ export function App() {
                 />
                 <div className="app__btn btn btn_theme_transparent-white">
                   <span>Import blacklisted tracks</span>
-                  <FaFileImport />
+                  <FaFileImport className="icon" />
                 </div>
               </label>
             </div>
           </div>
 
           <div className="app__saved-filters">
-            <header className="app__saved-filters-header">Saved filters</header>
+            <header className="app__saved-filters-header">
+              Saved filters ({filters.state.ids.length})
+            </header>
             {filters.state.ids.map((id) => (
               <SavedFilter
                 key={
@@ -116,74 +118,79 @@ export function App() {
                 disabled={true}
               >
                 <span>Export as JSON</span>
-                <FaDownload />
+                <FaDownload className="icon" />
               </button>
             </div>
           </div>
 
-          <header className="app__playlist-header">
-            <EditableText className="app__playlist-name" text={playlist.name} />
+          <div>
+            <header className="app__playlist-header">
+              <EditableText
+                className="app__playlist-name"
+                text={playlist.name}
+              />
 
-            <div className="app__duration">
-              {toHourMinSec(
-                Object.values(playlist.tracks)
-                  .flat()
-                  .reduce((total, track) => track.duration + total, 0)
-              )}
-            </div>
-          </header>
+              <div className="app__duration">
+                {toHourMinSec(
+                  Object.values(playlist.tracks)
+                    .flat()
+                    .reduce((total, track) => track.duration + total, 0)
+                )}
+              </div>
+            </header>
 
-          {playlist.groups.length === 0 && (
-            <div className="app__btns">
-              <button
-                className="btn btn_theme_transparent-black add-section-btn"
-                onClick={() => groups.handleAdd(0, "template")}
-              >
-                <span>Add new section (using saved filters)</span>
-                <FaFileAlt />
-              </button>
-              <button
-                className="btn btn_theme_transparent-black add-section-btn"
-                onClick={() => groups.handleAdd(0, "new-filter")}
-              >
-                <span>Add new section (creating a new filter)</span>
-                <FaFilter />
-              </button>
-            </div>
-          )}
+            {playlist.groups.length === 0 && (
+              <div className="app__btns">
+                <button
+                  className="btn btn_theme_transparent-black add-section-btn"
+                  onClick={() => groups.handleAdd(0, "template")}
+                >
+                  <span>Add new section (using saved filters)</span>
+                  <FaFileAlt className="icon" />
+                </button>
+                <button
+                  className="btn btn_theme_transparent-black add-section-btn"
+                  onClick={() => groups.handleAdd(0, "new-filter")}
+                >
+                  <span>Add new section (creating a new filter)</span>
+                  <FaFilter className="icon" />
+                </button>
+              </div>
+            )}
 
-          {playlist.groups.map((groupId, index) => (
-            <Group
-              mode={playlist.groupModes[`${groupId}`]}
-              groupId={groupId}
-              key={groupId}
-              name={playlist.groupNames[`${groupId}`]}
-              onAddGroupWithTemplate={() =>
-                groups.handleAdd(index + 1, "template")
-              }
-              onAddGroupWithNewFilter={() =>
-                groups.handleAdd(index + 1, "new-filter")
-              }
-              onDeleteGroup={() => groups.handleDestroy(groupId)}
-              onRenameGroup={groups.handleRename}
-              onToggle={() => groups.toggleIsGroupOpen(groupId)}
-              onRemoveTrack={tracks.handleRemove}
-              onReplaceTrack={tracks.handleReplace}
-              onGetTrack={tracks.handleAdd}
-              onGroupReorderUp={() => groups.handleReorder(index, "UP")}
-              onGroupReorderDown={() => groups.handleReorder(index, "DOWN")}
-              onFiltersChange={tracks.handleReset}
-              isOpenGroupId={playlist.isGroupOpen}
-              years={statsQuery.data?.years.results}
-              genres={statsQuery.data?.genres.results}
-              tracks={playlist.tracks}
-              onReorderTrack={tracks.handleReorder}
-              setPlayingIndex={player.setPlayingIndex}
-              saveFilter={filters.save}
-              deleteFilter={filters.delete}
-              filters={filters.state}
-            />
-          ))}
+            {playlist.groups.map((groupId, index) => (
+              <Group
+                mode={playlist.groupModes[`${groupId}`]}
+                groupId={groupId}
+                key={groupId}
+                name={playlist.groupNames[`${groupId}`]}
+                onAddGroupWithTemplate={() =>
+                  groups.handleAdd(index + 1, "template")
+                }
+                onAddGroupWithNewFilter={() =>
+                  groups.handleAdd(index + 1, "new-filter")
+                }
+                onDeleteGroup={() => groups.handleDestroy(groupId)}
+                onRenameGroup={groups.handleRename}
+                onToggle={() => groups.toggleIsGroupOpen(groupId)}
+                onRemoveTrack={tracks.handleRemove}
+                onReplaceTrack={tracks.handleReplace}
+                onGetTrack={tracks.handleAdd}
+                onGroupReorderUp={() => groups.handleReorder(index, "UP")}
+                onGroupReorderDown={() => groups.handleReorder(index, "DOWN")}
+                onFiltersChange={tracks.handleReset}
+                isOpenGroupId={playlist.isGroupOpen}
+                years={statsQuery.data?.years.results}
+                genres={statsQuery.data?.genres.results}
+                tracks={playlist.tracks}
+                onReorderTrack={tracks.handleReorder}
+                setPlayingIndex={player.setPlayingIndex}
+                saveFilter={filters.save}
+                deleteFilter={filters.delete}
+                filters={filters.state}
+              />
+            ))}
+          </div>
 
           <nav className="app__controls app__controls_bottom">
             <button
@@ -198,7 +205,7 @@ export function App() {
               disabled={Object.values(playlist.tracks).flat().length === 0}
             >
               <span>Export as M3U</span>
-              <FaDownload />
+              <FaDownload className="icon" />
             </button>
             <button
               onClick={() =>
@@ -208,7 +215,7 @@ export function App() {
               disabled={Object.values(playlist.tracks).flat().length === 0}
             >
               <span>Export as JSON</span>
-              <FaDownload />
+              <FaDownload className="icon" />
             </button>
             <div></div>
           </nav>

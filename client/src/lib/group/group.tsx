@@ -15,6 +15,9 @@ import {
   FaMinus,
   FaFilter,
   FaFileAlt,
+  FaAngleDown,
+  FaArrowDown,
+  FaArrowUp,
 } from "react-icons/fa";
 import Select from "react-select";
 
@@ -30,9 +33,10 @@ import { EditableText } from "../../lib/editable-text/editable-text";
 import { State as EditableState } from "../../hooks/use-editable-text";
 import { Filter } from "../../hooks/use-filters";
 import { Playlist } from "../playlist/playlist";
-import { FiltersFormMemoized } from "../filters-form/filters-form";
+import { FiltersFormMemoized } from "./filters-form/filters-form";
 import { defaultValues, OPERATORS } from "../../config/constants";
 import { Stats as StatsType } from "../../types";
+import { TemplatesForm } from "./templates-form/templates-form";
 
 import "./group.scss";
 
@@ -92,9 +96,7 @@ export function Group(props: GroupProps) {
 
   const [filtersMode, setFiltersMode] = React.useState(false);
 
-  //
   // Group name
-  //
 
   const groupName = useEditableText(props.name);
 
@@ -102,9 +104,7 @@ export function Group(props: GroupProps) {
     props.onRenameGroup(props.groupId, groupName.state.text);
   }, [groupName.state.text]);
 
-  //
   // "Filter constructor" mode
-  //
 
   const {
     formState,
@@ -131,6 +131,7 @@ export function Group(props: GroupProps) {
   //
 
   const [stats, setStats] = React.useState<Stats>({ years: [], genres: [] });
+
   React.useEffect(() => {
     if (!props.genres || !props.years) return;
 
@@ -145,9 +146,7 @@ export function Group(props: GroupProps) {
     setStats({ genres, years });
   }, [props.genres, props.years]);
 
-  //
   // Reset "filter constructor" mode's state on form update
-  //
 
   // If (form has been changed) reset all tracks
   const [isFiltersChanged, setIsFiltersChanged] = React.useState(false);
@@ -166,9 +165,7 @@ export function Group(props: GroupProps) {
     }
   }, [formState]);
 
-  //
   // "Saved filters" mode
-  //
 
   const {
     control: control2,
@@ -203,19 +200,23 @@ export function Group(props: GroupProps) {
 
           <button
             onClick={props.onGroupReorderUp}
-            className="btn btn_theme_transparent-black"
+            className="btn btn_theme_transparent-black group__sort-btn"
           >
-            <FaChevronUp />
+            <FaArrowUp className="icon" />
           </button>
           <button
             onClick={props.onGroupReorderDown}
-            className="btn btn_theme_transparent-black"
+            className="btn btn_theme_transparent-black group__sort-btn"
           >
-            <FaChevronDown />
+            <FaArrowDown className="icon" />
           </button>
 
           <div className="group__toggle-group-btn" onClick={props.onToggle}>
-            {props.isOpenGroupId[`${props.groupId}`] ? <FaMinus /> : <FaPlus />}
+            {props.isOpenGroupId[`${props.groupId}`] ? (
+              <FaChevronUp className="icon" />
+            ) : (
+              <FaChevronDown className="icon" />
+            )}
           </div>
         </header>
 
@@ -241,7 +242,7 @@ export function Group(props: GroupProps) {
             )}
           </div>
           {props.mode === "template" ? (
-            <FilterTemplatesForm
+            <TemplatesForm
               handleSubmit2={handleSubmit2}
               onTemplateSubmit={onSavedFilterSubmit}
               filters={props.filters}
@@ -282,65 +283,16 @@ export function Group(props: GroupProps) {
           onClick={props.onAddGroupWithTemplate}
         >
           <span>Add new section (using saved filters)</span>
-          <FaFileAlt />
+          <FaFileAlt className="icon" />
         </button>
         <button
           className="btn btn_theme_transparent-black add-section-btn"
           onClick={props.onAddGroupWithNewFilter}
         >
           <span>Add new section (creating a new filter)</span>
-          <FaFilter />
+          <FaFilter className="icon" />
         </button>
       </div>
     </>
-  );
-}
-
-interface FilterTemplatesForm extends React.HTMLAttributes<HTMLFormElement> {
-  handleSubmit2: UseFormHandleSubmit<
-    { templateId: OptionsList<string> },
-    undefined
-  >;
-  onTemplateSubmit: (formValues: { templateId: OptionsList<string> }) => void;
-  filters: {
-    ids: string[];
-    names: Record<string, string>;
-    settings: Record<string, FormValues>;
-  };
-  register2: UseFormRegister<{
-    templateId: OptionsList<string>;
-  }>;
-  control: Control<{ templateId: OptionsList<string> }, any>;
-}
-
-function FilterTemplatesForm(props: FilterTemplatesForm) {
-  return (
-    <form
-      className={`filter-templates-form ${props.className || ""}`}
-      onSubmit={props.handleSubmit2(props.onTemplateSubmit)}
-    >
-      <Controller
-        name="templateId"
-        control={props.control}
-        render={({ field }) => (
-          <Select
-            className="filter-templates-form__select"
-            {...field}
-            options={Object.values(props.filters.ids).map((id) => {
-              return { label: props.filters.names[id], value: id };
-            })}
-          />
-        )}
-      />
-
-      <button
-        type="submit"
-        name="a"
-        disabled={false}
-        className="btn btn_theme_black filter-templates-form__find-track-btn"
-      >
-        Find a track
-      </button>
-    </form>
   );
 }

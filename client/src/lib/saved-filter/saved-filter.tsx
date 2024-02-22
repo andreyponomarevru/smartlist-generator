@@ -1,5 +1,5 @@
 import React from "react";
-import { IoIosClose } from "react-icons/io";
+import { FaRegTrashAlt } from "react-icons/fa";
 
 import { FormValues } from "../../types";
 
@@ -37,7 +37,7 @@ export function SavedFilter(props: SavedFilterProps) {
       </div>
 
       <button className="saved-filter__delete-btn" onClick={props.handleDelete}>
-        <IoIosClose />
+        <FaRegTrashAlt className="icon" />
       </button>
     </div>
   );

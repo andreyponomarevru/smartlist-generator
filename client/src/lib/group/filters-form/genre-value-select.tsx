@@ -1,9 +1,9 @@
 import React from "react";
 import { useWatch, Controller } from "react-hook-form";
 import Select from "react-select";
-import { SelectProps } from "../../types";
+import { SelectProps } from "../../../types";
 
-export function YearValueSelect(props: SelectProps<number>) {
+export function GenreValueSelect(props: SelectProps<number>) {
   const filtersWatch = useWatch({ name: "filters", control: props.control });
 
   React.useEffect(() => {
@@ -22,8 +22,8 @@ export function YearValueSelect(props: SelectProps<number>) {
       render={({ field }) => (
         <Select
           {...field}
-          closeMenuOnSelect={true}
-          isMulti={false}
+          closeMenuOnSelect={false}
+          isMulti={true}
           options={props.options}
         />
       )}

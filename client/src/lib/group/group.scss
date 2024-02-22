@@ -60,11 +60,7 @@
   }
 
   &__edit-name-btn {
-    font-size: $font-size_sm;
-  }
-
-  &__active-tab {
-    background-color: red;
+    font-size: 1.2rem;
   }
 
   &__form {
@@ -73,7 +69,6 @@
     column-gap: 1rem;
     align-items: center;
     border-radius: $border_radius_block;
-    padding: 0;
   }
 
   &__playlist {
@@ -87,7 +82,7 @@
   }
 
   &__toggle-group-btn {
-    font-size: 1rem;
+    font-size: 1.2rem;
     cursor: pointer;
     width: 2rem;
     display: flex;
@@ -96,19 +91,13 @@
     font-weight: bold;
   }
 
-  &__find-track-btn {
-    align-self: flex-end;
+  &__sort-btn {
+    font-size: 1.2rem;
   }
 
   &__new-group-form {
     display: flex;
     flex-flow: row nowrap;
-    column-gap: 1rem;
-  }
-
-  &__add-section-btns {
-    display: grid;
-    grid-template-columns: 0.5fr 0.5fr;
     column-gap: 1rem;
   }
 }
@@ -123,19 +112,5 @@
   padding: 1rem 0;
   transition: transform 0.2s ease, border 0.2s ease, color 0.2s ease,
     box-shadow 0.2s ease;
-}
-
-.filter-templates-form {
-  display: grid;
-  grid-template-columns: 1fr;
-  row-gap: 1rem;
-  justify-items: flex-start;
-
-  &__find-track-btn {
-    justify-self: flex-end;
-  }
-
-  &__select {
-    min-width: 15rem;
-  }
+  font-size: 1.2rem;
 }

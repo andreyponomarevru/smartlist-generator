@@ -1,12 +1,17 @@
-@import "../../global.scss";
+@import "../../../global.scss";
 
 .filters-form {
+  &__find-track-btn {
+    margin-top: 1rem;
+    align-self: flex-end;
+  }
+
   &__row {
     display: grid;
     width: 100%;
     grid-template-columns: auto auto auto;
     align-items: center;
-    padding: 0.5rem 0;
+    padding: 0.5rem 0 0.5rem 0;
     column-gap: 1rem;
     align-items: center;
     border-bottom: 1px solid #ccc;
@@ -36,5 +41,11 @@
   &__btn:disabled {
     border: 1px solid $color_brand_gray-10;
     color: $color_brand_gray-10;
+  }
+}
+
+.filter-templates-form {
+  &__find-track-btn {
+    padding-top: 1rem;
   }
 }

@@ -19,7 +19,7 @@ export function Sidebar(props: SidebarProps) {
       <ul className="sidebar__general-stats">
         <li className="sidebar__row">
           <span className="sidebar__stats sidebar__stats_name">
-            <FaDatabase />
+            <FaDatabase className="icon" />
             <span>init. on {new Date().toDateString()}</span>
           </span>
         </li>
