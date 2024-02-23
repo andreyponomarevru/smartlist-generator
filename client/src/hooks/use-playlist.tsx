@@ -18,7 +18,6 @@ import { useTrackIds } from "./api/use-track-ids";
 type Mode = "new-filter" | "template";
 
 type State = {
-  name: string;
   groups: number[];
   groupNames: Record<string, string>;
   groupModes: Record<string, Mode>;
@@ -237,7 +236,6 @@ function playlistReducer(state: State, action: Action): State {
 
 export function usePlaylist() {
   const initialState: State = {
-    name: `Playlist ${new Date().toDateString()}`,
     groups: [],
     groupNames: {},
     groupModes: {},
@@ -247,7 +245,7 @@ export function usePlaylist() {
   };
 
   const [state, dispatch] = React.useReducer(playlistReducer, initialState);
-  const playlistName = useEditableText(state.name);
+  const playlistName = useEditableText(`Playlist ${new Date().toDateString()}`);
   const trackQuery = useTrack();
   const trackIdsQuery = useTrackIds();
 

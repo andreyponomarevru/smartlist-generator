@@ -7,7 +7,7 @@ import { State } from "../../hooks/use-editable-text";
 import "./editable-text.scss";
 
 interface EditableTextProps extends React.HTMLAttributes<HTMLFormElement> {
-  text: {
+  editable: {
     state: State;
     handleEdit: () => void;
     handleCancelEditing: () => void;
@@ -19,7 +19,7 @@ interface EditableTextProps extends React.HTMLAttributes<HTMLFormElement> {
 export function EditableText(props: EditableTextProps) {
   return (
     <div className="editable-text">
-      {props.text.state.isFormVisible ? (
+      {props.editable.state.isFormVisible ? (
         <form className={`editable-text__form ${props.className || ""}`}>
           <label className="editable-text__label" htmlFor="editable-text" />
           <input
@@ -31,18 +31,28 @@ export function EditableText(props: EditableTextProps) {
             name="editable-text"
             autoComplete="off"
             placeholder="Type a new name..."
-            value={props.text.state.inputValue}
-            onChange={props.text.handleInputChange}
+            value={props.editable.state.inputValue}
+            onChange={(e) => {
+              e.stopPropagation();
+              props.editable.handleInputChange(e);
+            }}
+            onClick={(e) => e.stopPropagation()}
           />
           <button
             className="btn btn_theme_black"
-            onClick={props.text.handleSave}
+            onClick={(e) => {
+              e.stopPropagation();
+              props.editable.handleSave();
+            }}
           >
             Save
           </button>
           <button
             className="btn btn_theme_black"
-            onClick={props.text.handleCancelEditing}
+            onClick={(e) => {
+              e.stopPropagation();
+              props.editable.handleCancelEditing();
+            }}
           >
             Cancel
           </button>
@@ -50,9 +60,14 @@ export function EditableText(props: EditableTextProps) {
       ) : (
         <span
           className={`editable-text ${props.className || ""}`}
-          onClick={props.text.handleEdit}
+          onClick={(e) => {
+            e.stopPropagation();
+            props.editable.handleEdit();
+          }}
         >
-          <span className={`editable-text__name`}>{props.text.state.text}</span>
+          <span className={`editable-text__name`}>
+            {props.editable.state.text}
+          </span>
           <span className="editable-text__edit-btn">
             <FaPen />
           </span>
