@@ -26,13 +26,17 @@ export type OptionsList<Value> = {
   value: Value;
 };
 
-export interface FormValues {
+export interface FilterFormValues {
   operator: { label: string; value: string };
   filters: {
     name: { label: string; value: string };
     condition?: { label: string; value: string };
     value?: OptionsList<number> | OptionsList<number>[];
   }[];
+}
+
+export interface TemplateFormValues {
+  templateId: OptionsList<string>;
 }
 
 //
@@ -62,9 +66,9 @@ export type FindTrackIdsRes = { results: number[] };
 
 export type SelectProps<OptionsValue> = {
   name?: string;
-  control: Control<FormValues>;
+  control: Control<FilterFormValues>;
   index: number;
-  resetField: UseFormResetField<FormValues>;
+  resetField: UseFormResetField<FilterFormValues>;
   options: OptionsList<OptionsValue>[];
   defaultValue?: OptionsList<OptionsValue>;
 };

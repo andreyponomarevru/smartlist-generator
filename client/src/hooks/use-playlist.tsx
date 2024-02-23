@@ -1,5 +1,10 @@
 import React from "react";
-import { TrackMeta, FormValues, APIResponse, GetTrackRes } from "../types";
+import {
+  TrackMeta,
+  FilterFormValues,
+  APIResponse,
+  GetTrackRes,
+} from "../types";
 import {
   API_ROOT_URL,
   LOCAL_MUSIC_LIB_DIR,
@@ -278,7 +283,7 @@ export function usePlaylist() {
   async function handleReplaceTrack(
     groupId: number,
     trackId: number,
-    formValues: FormValues
+    formValues: FilterFormValues
   ) {
     try {
       const track = await trackQuery.mutateAsync(
@@ -298,7 +303,7 @@ export function usePlaylist() {
     }
   }
 
-  async function handleAddTrack(groupId: number, formValues: FormValues) {
+  async function handleAddTrack(groupId: number, formValues: FilterFormValues) {
     try {
       const track = await trackQuery.mutateAsync(
         buildSearchQuery(formValues, [

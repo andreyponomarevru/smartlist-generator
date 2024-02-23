@@ -1,20 +1,20 @@
 import React from "react";
 
-import { FormValues } from "../types";
+import { FilterFormValues } from "../types";
 import { useLocalStorage } from "./use-local-storage";
 
-export type Filter = { id: string; name: string; settings: FormValues };
+export type Filter = { id: string; name: string; settings: FilterFormValues };
 
 type State = {
   ids: string[];
   names: Record<string, string>;
-  settings: Record<string, FormValues>;
+  settings: Record<string, FilterFormValues>;
 };
 
 type Action =
   | {
       type: "SAVE";
-      payload: { id: string; name: string; settings: FormValues };
+      payload: { id: string; name: string; settings: FilterFormValues };
     }
   | { type: "DELETE"; payload: { id: string } };
 

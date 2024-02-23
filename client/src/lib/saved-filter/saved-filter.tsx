@@ -1,13 +1,13 @@
 import React from "react";
 import { FaRegTrashAlt } from "react-icons/fa";
 
-import { FormValues } from "../../types";
+import { FilterFormValues } from "../../types";
 
 import "./saved-filter.scss";
 
 interface SavedFilterProps extends React.HTMLAttributes<HTMLDivElement> {
   name: string;
-  filtersGroup: FormValues;
+  filtersGroup: FilterFormValues;
   handleDelete: () => void;
 }
 
