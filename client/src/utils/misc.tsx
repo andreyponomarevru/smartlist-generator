@@ -1,4 +1,4 @@
-import { FormValues, TrackMeta, SearchQuery } from "../types";
+import { FilterFormValues, TrackMeta, SearchQuery } from "../types";
 
 export function toHourMinSec(sec: number) {
   let hms = new Date(sec * 1000).toISOString().substr(11, 8).split(":");
@@ -7,10 +7,10 @@ export function toHourMinSec(sec: number) {
 }
 
 export function buildSearchQuery(
-  formValues: FormValues,
+  formValues: FilterFormValues,
   excludedTracks: number[]
 ) {
-  function buildFilters(filters: FormValues["filters"]) {
+  function buildFilters(filters: FilterFormValues["filters"]) {
     // When there is only a single value selected in React-select multiselect dropdown, it is submitted as { label: string, value: object} , instead of as object inside an array ([ { label: string, value: object } ]).
     // Here we wrap it in array, to keep it consistent.
     const withFixedValueKey = filters.map((filter) => {
