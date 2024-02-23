@@ -39,6 +39,10 @@ export function App() {
   const filters = useFilters();
   const statsQuery = useStats(playlist.excludedTracks);
 
+  React.useEffect(() => {
+    console.log("tracks state: ", playlist.tracks);
+  }, [playlist.tracks]);
+
   //
 
   const player = usePlayer(playlist.tracks);

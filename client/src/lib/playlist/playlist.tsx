@@ -9,12 +9,20 @@ import {
 } from "react-icons/fa";
 
 import { toHourMinSec } from "../../utils/misc";
-import { FormValues, TrackMeta } from "../../types";
+import {
+  FilterFormValues,
+  TrackMeta,
+  OptionsList,
+  TemplateFormValues,
+} from "../../types";
 
 import "./playlist.scss";
 
 interface PlaylistProps extends React.HTMLAttributes<HTMLDivElement> {
-  handleSubmit: UseFormHandleSubmit<FormValues, undefined>;
+  handleSubmit: UseFormHandleSubmit<
+    FilterFormValues | TemplateFormValues,
+    undefined
+  >;
   groupId: number;
   tracks: Record<string, TrackMeta[]>;
   setPlayingIndex: ({
@@ -32,9 +40,11 @@ interface PlaylistProps extends React.HTMLAttributes<HTMLDivElement> {
   onReplaceTrack: (
     groupId: number,
     trackId: number,
-    formValues: FormValues
+    formValues: FilterFormValues
   ) => void;
   onRemoveTrack: (groupId: number, trackId: number) => void;
+
+  template?: FilterFormValues;
 }
 
 export function Playlist(props: PlaylistProps) {
@@ -97,8 +107,18 @@ export function Playlist(props: PlaylistProps) {
             <div className="track__controls">
               <button
                 name="b"
-                onClick={props.handleSubmit((e) =>
-                  props.onReplaceTrack(props.groupId, track.trackId, e)
+                onClick={props.handleSubmit(
+                  (e: FilterFormValues | TemplateFormValues) => {
+                    if ("templateId" in e && props.template) {
+                      props.onReplaceTrack(
+                        props.groupId,
+                        track.trackId,
+                        props.template
+                      );
+                    } else if ("filters" in e) {
+                      props.onReplaceTrack(props.groupId, track.trackId, e);
+                    }
+                  }
                 )}
                 type="submit"
                 form={`filter-form-${props.groupId}`}
@@ -115,15 +135,6 @@ export function Playlist(props: PlaylistProps) {
               >
                 <FaMinus />
               </span>
-              <button
-                name="a"
-                type="submit"
-                form={`filter-form-${props.groupId}`}
-                disabled={false}
-                className="btn btn_theme_black track__btn"
-              >
-                <FaPlus />
-              </button>
             </div>
           </li>
         );

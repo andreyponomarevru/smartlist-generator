@@ -22,7 +22,7 @@ import {
 import Select from "react-select";
 
 import {
-  FormValues,
+  FilterFormValues,
   TrackMeta,
   OptionsList,
   GetStatsRes,
@@ -33,7 +33,7 @@ import { EditableText } from "../../lib/editable-text/editable-text";
 import { State as EditableState } from "../../hooks/use-editable-text";
 import { Filter } from "../../hooks/use-filters";
 import { Playlist } from "../playlist/playlist";
-import { FiltersFormMemoized } from "./filters-form/filters-form";
+import { FiltersForm } from "./filters-form/filters-form";
 import { defaultValues, OPERATORS } from "../../config/constants";
 import { Stats as StatsType } from "../../types";
 import { TemplatesForm } from "./templates-form/templates-form";
@@ -52,12 +52,17 @@ interface GroupProps extends React.HTMLAttributes<HTMLDivElement> {
   onAddGroupWithNewFilter: () => void;
   onDeleteGroup: () => void;
   onRenameGroup: (groupId: number, newName: string) => void;
-  onGetTrack: (groupId: number, formValues: FormValues) => void;
+  onGetTrack: (groupId: number, formValues: FilterFormValues) => void;
   onRemoveTrack: (groupId: number, trackId: number) => void;
   onReplaceTrack: (
     groupId: number,
     trackId: number,
-    formValues: FormValues
+    formValues: FilterFormValues
+  ) => void;
+  onReorderTrack: (
+    index: number,
+    direction: "UP" | "DOWN",
+    groupId: number
   ) => void;
   onFiltersChange: (groupId: number) => void;
   onGroupReorderUp: () => void;
@@ -70,32 +75,19 @@ interface GroupProps extends React.HTMLAttributes<HTMLDivElement> {
     index: number;
   }) => void;
   tracks: Record<string, TrackMeta[]>;
-  onReorderTrack: (
-    index: number,
-    direction: "UP" | "DOWN",
-    groupId: number
-  ) => void;
   saveFilter: ({ id, name, settings }: Filter) => void;
   deleteFilter: (name: string) => void;
   filters: {
     ids: string[];
     names: Record<string, string>;
-    settings: Record<string, FormValues>;
+    settings: Record<string, FilterFormValues>;
   };
 }
 
 let renderCount = 0;
 
-type Stats = {
-  years: OptionsList<number>[];
-  genres: OptionsList<number>[];
-};
-
 export function Group(props: GroupProps) {
   // console.log(renderCount++);
-
-  const [filtersMode, setFiltersMode] = React.useState(false);
-
   // Group name
 
   const groupName = useEditableText(props.name);
@@ -103,88 +95,6 @@ export function Group(props: GroupProps) {
   React.useEffect(() => {
     props.onRenameGroup(props.groupId, groupName.state.text);
   }, [groupName.state.text]);
-
-  // "Filter constructor" mode
-
-  const {
-    formState,
-    control,
-    register,
-    handleSubmit,
-    resetField,
-    reset,
-    setValue,
-    watch,
-  } = useForm<FormValues>({
-    defaultValues,
-    mode: "onSubmit",
-    shouldUnregister: false,
-  });
-
-  const { fields, remove, insert } = useFieldArray({
-    control,
-    name: "filters",
-  });
-
-  const watchedNewFilters = watch();
-
-  //
-
-  const [stats, setStats] = React.useState<Stats>({ years: [], genres: [] });
-
-  React.useEffect(() => {
-    if (!props.genres || !props.years) return;
-
-    const genres: OptionsList<number>[] = [...props.genres]
-      .sort((a, b) => a.name.localeCompare(b.name))
-      .map((g) => ({ value: g.id as number, label: g.name }));
-
-    const years: OptionsList<number>[] = [...props.years]
-      .sort((a, b) => parseInt(b.name) - parseInt(a.name))
-      .map((y) => ({ value: parseInt(y.name), label: String(y.name) }));
-
-    setStats({ genres, years });
-  }, [props.genres, props.years]);
-
-  // Reset "filter constructor" mode's state on form update
-
-  // If (form has been changed) reset all tracks
-  const [isFiltersChanged, setIsFiltersChanged] = React.useState(false);
-  React.useEffect(() => {
-    if (formState.isDirty) {
-      setIsFiltersChanged(true);
-      props.onFiltersChange(props.groupId);
-    } else {
-      setIsFiltersChanged(false);
-    }
-  }, [formState]);
-
-  React.useEffect(() => {
-    if (isFiltersChanged) {
-      reset(undefined, { keepValues: true, keepDirty: false });
-    }
-  }, [formState]);
-
-  // "Saved filters" mode
-
-  const {
-    control: control2,
-    register: register2,
-    handleSubmit: handleSubmit2,
-  } = useForm<{ templateId: OptionsList<string> }>({
-    defaultValues: { templateId: { value: "", label: "" } },
-    mode: "onSubmit",
-    shouldUnregister: false,
-  });
-
-  function onSavedFilterSubmit(formValues: {
-    templateId: OptionsList<string>;
-  }) {
-    props.onGetTrack(
-      props.groupId,
-      props.filters.settings[formValues.templateId.value]
-    );
-  }
 
   return (
     <>
@@ -225,56 +135,35 @@ export function Group(props: GroupProps) {
             props.isOpenGroupId[`${props.groupId}`] ? "" : "group__body_hidden"
           }`}
         >
-          <div className="group__tabs group__btns">
-            {props.mode === "template" ? null : (
-              <button
-                className="btn btn_theme_transparent-black group__save-filter-btn"
-                onClick={() => {
-                  props.saveFilter({
-                    id: JSON.stringify(watchedNewFilters),
-                    name: groupName.state.text,
-                    settings: watchedNewFilters,
-                  });
-                }}
-              >
-                Save filter
-              </button>
-            )}
-          </div>
           {props.mode === "template" ? (
             <TemplatesForm
-              handleSubmit2={handleSubmit2}
-              onTemplateSubmit={onSavedFilterSubmit}
+              groupId={props.groupId}
               filters={props.filters}
-              register2={register2}
-              control={control2}
+              onGetTrack={props.onGetTrack}
+              setPlayingIndex={props.setPlayingIndex}
+              tracks={props.tracks}
+              onRemoveTrack={props.onRemoveTrack}
+              onReplaceTrack={props.onReplaceTrack}
+              onReorderTrack={props.onReorderTrack}
+              onFiltersChange={props.onFiltersChange}
             />
           ) : (
-            <FiltersFormMemoized
+            <FiltersForm
               groupId={props.groupId}
-              register={register}
-              insert={insert}
-              remove={remove}
-              handleSubmit={handleSubmit}
+              name={groupName.state.text}
               onGetTrack={props.onGetTrack}
-              control={control}
-              resetField={resetField}
-              fields={fields}
-              setValue={setValue}
-              stats={stats}
+              years={props.years}
+              genres={props.genres}
+              onFiltersChange={props.onFiltersChange}
+              saveFilter={props.saveFilter}
+              setPlayingIndex={props.setPlayingIndex}
+              tracks={props.tracks}
+              onRemoveTrack={props.onRemoveTrack}
+              onReplaceTrack={props.onReplaceTrack}
+              onReorderTrack={props.onReorderTrack}
               className="group__form"
             />
           )}
-          <Playlist
-            className="group__playlist"
-            handleSubmit={handleSubmit}
-            tracks={props.tracks}
-            groupId={props.groupId}
-            setPlayingIndex={props.setPlayingIndex}
-            onReorderTrack={props.onReorderTrack}
-            onReplaceTrack={props.onReplaceTrack}
-            onRemoveTrack={props.onRemoveTrack}
-          />
         </div>
       </div>
       <div className="app__btns">

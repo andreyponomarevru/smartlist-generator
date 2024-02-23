@@ -4,58 +4,114 @@ import {
   UseFormRegister,
   Controller,
   Control,
+  useForm,
 } from "react-hook-form";
 import Select from "react-select";
 
-import { FormValues, OptionsList } from "../../../types";
+import { FilterFormValues, OptionsList, TrackMeta } from "../../../types";
+import { Playlist } from "../../playlist/playlist";
 
 import "./templates-form.scss";
 
 interface TemplatesForm extends React.HTMLAttributes<HTMLFormElement> {
-  handleSubmit2: UseFormHandleSubmit<
-    { templateId: OptionsList<string> },
-    undefined
-  >;
-  onTemplateSubmit: (formValues: { templateId: OptionsList<string> }) => void;
+  groupId: number;
   filters: {
     ids: string[];
     names: Record<string, string>;
-    settings: Record<string, FormValues>;
+    settings: Record<string, FilterFormValues>;
   };
-  register2: UseFormRegister<{
-    templateId: OptionsList<string>;
-  }>;
-  control: Control<{ templateId: OptionsList<string> }, any>;
+  onGetTrack: (groupId: number, formValues: FilterFormValues) => void;
+  onFiltersChange: (groupId: number) => void;
+
+  // Playlist props
+  setPlayingIndex: ({
+    groupId,
+    index,
+  }: {
+    groupId: number;
+    index: number;
+  }) => void;
+  tracks: Record<string, TrackMeta[]>;
+  onRemoveTrack: (groupId: number, trackId: number) => void;
+  onReplaceTrack: (
+    groupId: number,
+    trackId: number,
+    formValues: FilterFormValues
+  ) => void;
+  onReorderTrack: (
+    index: number,
+    direction: "UP" | "DOWN",
+    groupId: number
+  ) => void;
 }
 
 export function TemplatesForm(props: TemplatesForm) {
-  return (
-    <form
-      className={`templates-form ${props.className || ""}`}
-      onSubmit={props.handleSubmit2(props.onTemplateSubmit)}
-    >
-      <Controller
-        name="templateId"
-        control={props.control}
-        render={({ field }) => (
-          <Select
-            className="templates-form__select"
-            {...field}
-            options={Object.values(props.filters.ids).map((id) => {
-              return { label: props.filters.names[id], value: id };
-            })}
-          />
-        )}
-      />
+  const { control, handleSubmit, watch } = useForm<{
+    templateId: OptionsList<string>;
+  }>({
+    defaultValues: { templateId: { value: "", label: "" } },
+    mode: "onSubmit",
+    shouldUnregister: false,
+  });
 
-      <button
-        type="submit"
-        name="a"
-        disabled={false}
-        className="btn btn_theme_black templates-form__find-track-btn"
+  const watchedSelect = watch();
+
+  React.useEffect(() => {
+    props.onFiltersChange(props.groupId);
+  }, [watchedSelect.templateId]);
+
+  function onSavedFilterSubmit(formValues: {
+    templateId: OptionsList<string>;
+  }) {
+    props.onGetTrack(
+      props.groupId,
+      props.filters.settings[formValues.templateId.value]
+    );
+  }
+
+  // props.onReplaceTrackprops.groupId, track.trackId, props.template);
+
+  return (
+    <>
+      <form
+        className={`templates-form ${props.className || ""}`}
+        onSubmit={handleSubmit(onSavedFilterSubmit)}
       >
-        Find a track
-      </button>
-    </form>
+        <Controller
+          name="templateId"
+          control={control}
+          render={({ field }) => (
+            <Select
+              className="templates-form__select"
+              {...field}
+              options={Object.values(props.filters.ids).map((id) => {
+                return { label: props.filters.names[id], value: id };
+              })}
+            />
+          )}
+        />
+
+        <button
+          type="submit"
+          name="a"
+          disabled={false}
+          className="btn btn_theme_black templates-form__find-track-btn"
+        >
+          Find a track
+        </button>
+      </form>
+
+      <Playlist
+        className="group__playlist"
+        handleSubmit={handleSubmit}
+        tracks={props.tracks}
+        groupId={props.groupId}
+        setPlayingIndex={props.setPlayingIndex}
+        onReorderTrack={props.onReorderTrack}
+        onReplaceTrack={props.onReplaceTrack}
+        onRemoveTrack={props.onRemoveTrack}
+        template={props.filters.settings[watchedSelect.templateId.value]}
+      />
+    </>
   );
 }
