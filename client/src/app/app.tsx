@@ -26,7 +26,7 @@ import { usePlaylist } from "../hooks/use-playlist";
 import { usePlayer } from "../hooks/use-player";
 import { Controls } from "./controls/controls";
 import { toHourMinSec } from "../utils/misc";
-import { useFilters } from "../hooks/use-filters";
+import { useTemplates } from "../hooks/use-templates";
 import { SavedFilter } from "../lib/saved-filter/saved-filter";
 import { useStats } from "../hooks/api/use-stats";
 import { Loader } from "../lib/loader/loader";
@@ -36,15 +36,8 @@ import "./app.scss";
 
 export function App() {
   const { playlist, groups, tracks } = usePlaylist();
-  const filters = useFilters();
+  const filters = useTemplates();
   const statsQuery = useStats(playlist.excludedTracks);
-
-  React.useEffect(() => {
-    console.log("tracks state: ", playlist.tracks);
-  }, [playlist.tracks]);
-
-  //
-
   const player = usePlayer(playlist.tracks);
 
   if (statsQuery.isLoading) return <Loader for="page" color="pink" />;
@@ -102,12 +95,12 @@ export function App() {
             </header>
             {filters.state.ids.map((id) => (
               <SavedFilter
-                key={
-                  id + JSON.stringify(filters.state.names[`${id}`]) + Date.now()
-                }
+                key={JSON.stringify(filters.state.names[`${id}`]) + Date.now()}
+                templateId={id}
                 name={filters.state.names[id]}
-                filtersGroup={filters.state.settings[`${id}`]}
-                handleDelete={() => filters.delete(id)}
+                template={filters.state.settings[`${id}`]}
+                handleDestroyTemplate={() => filters.handleDestroy(id)}
+                handleRenameTemplate={filters.handleRename}
               />
             ))}
             <div>
@@ -131,7 +124,7 @@ export function App() {
             <header className="app__playlist-header">
               <EditableText
                 className="app__playlist-name"
-                text={playlist.name}
+                editable={playlist.name}
               />
 
               <div className="app__duration">
@@ -189,8 +182,8 @@ export function App() {
                 tracks={playlist.tracks}
                 onReorderTrack={tracks.handleReorder}
                 setPlayingIndex={player.setPlayingIndex}
-                saveFilter={filters.save}
-                deleteFilter={filters.delete}
+                saveFilter={filters.handleSave}
+                deleteFilter={filters.handleDestroy}
                 filters={filters.state}
               />
             ))}

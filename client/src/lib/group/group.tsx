@@ -31,7 +31,7 @@ import {
 import { useEditableText } from "../../hooks/use-editable-text";
 import { EditableText } from "../../lib/editable-text/editable-text";
 import { State as EditableState } from "../../hooks/use-editable-text";
-import { Filter } from "../../hooks/use-filters";
+import { Filter } from "../../hooks/use-templates";
 import { Playlist } from "../playlist/playlist";
 import { FiltersForm } from "./filters-form/filters-form";
 import { defaultValues, OPERATORS } from "../../config/constants";
@@ -88,19 +88,20 @@ let renderCount = 0;
 
 export function Group(props: GroupProps) {
   // console.log(renderCount++);
-  // Group name
 
   const groupName = useEditableText(props.name);
 
   React.useEffect(() => {
-    props.onRenameGroup(props.groupId, groupName.state.text);
+    if (groupName.state.text !== props.name) {
+      props.onRenameGroup(props.groupId, groupName.state.text);
+    }
   }, [groupName.state.text]);
 
   return (
     <>
       <div className={`group ${props.className || ""}`}>
         <header className="group__header">
-          <EditableText className="group__name" text={groupName} />
+          <EditableText className="group__name" editable={groupName} />
           <button
             onClick={props.onDeleteGroup}
             className="btn btn_theme_transparent-black"
@@ -150,7 +151,7 @@ export function Group(props: GroupProps) {
           ) : (
             <FiltersForm
               groupId={props.groupId}
-              name={groupName.state.text}
+              name={"groupName.state.text"}
               onGetTrack={props.onGetTrack}
               years={props.years}
               genres={props.genres}

@@ -27,7 +27,7 @@ import { YearValueSelect } from "./year-value-select";
 import { GenreValueSelect } from "./genre-value-select";
 import { defaultValues } from "../../../config/constants";
 import { Stats as StatsType } from "../../../types";
-import { Filter } from "../../../hooks/use-filters";
+import { Filter } from "../../../hooks/use-templates";
 import { Playlist } from "../../playlist/playlist";
 
 import "./filters-form.scss";
@@ -136,17 +136,6 @@ export function FiltersForm(props: FiltersFormProps) {
     props.onGetTrack(groupId, formValues);
   }
 
-  /*
-
-(e: FilterFormValues | TemplateFormValues) => {
-                    if ("templateId" in e) {
-                      props.onReplaceTrackprops.groupId, track.trackId, props.template);
-                    //
-                    } else if ("filters" in e) {
-                      
-                    }
-                  }
-*/
   return (
     <>
       <div className="group__tabs group__btns">

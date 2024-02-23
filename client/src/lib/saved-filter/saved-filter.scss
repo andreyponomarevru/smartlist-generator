@@ -2,7 +2,8 @@
 
 .saved-filter {
   display: grid;
-  grid-template-columns: 12% 2rem 1fr 2rem;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto;
   align-items: flex-start;
   background-color: $color_gray-lightest;
   align-content: flex-start;
@@ -10,16 +11,22 @@
   border-radius: $border_radius_block;
   font-size: $font-size_sm;
   column-gap: 1rem;
-  font-size: $font-size_sm;
   width: 100%;
   text-overflow: ellipsis;
   background-color: white;
   box-shadow: 0px 0px 1rem $color_gray-lighten;
+  row-gap: 0.5rem;
 
   &__name {
+    display: flex;
+    flex-flow: row nowrap;
     font-weight: bold;
     overflow: hidden;
     text-overflow: ellipsis;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-size: $font-size_h5;
   }
 
   &__body {
