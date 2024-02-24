@@ -26,7 +26,7 @@ import { usePlaylist } from "../hooks/use-playlist";
 import { usePlayer } from "../hooks/use-player";
 import { Controls } from "./controls/controls";
 import { toHourMinSec } from "../utils/misc";
-import { useTemplates } from "../hooks/use-templates";
+import { useSavedFilters } from "../hooks/use-saved-filters";
 import { SavedFilter } from "../lib/saved-filter/saved-filter";
 import { useStats } from "../hooks/api/use-stats";
 import { Loader } from "../lib/loader/loader";
@@ -36,7 +36,7 @@ import "./app.scss";
 
 export function App() {
   const { playlist, groups, tracks } = usePlaylist();
-  const filters = useTemplates();
+  const filters = useSavedFilters();
   const statsQuery = useStats(playlist.excludedTracks);
   const player = usePlayer(playlist.tracks);
 
@@ -96,11 +96,11 @@ export function App() {
             {filters.state.ids.map((id) => (
               <SavedFilter
                 key={JSON.stringify(filters.state.names[`${id}`]) + Date.now()}
-                templateId={id}
+                savedFilterId={id}
                 name={filters.state.names[id]}
-                template={filters.state.settings[`${id}`]}
-                handleDestroyTemplate={() => filters.handleDestroy(id)}
-                handleRenameTemplate={filters.handleRename}
+                filter={filters.state.settings[`${id}`]}
+                handleDestroy={() => filters.handleDestroy(id)}
+                handleRename={filters.handleRename}
               />
             ))}
             <div>

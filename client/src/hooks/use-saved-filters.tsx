@@ -1,8 +1,6 @@
 import React from "react";
 
 import { FilterFormValues } from "../types";
-import { useLocalStorage } from "./use-local-storage";
-import { useEditableText } from "./use-editable-text";
 
 export type Filter = { id: string; name: string; settings: FilterFormValues };
 
@@ -20,7 +18,7 @@ type Action =
   | { type: "DELETE"; payload: { id: string } }
   | { type: "RENAME"; payload: { id: string; newName: string } };
 
-function templateReducer(state: State, action: Action): State {
+function savedFiltersReducer(state: State, action: Action): State {
   switch (action.type) {
     case "SAVE": {
       if (state.ids.includes(action.payload.id)) return state;
@@ -65,7 +63,7 @@ function templateReducer(state: State, action: Action): State {
   }
 }
 
-export function useTemplates() {
+export function useSavedFilters() {
   const initialState: State = { ids: [], names: {}, settings: {} };
 
   function getInitialState() {
@@ -74,7 +72,7 @@ export function useTemplates() {
   }
 
   const [state, dispatch] = React.useReducer(
-    templateReducer,
+    savedFiltersReducer,
     initialState,
     getInitialState
   );

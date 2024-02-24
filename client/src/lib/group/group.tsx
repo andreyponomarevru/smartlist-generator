@@ -1,40 +1,18 @@
 import React from "react";
 import {
-  useForm,
-  useFieldArray,
-  UseFormHandleSubmit,
-  UseFormRegister,
-  Controller,
-  Control,
-  UseFormReset,
-} from "react-hook-form";
-import {
   FaChevronUp,
   FaChevronDown,
-  FaPlus,
-  FaMinus,
   FaFilter,
   FaFileAlt,
-  FaAngleDown,
   FaArrowDown,
   FaArrowUp,
 } from "react-icons/fa";
-import Select from "react-select";
 
-import {
-  FilterFormValues,
-  TrackMeta,
-  OptionsList,
-  GetStatsRes,
-  APIResponse,
-} from "../../types";
+import { FilterFormValues, TrackMeta } from "../../types";
 import { useEditableText } from "../../hooks/use-editable-text";
 import { EditableText } from "../../lib/editable-text/editable-text";
-import { State as EditableState } from "../../hooks/use-editable-text";
-import { Filter } from "../../hooks/use-templates";
-import { Playlist } from "../playlist/playlist";
+import { Filter } from "../../hooks/use-saved-filters";
 import { FiltersForm } from "./filters-form/filters-form";
-import { defaultValues, OPERATORS } from "../../config/constants";
 import { Stats as StatsType } from "../../types";
 import { TemplatesForm } from "./templates-form/templates-form";
 

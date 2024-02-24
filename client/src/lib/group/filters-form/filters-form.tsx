@@ -27,7 +27,7 @@ import { YearValueSelect } from "./year-value-select";
 import { GenreValueSelect } from "./genre-value-select";
 import { defaultValues } from "../../../config/constants";
 import { Stats as StatsType } from "../../../types";
-import { Filter } from "../../../hooks/use-templates";
+import { Filter } from "../../../hooks/use-saved-filters";
 import { Playlist } from "../../playlist/playlist";
 
 import "./filters-form.scss";
