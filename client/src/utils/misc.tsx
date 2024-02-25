@@ -1,4 +1,6 @@
 import { FilterFormValues, TrackMeta, SearchQuery } from "../types";
+import { MUSIC_LIB_DIR } from "../config/env";
+import { LOCAL_MUSIC_LIB_DIR } from "../config/env";
 
 export function toHourMinSec(sec: number) {
   let hms = new Date(sec * 1000).toISOString().substr(11, 8).split(":");
@@ -93,4 +95,34 @@ export function encodeRFC3986URIComponent(str: string) {
     /[!'()*]/g,
     (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`
   );
+}
+
+export function m3uToFilePaths(m3u: string) {
+  const m3uStrings = m3u.split("\n");
+  const filePaths: string[] = [];
+
+  for (let i = 3; i < m3uStrings.length; i++) {
+    const filePath =
+      MUSIC_LIB_DIR +
+      decodeURIComponent(m3uStrings[i])
+        .replace("file://", "")
+        .replace(LOCAL_MUSIC_LIB_DIR, "");
+    filePaths.push(filePath);
+  }
+
+  return filePaths;
+}
+
+export function readFileAsString(file: File): Promise<string> {
+  return new Promise(function (resolve, reject) {
+    let fr = new FileReader();
+
+    fr.onload = (e) => {
+      const fileContent = e.target?.result;
+      if (typeof fileContent === "string") resolve(fileContent);
+      else reject("File content is not a text");
+    };
+    fr.onerror = () => reject(fr);
+    fr.readAsText(file, "UTF-8");
+  });
 }
