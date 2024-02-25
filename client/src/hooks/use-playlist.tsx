@@ -1,16 +1,10 @@
 import React from "react";
+import { TrackMeta, FilterFormValues } from "../types";
 import {
-  TrackMeta,
-  FilterFormValues,
-  APIResponse,
-  GetTrackRes,
-} from "../types";
-import {
-  API_ROOT_URL,
-  LOCAL_MUSIC_LIB_DIR,
-  MUSIC_LIB_DIR,
-} from "../config/env";
-import { buildSearchQuery } from "../utils/misc";
+  buildSearchQuery,
+  m3uToFilePaths,
+  readFileAsString,
+} from "../utils/misc";
 import { useEditableText } from "./use-editable-text";
 import { useTrack } from "./api/use-track";
 import { useTrackIds } from "./api/use-track-ids";
@@ -22,7 +16,7 @@ type State = {
   groupNames: Record<string, string>;
   groupModes: Record<string, Mode>;
   tracks: Record<string, TrackMeta[]>;
-  excludedTracks: number[];
+  excludedTracks: Set<number>;
   isGroupOpen: Record<string, boolean>;
 };
 type Action =
@@ -170,7 +164,10 @@ function playlistReducer(state: State, action: Action): State {
         groups: [],
         groupNames: {},
         tracks: {},
-        excludedTracks: action.payload.trackIds,
+        excludedTracks: new Set([
+          ...state.excludedTracks,
+          ...action.payload.trackIds,
+        ]),
         isGroupOpen: {},
         groupModes: {},
       };
@@ -240,14 +237,37 @@ export function usePlaylist() {
     groupNames: {},
     groupModes: {},
     tracks: {},
-    excludedTracks: [],
+    excludedTracks: new Set<number>(),
     isGroupOpen: {},
   };
 
-  const [state, dispatch] = React.useReducer(playlistReducer, initialState);
+  function getInitialState() {
+    const savedExcludedTracks = localStorage.getItem("excludedTracks");
+    if (savedExcludedTracks !== null) {
+      return {
+        ...initialState,
+        excludedTracks: JSON.parse(savedExcludedTracks),
+      };
+    } else {
+      return initialState;
+    }
+  }
+
+  const [state, dispatch] = React.useReducer(
+    playlistReducer,
+    initialState,
+    getInitialState
+  );
   const playlistName = useEditableText(`Playlist ${new Date().toDateString()}`);
-  const trackQuery = useTrack();
-  const trackIdsQuery = useTrackIds();
+  const getTrackQuery = useTrack();
+  const getTrackIdsQuery = useTrackIds();
+
+  React.useEffect(() => {
+    localStorage.setItem(
+      "excludedTracks",
+      JSON.stringify([...state.excludedTracks])
+    );
+  }, [state.excludedTracks]);
 
   function handleAddGroup(insertAt: number, mode: Mode) {
     dispatch({ type: "ADD_GROUP", payload: { insertAt, mode } });
@@ -284,7 +304,7 @@ export function usePlaylist() {
     formValues: FilterFormValues
   ) {
     try {
-      const track = await trackQuery.mutateAsync(
+      const track = await getTrackQuery.mutateAsync(
         buildSearchQuery(formValues, [
           ...Object.values(state.tracks)
             .flat()
@@ -297,13 +317,13 @@ export function usePlaylist() {
         payload: { groupId, trackId, newTrack: track },
       });
     } catch (err) {
-      console.error(trackQuery.error);
+      console.error(getTrackQuery.error);
     }
   }
 
   async function handleAddTrack(groupId: number, formValues: FilterFormValues) {
     try {
-      const track = await trackQuery.mutateAsync(
+      const track = await getTrackQuery.mutateAsync(
         buildSearchQuery(formValues, [
           ...Object.values(state.tracks)
             .flat()
@@ -317,28 +337,31 @@ export function usePlaylist() {
     }
   }
 
-  function handleImportBlacklistedTracks(
+  async function handleImportExcludedTracks(
     e: React.ChangeEvent<HTMLInputElement>
   ) {
-    const fileReader = new FileReader();
-    fileReader.readAsText((e.target as HTMLInputElement).files![0], "UTF-8");
+    if (!e.target.files || !(e.target.files.length > 0)) {
+      throw new Error("No file(s)");
+    }
 
-    fileReader.onload = async function (e) {
-      if (e.target?.result && typeof e.target?.result === "string") {
-        const filePaths = JSON.parse(e.target?.result).map((t: string) => {
-          return `${MUSIC_LIB_DIR}${t.replace(LOCAL_MUSIC_LIB_DIR, "")}`;
-        });
+    const files = Array.from(e.target.files);
+    const isValidExtension = files.every((file) => {
+      return file.name.split(".").pop()?.toLowerCase() === "m3u";
+    });
+    if (!isValidExtension) {
+      throw new Error("One or more files have unsupported extension.");
+    }
 
-        await trackIdsQuery.mutateAsync(filePaths, {
-          onSuccess: (data, variables, context) => {
-            dispatch({
-              type: "IMPORT_BLACKLISTED_TRACKS",
-              payload: { trackIds: data },
-            });
-          },
+    const stringifiedFiles = await Promise.all(files.map(readFileAsString));
+    const excludedPaths = stringifiedFiles.map(m3uToFilePaths).flat();
+    await getTrackIdsQuery.mutateAsync(excludedPaths, {
+      onSuccess: (data) => {
+        dispatch({
+          type: "IMPORT_BLACKLISTED_TRACKS",
+          payload: { trackIds: data },
         });
-      }
-    };
+      },
+    });
   }
 
   //
@@ -347,11 +370,11 @@ export function usePlaylist() {
     dispatch({ type: "OPEN_GROUP", payload: { groupId } });
   }
 
-  function reorderGroup(index: number, direction: "UP" | "DOWN") {
+  function handleReorderGroups(index: number, direction: "UP" | "DOWN") {
     dispatch({ type: "REORDER_GROUP", payload: { index, direction } });
   }
 
-  function reorderTrack(
+  function handleReorderTracks(
     index: number,
     direction: "UP" | "DOWN",
     groupId: number
@@ -360,22 +383,19 @@ export function usePlaylist() {
   }
 
   return {
-    playlist: { ...state, name: playlistName },
-    groups: {
-      handleAdd: handleAddGroup,
-      handleDestroy: handleDestroyGroup,
-      handleRename: handleRenameGroup,
-      handleReset: handleResetGroups,
-      toggleIsGroupOpen,
-      handleReorder: reorderGroup,
-    },
-    tracks: {
-      handleAdd: handleAddTrack,
-      handleRemove: handleRemoveTrack,
-      handleReplace: handleReplaceTrack,
-      handleReset: handleResetTracks,
-      handleImportBlacklisted: handleImportBlacklistedTracks,
-      handleReorder: reorderTrack,
-    },
+    ...state,
+    name: playlistName,
+    handleAddGroup,
+    handleDestroyGroup,
+    handleRenameGroup,
+    handleResetGroups,
+    toggleIsGroupOpen,
+    handleReorderGroups,
+    handleAddTrack,
+    handleRemoveTrack,
+    handleReplaceTrack,
+    handleResetTracks,
+    handleImportExcludedTracks,
+    handleReorderTracks,
   };
 }

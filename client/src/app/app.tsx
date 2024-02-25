@@ -15,11 +15,7 @@ import {
 
 import { ErrorBoundary } from "../lib/error-boundary/error-boundary";
 import { Group } from "../lib/group/group";
-import {
-  exportFiltersTemplate,
-  exportPlaylistAsJSON,
-  exportPlaylistAsM3U,
-} from "../utils/misc";
+import { exportPlaylistAsJSON, exportPlaylistAsM3U } from "../utils/misc";
 import { Sidebar } from "../lib/sidebar/sidebar";
 import { EditableText } from "../lib/editable-text/editable-text";
 import { usePlaylist } from "../hooks/use-playlist";
@@ -35,9 +31,9 @@ import { Message } from "../lib/message/message";
 import "./app.scss";
 
 export function App() {
-  const { playlist, groups, tracks } = usePlaylist();
+  const playlist = usePlaylist();
   const filters = useSavedFilters();
-  const statsQuery = useStats(playlist.excludedTracks);
+  const statsQuery = useStats(Array.from(playlist.excludedTracks));
   const player = usePlayer(playlist.tracks);
 
   if (statsQuery.isLoading) return <Loader for="page" color="pink" />;
@@ -67,7 +63,7 @@ export function App() {
             </a>
             <div className="app__controls app__controls_top">
               <button
-                onClick={groups.handleReset}
+                onClick={playlist.handleResetGroups}
                 className="app__btn btn btn_theme_transparent-white"
               >
                 <span>Reset</span>
@@ -78,7 +74,8 @@ export function App() {
                 <input
                   id="importblacklisted"
                   type="file"
-                  onChange={tracks.handleImportBlacklisted}
+                  onChange={playlist.handleImportExcludedTracks}
+                  multiple
                   hidden
                 />
                 <div className="app__btn btn btn_theme_transparent-white">
@@ -140,14 +137,14 @@ export function App() {
               <div className="app__btns">
                 <button
                   className="btn btn_theme_transparent-black add-section-btn"
-                  onClick={() => groups.handleAdd(0, "template")}
+                  onClick={() => playlist.handleAddGroup(0, "template")}
                 >
                   <span>Add new section (using saved filters)</span>
                   <FaFileAlt className="icon" />
                 </button>
                 <button
                   className="btn btn_theme_transparent-black add-section-btn"
-                  onClick={() => groups.handleAdd(0, "new-filter")}
+                  onClick={() => playlist.handleAddGroup(0, "new-filter")}
                 >
                   <span>Add new section (creating a new filter)</span>
                   <FaFilter className="icon" />
@@ -162,25 +159,29 @@ export function App() {
                 key={groupId}
                 name={playlist.groupNames[`${groupId}`]}
                 onAddGroupWithTemplate={() =>
-                  groups.handleAdd(index + 1, "template")
+                  playlist.handleAddGroup(index + 1, "template")
                 }
                 onAddGroupWithNewFilter={() =>
-                  groups.handleAdd(index + 1, "new-filter")
+                  playlist.handleAddGroup(index + 1, "new-filter")
                 }
-                onDeleteGroup={() => groups.handleDestroy(groupId)}
-                onRenameGroup={groups.handleRename}
-                onToggle={() => groups.toggleIsGroupOpen(groupId)}
-                onRemoveTrack={tracks.handleRemove}
-                onReplaceTrack={tracks.handleReplace}
-                onGetTrack={tracks.handleAdd}
-                onGroupReorderUp={() => groups.handleReorder(index, "UP")}
-                onGroupReorderDown={() => groups.handleReorder(index, "DOWN")}
-                onFiltersChange={tracks.handleReset}
+                onDeleteGroup={() => playlist.handleDestroyGroup(groupId)}
+                onRenameGroup={playlist.handleRenameGroup}
+                onToggle={() => playlist.toggleIsGroupOpen(groupId)}
+                onRemoveTrack={playlist.handleRemoveTrack}
+                onReplaceTrack={playlist.handleReplaceTrack}
+                onGetTrack={playlist.handleAddTrack}
+                onGroupReorderUp={() =>
+                  playlist.handleReorderGroups(index, "UP")
+                }
+                onGroupReorderDown={() =>
+                  playlist.handleReorderGroups(index, "DOWN")
+                }
+                onFiltersChange={playlist.handleResetTracks}
                 isOpenGroupId={playlist.isGroupOpen}
                 years={statsQuery.data?.years.results}
                 genres={statsQuery.data?.genres.results}
                 tracks={playlist.tracks}
-                onReorderTrack={tracks.handleReorder}
+                onReorderTrack={playlist.handleReorderTracks}
                 setPlayingIndex={player.setPlayingIndex}
                 saveFilter={filters.handleSave}
                 deleteFilter={filters.handleDestroy}
