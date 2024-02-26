@@ -28,9 +28,9 @@ export function SavedFilter(props: SavedFilterProps) {
 
   return (
     <div className="saved-filter">
-      <div
-        className="saved-filter__name"
-        onClick={(e) => setIsOpen((prev) => !prev)}
+      <header
+        className="saved-filter__header"
+        onClick={() => setIsOpen((prev) => !prev)}
       >
         <EditableText editable={savedFilterName} />
 
@@ -52,7 +52,7 @@ export function SavedFilter(props: SavedFilterProps) {
             )}
           </div>
         </div>
-      </div>
+      </header>
       {isOpen && (
         <div className="saved-filter__body">
           <div className="saved-filter__operator">

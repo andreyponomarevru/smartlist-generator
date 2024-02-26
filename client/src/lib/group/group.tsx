@@ -71,7 +71,7 @@ export function Group(props: GroupProps) {
   return (
     <>
       <div className={`group ${props.className || ""}`}>
-        <header className="group__header">
+        <header className="group__header" onClick={props.onToggle}>
           <EditableText className="group__name" editable={groupName} />
           <button
             onClick={props.onDeleteGroup}
@@ -79,21 +79,25 @@ export function Group(props: GroupProps) {
           >
             <span>Delete</span>
           </button>
-
           <button
-            onClick={props.onGroupReorderUp}
+            onClick={(e) => {
+              e.stopPropagation();
+              props.onGroupReorderUp();
+            }}
             className="btn btn_theme_transparent-black group__sort-btn"
           >
             <FaArrowUp className="icon" />
           </button>
           <button
-            onClick={props.onGroupReorderDown}
+            onClick={(e) => {
+              e.stopPropagation();
+              props.onGroupReorderDown();
+            }}
             className="btn btn_theme_transparent-black group__sort-btn"
           >
             <FaArrowDown className="icon" />
           </button>
-
-          <div className="group__toggle-group-btn" onClick={props.onToggle}>
+          <div className="group__toggle-group-btn">
             {props.isOpenGroupId[`${props.groupId}`] ? (
               <FaChevronUp className="icon" />
             ) : (
