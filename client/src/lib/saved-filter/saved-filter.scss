@@ -15,7 +15,6 @@
   text-overflow: ellipsis;
   background-color: white;
   box-shadow: 0px 0px 1rem $color_gray-lighten;
-  row-gap: 0.5rem;
 
   &__name {
     display: flex;
@@ -33,6 +32,7 @@
     display: flex;
     flex-flow: column nowrap;
     row-gap: 0rem;
+    padding-top: 0.5rem;
   }
 
   &__row {

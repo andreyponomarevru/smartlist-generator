@@ -9,7 +9,18 @@ import { useEditableText } from "./use-editable-text";
 import { useTrack } from "./api/use-track";
 import { useTrackIds } from "./api/use-track-ids";
 
-type Mode = "new-filter" | "template";
+type Mode = "new-filter" | "saved-filter";
+type Direction = "UP" | "DOWN";
+export type TrackToReorder = {
+  index: number;
+  direction: Direction;
+  groupId: number;
+};
+export type TrackToReplace = {
+  groupId: number;
+  trackId: number;
+  formValues: FilterFormValues;
+};
 
 type State = {
   groups: number[];
@@ -26,7 +37,7 @@ type Action =
   | { type: "RENAME_GROUP"; payload: { groupId: number; newName: string } }
   | {
       type: "REORDER_GROUP";
-      payload: { index: number; direction: "UP" | "DOWN" };
+      payload: { index: number; direction: Direction };
     }
   | { type: "OPEN_GROUP"; payload: { groupId: number } }
   | { type: "ADD_TRACK"; payload: { groupId: number; tracks: TrackMeta[] } }
@@ -38,7 +49,7 @@ type Action =
     }
   | {
       type: "REORDER_TRACK";
-      payload: { index: number; direction: "UP" | "DOWN"; groupId: number };
+      payload: { index: number; direction: Direction; groupId: number };
     }
   | { type: "IMPORT_BLACKLISTED_TRACKS"; payload: { trackIds: number[] } };
 
@@ -47,6 +58,7 @@ let counter = 0;
 function playlistReducer(state: State, action: Action): State {
   switch (action.type) {
     case "ADD_GROUP": {
+      action.payload.mode;
       const newGroupId = ++counter;
       return {
         ...state,
@@ -298,11 +310,11 @@ export function usePlaylist() {
     dispatch({ type: "RESET_TRACKS", payload: { groupId } });
   }
 
-  async function handleReplaceTrack(
-    groupId: number,
-    trackId: number,
-    formValues: FilterFormValues
-  ) {
+  async function handleReplaceTrack({
+    groupId,
+    trackId,
+    formValues,
+  }: TrackToReplace) {
     try {
       const track = await getTrackQuery.mutateAsync(
         buildSearchQuery(formValues, [
@@ -349,7 +361,7 @@ export function usePlaylist() {
       return file.name.split(".").pop()?.toLowerCase() === "m3u";
     });
     if (!isValidExtension) {
-      throw new Error("One or more files have unsupported extension.");
+      throw new Error("Only M3U files are allowed.");
     }
 
     const stringifiedFiles = await Promise.all(files.map(readFileAsString));
@@ -370,15 +382,11 @@ export function usePlaylist() {
     dispatch({ type: "OPEN_GROUP", payload: { groupId } });
   }
 
-  function handleReorderGroups(index: number, direction: "UP" | "DOWN") {
+  function handleReorderGroups(index: number, direction: Direction) {
     dispatch({ type: "REORDER_GROUP", payload: { index, direction } });
   }
 
-  function handleReorderTracks(
-    index: number,
-    direction: "UP" | "DOWN",
-    groupId: number
-  ) {
+  function handleReorderTracks({ index, direction, groupId }: TrackToReorder) {
     dispatch({ type: "REORDER_TRACK", payload: { index, direction, groupId } });
   }
 

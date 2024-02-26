@@ -1,10 +1,4 @@
-import {
-  UseFormRegister,
-  Control,
-  UseFormResetField,
-  UseFormUnregister,
-  UseFormSetValue,
-} from "react-hook-form";
+import { Control, UseFormResetField } from "react-hook-form";
 
 export type TrackMeta = {
   year: number;
@@ -35,24 +29,13 @@ export interface FilterFormValues {
   }[];
 }
 
-export interface TemplateFormValues {
-  templateId: OptionsList<string>;
+export interface SavedFilterFormValues {
+  savedFilterId: OptionsList<string>;
 }
 
 //
 // API
 //
-
-export type ParsedResponse<Body> = {
-  status: number;
-  body: Body | null;
-};
-
-export interface APIResponse<Results> {
-  error: APIError | Error | null;
-  isLoading: boolean;
-  response: ParsedResponse<Results> | null;
-}
 
 export type APIError = { status: number; moreInfo: string; message: string };
 

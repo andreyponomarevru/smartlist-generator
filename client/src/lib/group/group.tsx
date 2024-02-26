@@ -14,7 +14,8 @@ import { EditableText } from "../../lib/editable-text/editable-text";
 import { Filter } from "../../hooks/use-saved-filters";
 import { FiltersForm } from "./filters-form/filters-form";
 import { Stats as StatsType } from "../../types";
-import { TemplatesForm } from "./templates-form/templates-form";
+import { SavedFiltersForm } from "./saved-filters-form/saved-filters-form";
+import { TrackToReorder, TrackToReplace } from "../../hooks/use-playlist";
 
 import "./group.scss";
 
@@ -26,22 +27,14 @@ interface GroupProps extends React.HTMLAttributes<HTMLDivElement> {
   genres?: StatsType[];
   isOpenGroupId: Record<string, boolean>;
   onToggle: () => void;
-  onAddGroupWithTemplate: () => void;
+  onAddGroupWithSavedFilter: () => void;
   onAddGroupWithNewFilter: () => void;
   onDeleteGroup: () => void;
   onRenameGroup: (groupId: number, newName: string) => void;
   onGetTrack: (groupId: number, formValues: FilterFormValues) => void;
   onRemoveTrack: (groupId: number, trackId: number) => void;
-  onReplaceTrack: (
-    groupId: number,
-    trackId: number,
-    formValues: FilterFormValues
-  ) => void;
-  onReorderTrack: (
-    index: number,
-    direction: "UP" | "DOWN",
-    groupId: number
-  ) => void;
+  onReplaceTrack: ({ groupId, trackId, formValues }: TrackToReplace) => void;
+  onReorderTrack: ({ index, direction, groupId }: TrackToReorder) => void;
   onFiltersChange: (groupId: number) => void;
   onGroupReorderUp: () => void;
   onGroupReorderDown: () => void;
@@ -114,8 +107,8 @@ export function Group(props: GroupProps) {
             props.isOpenGroupId[`${props.groupId}`] ? "" : "group__body_hidden"
           }`}
         >
-          {props.mode === "template" ? (
-            <TemplatesForm
+          {props.mode === "saved-filter" ? (
+            <SavedFiltersForm
               groupId={props.groupId}
               filters={props.filters}
               onGetTrack={props.onGetTrack}
@@ -129,7 +122,7 @@ export function Group(props: GroupProps) {
           ) : (
             <FiltersForm
               groupId={props.groupId}
-              name={"groupName.state.text"}
+              name={groupName.state.text}
               onGetTrack={props.onGetTrack}
               years={props.years}
               genres={props.genres}
@@ -148,7 +141,7 @@ export function Group(props: GroupProps) {
       <div className="app__btns">
         <button
           className="btn btn_theme_transparent-black add-section-btn"
-          onClick={props.onAddGroupWithTemplate}
+          onClick={props.onAddGroupWithSavedFilter}
         >
           <span>Add new section (using saved filters)</span>
           <FaFileAlt className="icon" />
