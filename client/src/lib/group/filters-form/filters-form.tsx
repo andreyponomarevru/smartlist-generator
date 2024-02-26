@@ -11,10 +11,10 @@ import {
   useForm,
   useFieldArray,
 } from "react-hook-form";
-
 import Select from "react-select";
 import { FaPlus, FaMinus } from "react-icons/fa";
 
+import { SubmitFormBtn } from "../submit-form-btn/submit-form-btn";
 import { FilterFormValues, OptionsList, TrackMeta } from "../../../types";
 import {
   FILTER_NAMES,
@@ -148,7 +148,6 @@ export function FiltersForm(props: FiltersFormProps) {
       >
         <div className="filters-form__row">
           <label htmlFor={`filter-form-${props.groupId}`}>Match</label>
-
           <Controller
             name="operator"
             control={control}
@@ -237,18 +236,11 @@ export function FiltersForm(props: FiltersFormProps) {
             </div>
           );
         })}
-
-        <button
-          name="a"
-          type="submit"
-          form={`filter-form-${props.groupId}`}
-          disabled={false}
-          className="btn btn_theme_black filters-form__find-track-btn"
-        >
-          Find a track
-        </button>
+        <SubmitFormBtn
+          groupId={props.groupId}
+          className="filters-form__find-track-btn"
+        />
       </form>
-
       <Playlist
         className="group__playlist"
         handleSubmit={handleSubmit}

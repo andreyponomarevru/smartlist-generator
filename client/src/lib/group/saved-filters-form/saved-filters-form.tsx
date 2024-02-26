@@ -6,6 +6,7 @@ import { FilterFormValues, OptionsList, TrackMeta } from "../../../types";
 import { Playlist } from "../../playlist/playlist";
 import { TrackToReorder, TrackToReplace } from "../../../hooks/use-playlist";
 import { State as SavedFilterState } from "../../../hooks/use-saved-filters";
+import { SubmitFormBtn } from "../submit-form-btn/submit-form-btn";
 
 import "./saved-filters-form.scss";
 
@@ -64,6 +65,7 @@ export function SavedFiltersForm(props: SavedFiltersForm) {
       <form
         className={`saved-filters-form ${props.className || ""}`}
         onSubmit={handleSubmit(onSavedFilterSubmit)}
+        id={`filter-form-${props.groupId}`}
       >
         <Controller
           name="savedFilterId"
@@ -76,15 +78,10 @@ export function SavedFiltersForm(props: SavedFiltersForm) {
             />
           )}
         />
-
-        <button
-          type="submit"
-          name="a"
-          disabled={false}
-          className="btn btn_theme_black saved-filters-form__find-track-btn"
-        >
-          Find a track
-        </button>
+        <SubmitFormBtn
+          groupId={props.groupId}
+          className="saved-filters-form__find-track-btn"
+        />
       </form>
 
       <Playlist
