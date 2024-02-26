@@ -30,15 +30,21 @@ interface SavedFiltersForm extends React.HTMLAttributes<HTMLFormElement> {
 }
 
 export function SavedFiltersForm(props: SavedFiltersForm) {
+  const savedFilterIds = Object.values(props.filters.ids).map((id) => {
+    return { label: props.filters.names[id], value: id };
+  });
+
   const { control, handleSubmit, watch } = useForm<{
     savedFilterId: OptionsList<string>;
   }>({
-    defaultValues: { savedFilterId: { value: "", label: "" } },
+    defaultValues: { savedFilterId: savedFilterIds[0] },
     mode: "onSubmit",
     shouldUnregister: false,
   });
 
   const watchedSelect = watch();
+
+  console.log("props.filters.ids", props.filters.ids);
 
   React.useEffect(() => {
     props.onFiltersChange(props.groupId);
@@ -62,18 +68,13 @@ export function SavedFiltersForm(props: SavedFiltersForm) {
         <Controller
           name="savedFilterId"
           control={control}
-          render={({ field }) => {
-            const options = Object.values(props.filters.ids).map((id) => {
-              return { label: props.filters.names[id], value: id };
-            });
-            return (
-              <Select
-                {...field}
-                className="saved-filters-form__select"
-                options={options}
-              />
-            );
-          }}
+          render={({ field }) => (
+            <Select
+              {...field}
+              className="saved-filters-form__select"
+              options={savedFilterIds}
+            />
+          )}
         />
 
         <button
