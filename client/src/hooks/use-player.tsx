@@ -71,7 +71,6 @@ export function usePlayer(tracks: Record<string, TrackMeta[]>) {
     setDuration(0);
     if (audioRef.current) audioRef.current.currentTime = 0;
     if (progressBarRef.current) progressBarRef.current.value = "0";
-    console.log("RESET");
   }
 
   //
@@ -88,7 +87,6 @@ export function usePlayer(tracks: Record<string, TrackMeta[]>) {
     }
 
     if (playingIndex.index >= tracks[playingIndex.groupId].length - 1) {
-      console.log("A");
       setPlayingIndex((prev) => {
         return prev ? { ...prev, index: 0 } : null;
       });

@@ -15,7 +15,11 @@ import {
 
 import { ErrorBoundary } from "../lib/error-boundary/error-boundary";
 import { Group } from "../lib/group/group";
-import { exportPlaylistAsJSON, exportPlaylistAsM3U } from "../utils/misc";
+import {
+  exportPlaylistAsJSON,
+  exportPlaylistToM3U,
+  exportSavedFiltersToJSON,
+} from "../utils/misc";
 import { Sidebar } from "../lib/sidebar/sidebar";
 import { EditableText } from "../lib/editable-text/editable-text";
 import { usePlaylist } from "../hooks/use-playlist";
@@ -32,7 +36,7 @@ import "./app.scss";
 
 export function App() {
   const playlist = usePlaylist();
-  const filters = useSavedFilters();
+  const savedFilters = useSavedFilters();
   const statsQuery = useStats(Array.from(playlist.excludedTracks));
   const player = usePlayer(playlist.tracks);
 
@@ -79,7 +83,7 @@ export function App() {
                   hidden
                 />
                 <div className="app__btn btn btn_theme_transparent-white">
-                  <span>Import blacklisted tracks</span>
+                  <span>Import blacklisted tracks (M3U)</span>
                   <FaFileImport className="icon" />
                 </div>
               </label>
@@ -88,32 +92,47 @@ export function App() {
 
           <div className="app__saved-filters">
             <header className="app__saved-filters-header">
-              Saved filters ({filters.state.ids.length})
+              Saved filters ({savedFilters.state.ids.length})
             </header>
-            {filters.state.ids.map((id) => (
+            {savedFilters.state.ids.map((id) => (
               <SavedFilter
-                key={JSON.stringify(filters.state.names[`${id}`]) + Date.now()}
+                key={
+                  JSON.stringify(savedFilters.state.names[`${id}`]) + Date.now()
+                }
                 savedFilterId={id}
-                name={filters.state.names[id]}
-                filter={filters.state.settings[`${id}`]}
-                handleDestroy={() => filters.handleDestroy(id)}
-                handleRename={filters.handleRename}
+                name={savedFilters.state.names[id]}
+                filter={savedFilters.state.settings[`${id}`]}
+                handleDestroy={() => savedFilters.handleDestroy(id)}
+                handleRename={savedFilters.handleRename}
               />
             ))}
-            <div>
+            <div className="app__controls app__controls_bottom">
               <button
                 onClick={() =>
-                  exportPlaylistAsJSON(
+                  exportSavedFiltersToJSON(
                     playlist.name.state.text,
-                    playlist.tracks
+                    savedFilters.state
                   )
                 }
                 className="app__btn btn btn_theme_transparent-black"
-                disabled={true}
+                disabled={savedFilters.state.ids.length === 0}
               >
                 <span>Export as JSON</span>
                 <FaDownload className="icon" />
               </button>
+              <label htmlFor="importsavedfilters">
+                <input
+                  id="importsavedfilters"
+                  type="file"
+                  onChange={savedFilters.handleImportAsJSON}
+                  multiple
+                  hidden
+                />
+                <div className="app__btn btn btn_theme_transparent-black">
+                  <span>Import as JSON</span>
+                  <FaFileImport className="icon" />
+                </div>
+              </label>
             </div>
           </div>
 
@@ -137,7 +156,7 @@ export function App() {
               <div className="app__btns">
                 <button
                   className="btn btn_theme_transparent-black add-section-btn"
-                  onClick={() => playlist.handleAddGroup(0, "template")}
+                  onClick={() => playlist.handleAddGroup(0, "saved-filter")}
                 >
                   <span>Add new section (using saved filters)</span>
                   <FaFileAlt className="icon" />
@@ -158,8 +177,8 @@ export function App() {
                 groupId={groupId}
                 key={groupId}
                 name={playlist.groupNames[`${groupId}`]}
-                onAddGroupWithTemplate={() =>
-                  playlist.handleAddGroup(index + 1, "template")
+                onAddGroupWithSavedFilter={() =>
+                  playlist.handleAddGroup(index + 1, "saved-filter")
                 }
                 onAddGroupWithNewFilter={() =>
                   playlist.handleAddGroup(index + 1, "new-filter")
@@ -183,9 +202,9 @@ export function App() {
                 tracks={playlist.tracks}
                 onReorderTrack={playlist.handleReorderTracks}
                 setPlayingIndex={player.setPlayingIndex}
-                saveFilter={filters.handleSave}
-                deleteFilter={filters.handleDestroy}
-                filters={filters.state}
+                saveFilter={savedFilters.handleSave}
+                deleteFilter={savedFilters.handleDestroy}
+                filters={savedFilters.state}
               />
             ))}
           </div>
@@ -193,7 +212,7 @@ export function App() {
           <nav className="app__controls app__controls_bottom">
             <button
               onClick={() =>
-                exportPlaylistAsM3U(
+                exportPlaylistToM3U(
                   playlist.name.state.text,
                   playlist.tracks,
                   playlist.groups

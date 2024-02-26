@@ -1,25 +1,17 @@
 import React from "react";
-import {
-  UseFormHandleSubmit,
-  UseFormRegister,
-  Controller,
-  Control,
-  useForm,
-} from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import Select from "react-select";
 
 import { FilterFormValues, OptionsList, TrackMeta } from "../../../types";
 import { Playlist } from "../../playlist/playlist";
+import { TrackToReorder, TrackToReplace } from "../../../hooks/use-playlist";
+import { State as SavedFilterState } from "../../../hooks/use-saved-filters";
 
-import "./templates-form.scss";
+import "./saved-filters-form.scss";
 
-interface TemplatesForm extends React.HTMLAttributes<HTMLFormElement> {
+interface SavedFiltersForm extends React.HTMLAttributes<HTMLFormElement> {
   groupId: number;
-  filters: {
-    ids: string[];
-    names: Record<string, string>;
-    settings: Record<string, FilterFormValues>;
-  };
+  filters: SavedFilterState;
   onGetTrack: (groupId: number, formValues: FilterFormValues) => void;
   onFiltersChange: (groupId: number) => void;
 
@@ -33,23 +25,15 @@ interface TemplatesForm extends React.HTMLAttributes<HTMLFormElement> {
   }) => void;
   tracks: Record<string, TrackMeta[]>;
   onRemoveTrack: (groupId: number, trackId: number) => void;
-  onReplaceTrack: (
-    groupId: number,
-    trackId: number,
-    formValues: FilterFormValues
-  ) => void;
-  onReorderTrack: (
-    index: number,
-    direction: "UP" | "DOWN",
-    groupId: number
-  ) => void;
+  onReplaceTrack: ({ groupId, trackId, formValues }: TrackToReplace) => void;
+  onReorderTrack: ({ index, direction, groupId }: TrackToReorder) => void;
 }
 
-export function TemplatesForm(props: TemplatesForm) {
+export function SavedFiltersForm(props: SavedFiltersForm) {
   const { control, handleSubmit, watch } = useForm<{
-    templateId: OptionsList<string>;
+    savedFilterId: OptionsList<string>;
   }>({
-    defaultValues: { templateId: { value: "", label: "" } },
+    defaultValues: { savedFilterId: { value: "", label: "" } },
     mode: "onSubmit",
     shouldUnregister: false,
   });
@@ -58,44 +42,45 @@ export function TemplatesForm(props: TemplatesForm) {
 
   React.useEffect(() => {
     props.onFiltersChange(props.groupId);
-  }, [watchedSelect.templateId]);
+  }, [watchedSelect.savedFilterId]);
 
   function onSavedFilterSubmit(formValues: {
-    templateId: OptionsList<string>;
+    savedFilterId: OptionsList<string>;
   }) {
     props.onGetTrack(
       props.groupId,
-      props.filters.settings[formValues.templateId.value]
+      props.filters.settings[formValues.savedFilterId.value]
     );
   }
-
-  // props.onReplaceTrackprops.groupId, track.trackId, props.template);
 
   return (
     <>
       <form
-        className={`templates-form ${props.className || ""}`}
+        className={`saved-filters-form ${props.className || ""}`}
         onSubmit={handleSubmit(onSavedFilterSubmit)}
       >
         <Controller
-          name="templateId"
+          name="savedFilterId"
           control={control}
-          render={({ field }) => (
-            <Select
-              className="templates-form__select"
-              {...field}
-              options={Object.values(props.filters.ids).map((id) => {
-                return { label: props.filters.names[id], value: id };
-              })}
-            />
-          )}
+          render={({ field }) => {
+            const options = Object.values(props.filters.ids).map((id) => {
+              return { label: props.filters.names[id], value: id };
+            });
+            return (
+              <Select
+                {...field}
+                className="saved-filters-form__select"
+                options={options}
+              />
+            );
+          }}
         />
 
         <button
           type="submit"
           name="a"
           disabled={false}
-          className="btn btn_theme_black templates-form__find-track-btn"
+          className="btn btn_theme_black saved-filters-form__find-track-btn"
         >
           Find a track
         </button>
@@ -110,7 +95,7 @@ export function TemplatesForm(props: TemplatesForm) {
         onReorderTrack={props.onReorderTrack}
         onReplaceTrack={props.onReplaceTrack}
         onRemoveTrack={props.onRemoveTrack}
-        template={props.filters.settings[watchedSelect.templateId.value]}
+        savedFilter={props.filters.settings[watchedSelect.savedFilterId.value]}
       />
     </>
   );

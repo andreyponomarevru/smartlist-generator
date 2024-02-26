@@ -1,6 +1,7 @@
 import { FilterFormValues, TrackMeta, SearchQuery } from "../types";
 import { MUSIC_LIB_DIR } from "../config/env";
 import { LOCAL_MUSIC_LIB_DIR } from "../config/env";
+import { State as SavedFiltersState } from "../hooks/use-saved-filters";
 
 export function toHourMinSec(sec: number) {
   let hms = new Date(sec * 1000).toISOString().substr(11, 8).split(":");
@@ -53,8 +54,6 @@ export function exportPlaylistAsJSON(
   playlistName: string,
   tracks: Record<string, TrackMeta[]>
 ) {
-  console.log("exportPlaylistAsJSON: ", tracks);
-
   const link = document.createElement("a");
   link.href = `data:text/json;chatset=utf-8,${encodeURIComponent(
     JSON.stringify(
@@ -69,7 +68,7 @@ export function exportPlaylistAsJSON(
   link.click();
 }
 
-export function exportPlaylistAsM3U(
+export function exportPlaylistToM3U(
   playlistName: string,
   tracks: Record<string, TrackMeta[]>,
   groupIds: number[]
@@ -86,8 +85,16 @@ export function exportPlaylistAsM3U(
   link.click();
 }
 
-export function exportFiltersTemplate() {
-  //("/mnt/CE64EB6A64EB53AD/music-lib/inbox-listened/chillout_psy_tagged/Lexx - Cosmic Shift (2019) [WEB FLAC]/Lexx - Cosmic Shift - 06 Hot Weather Feat. Harriett Brown.flac");
+export function exportSavedFiltersToJSON(
+  playlistName: string,
+  filters: SavedFiltersState
+) {
+  const link = document.createElement("a");
+  link.href = `data:text/json;chatset=utf-8,${encodeURIComponent(
+    JSON.stringify(filters, null, 2)
+  )}`;
+  link.download = `${playlistName}.json`;
+  link.click();
 }
 
 export function encodeRFC3986URIComponent(str: string) {

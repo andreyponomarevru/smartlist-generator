@@ -1,26 +1,20 @@
 import React from "react";
 import { UseFormHandleSubmit } from "react-hook-form";
-import {
-  FaChevronUp,
-  FaChevronDown,
-  FaPlus,
-  FaMinus,
-  FaRedo,
-} from "react-icons/fa";
+import { FaChevronUp, FaChevronDown, FaMinus, FaRedo } from "react-icons/fa";
 
 import { toHourMinSec } from "../../utils/misc";
 import {
   FilterFormValues,
   TrackMeta,
-  OptionsList,
-  TemplateFormValues,
+  SavedFilterFormValues,
 } from "../../types";
+import { TrackToReorder, TrackToReplace } from "../../hooks/use-playlist";
 
 import "./playlist.scss";
 
 interface PlaylistProps extends React.HTMLAttributes<HTMLDivElement> {
   handleSubmit: UseFormHandleSubmit<
-    FilterFormValues | TemplateFormValues,
+    FilterFormValues | SavedFilterFormValues,
     undefined
   >;
   groupId: number;
@@ -32,19 +26,11 @@ interface PlaylistProps extends React.HTMLAttributes<HTMLDivElement> {
     groupId: number;
     index: number;
   }) => void;
-  onReorderTrack: (
-    index: number,
-    direction: "UP" | "DOWN",
-    groupId: number
-  ) => void;
-  onReplaceTrack: (
-    groupId: number,
-    trackId: number,
-    formValues: FilterFormValues
-  ) => void;
+  onReorderTrack: ({ index, direction, groupId }: TrackToReorder) => void;
+  onReplaceTrack: ({ groupId, trackId, formValues }: TrackToReplace) => void;
   onRemoveTrack: (groupId: number, trackId: number) => void;
 
-  template?: FilterFormValues;
+  savedFilter?: FilterFormValues;
 }
 
 export function Playlist(props: PlaylistProps) {
@@ -58,17 +44,20 @@ export function Playlist(props: PlaylistProps) {
             onClick={(e) => {
               e.stopPropagation();
               if ((e.target as HTMLLIElement).nodeName === "SPAN") {
-                props.setPlayingIndex({
-                  groupId: props.groupId,
-                  index,
-                });
+                props.setPlayingIndex({ groupId: props.groupId, index });
               }
             }}
           >
             <div className="track__controls">
               <button
                 className="btn btn_theme_black"
-                onClick={() => props.onReorderTrack(index, "UP", props.groupId)}
+                onClick={() =>
+                  props.onReorderTrack({
+                    index,
+                    direction: "UP",
+                    groupId: props.groupId,
+                  })
+                }
                 disabled={
                   index === 0 || props.tracks[`${props.groupId}`].length === 1
                 }
@@ -78,7 +67,11 @@ export function Playlist(props: PlaylistProps) {
               <button
                 className="btn btn_theme_black"
                 onClick={() =>
-                  props.onReorderTrack(index, "DOWN", props.groupId)
+                  props.onReorderTrack({
+                    index,
+                    direction: "DOWN",
+                    groupId: props.groupId,
+                  })
                 }
                 disabled={
                   props.tracks[`${props.groupId}`].length - 1 === index ||
@@ -108,15 +101,19 @@ export function Playlist(props: PlaylistProps) {
               <button
                 name="b"
                 onClick={props.handleSubmit(
-                  (e: FilterFormValues | TemplateFormValues) => {
-                    if ("templateId" in e && props.template) {
-                      props.onReplaceTrack(
-                        props.groupId,
-                        track.trackId,
-                        props.template
-                      );
+                  (e: FilterFormValues | SavedFilterFormValues) => {
+                    if ("templateId" in e && props.savedFilter) {
+                      props.onReplaceTrack({
+                        groupId: props.groupId,
+                        trackId: track.trackId,
+                        formValues: props.savedFilter,
+                      });
                     } else if ("filters" in e) {
-                      props.onReplaceTrack(props.groupId, track.trackId, e);
+                      props.onReplaceTrack({
+                        groupId: props.groupId,
+                        trackId: track.trackId,
+                        formValues: e,
+                      });
                     }
                   }
                 )}

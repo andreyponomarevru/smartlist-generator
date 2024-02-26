@@ -29,6 +29,7 @@ import { defaultValues } from "../../../config/constants";
 import { Stats as StatsType } from "../../../types";
 import { Filter } from "../../../hooks/use-saved-filters";
 import { Playlist } from "../../playlist/playlist";
+import { TrackToReorder, TrackToReplace } from "../../../hooks/use-playlist";
 
 import "./filters-form.scss";
 
@@ -51,16 +52,8 @@ interface FiltersFormProps extends React.HTMLAttributes<HTMLFormElement> {
   }) => void;
   tracks: Record<string, TrackMeta[]>;
   onRemoveTrack: (groupId: number, trackId: number) => void;
-  onReplaceTrack: (
-    groupId: number,
-    trackId: number,
-    formValues: FilterFormValues
-  ) => void;
-  onReorderTrack: (
-    index: number,
-    direction: "UP" | "DOWN",
-    groupId: number
-  ) => void;
+  onReplaceTrack: ({ groupId, trackId, formValues }: TrackToReplace) => void;
+  onReorderTrack: ({ index, direction, groupId }: TrackToReorder) => void;
 }
 
 type Stats = {
@@ -69,16 +62,12 @@ type Stats = {
 };
 
 export function FiltersForm(props: FiltersFormProps) {
-  // "Filter constructor" mode
-
   const {
     formState,
     control,
-    register,
     handleSubmit,
     resetField,
     reset,
-    setValue,
     watch,
   } = useForm<FilterFormValues>({
     defaultValues,
@@ -90,7 +79,6 @@ export function FiltersForm(props: FiltersFormProps) {
     control,
     name: "filters",
   });
-
   const watchedNewFilters = watch();
 
   //
