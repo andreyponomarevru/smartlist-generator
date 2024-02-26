@@ -142,7 +142,7 @@ export function Group(props: GroupProps) {
           )}
         </div>
       </div>
-      <div className="app__btns">
+      <div className="group__btns-group">
         <button
           className="btn btn_theme_transparent-black add-section-btn"
           onClick={props.onAddGroupWithSavedFilter}

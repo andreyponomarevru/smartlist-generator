@@ -1,11 +1,5 @@
 import React from "react";
 import {
-  IoMdVolumeHigh,
-  IoMdVolumeOff,
-  IoMdVolumeLow,
-  IoIosClose,
-} from "react-icons/io";
-import {
   FaDownload,
   FaFileImport,
   FaUndo,
@@ -24,13 +18,13 @@ import { Sidebar } from "../lib/sidebar/sidebar";
 import { EditableText } from "../lib/editable-text/editable-text";
 import { usePlaylist } from "../hooks/use-playlist";
 import { usePlayer } from "../hooks/use-player";
-import { Controls } from "./controls/controls";
 import { toHourMinSec } from "../utils/misc";
 import { useSavedFilters } from "../hooks/use-saved-filters";
 import { SavedFilter } from "../lib/saved-filter/saved-filter";
 import { useStats } from "../hooks/api/use-stats";
 import { Loader } from "../lib/loader/loader";
 import { Message } from "../lib/message/message";
+import { Player } from "./player/player";
 
 import "./app.scss";
 
@@ -61,36 +55,19 @@ export function App() {
           }}
         />
         <div className="app__main">
-          <div className="app__header">
+          <header className="app__header">
             <a className="app__logo" href="/">
               Smartlist Generator
             </a>
-            <div className="app__controls app__controls_top">
-              <button
-                onClick={playlist.handleResetGroups}
-                className="app__btn btn btn_theme_transparent-white"
-              >
-                <span>Reset</span>
-                <FaUndo className="icon" />
-              </button>
-              <div></div>
-              <label htmlFor="importblacklisted">
-                <input
-                  id="importblacklisted"
-                  type="file"
-                  onChange={playlist.handleImportExcludedTracks}
-                  multiple
-                  hidden
-                />
-                <div className="app__btn btn btn_theme_transparent-white">
-                  <span>Import blacklisted tracks (M3U)</span>
-                  <FaFileImport className="icon" />
-                </div>
-              </label>
-            </div>
-          </div>
+            <nav>
+              <ul className="app__menu">
+                <li>Filters</li>
+                <li>Playlist Builder</li>
+              </ul>
+            </nav>
+          </header>
 
-          <div className="app__saved-filters">
+          <section className="app__section">
             <header className="app__saved-filters-header">
               Saved filters ({savedFilters.state.ids.length})
             </header>
@@ -134,43 +111,63 @@ export function App() {
                 </div>
               </label>
             </div>
-          </div>
+          </section>
 
-          <div>
-            <header className="app__playlist-header">
-              <EditableText
-                className="app__playlist-name"
-                editable={playlist.name}
-              />
-
-              <div className="app__duration">
-                {toHourMinSec(
-                  Object.values(playlist.tracks)
-                    .flat()
-                    .reduce((total, track) => track.duration + total, 0)
-                )}
+          <section className="app__section">
+            <header className="app__playlist-headers">
+              <div className="app__playlist-header-one">
+                <EditableText
+                  className="app__playlist-name"
+                  editable={playlist.name}
+                />
+                <div className="app__duration">
+                  {toHourMinSec(
+                    Object.values(playlist.tracks)
+                      .flat()
+                      .reduce((total, track) => track.duration + total, 0)
+                  )}
+                </div>
+              </div>
+              <div className="app__playlist-header-two">
+                <button
+                  onClick={playlist.handleResetGroups}
+                  className="app__btn btn btn_theme_transparent-black"
+                >
+                  <span>Reset groups</span>
+                </button>
+                <label htmlFor="importblacklisted">
+                  <input
+                    id="importblacklisted"
+                    type="file"
+                    onChange={playlist.handleImportExcludedTracks}
+                    multiple
+                    hidden
+                  />
+                  <div className="app__btn btn btn_theme_transparent-black">
+                    <span>Import blacklisted tracks (M3U)</span>
+                    <FaFileImport className="icon" />
+                  </div>
+                </label>
               </div>
             </header>
-
             {playlist.groups.length === 0 && (
-              <div className="app__btns">
+              <div className="app__add-new-group-btns">
                 <button
                   className="btn btn_theme_transparent-black add-section-btn"
                   onClick={() => playlist.handleAddGroup(0, "saved-filter")}
                 >
-                  <span>Add new section (using saved filters)</span>
+                  <span>Use saved filters</span>
                   <FaFileAlt className="icon" />
                 </button>
                 <button
                   className="btn btn_theme_transparent-black add-section-btn"
                   onClick={() => playlist.handleAddGroup(0, "new-filter")}
                 >
-                  <span>Add new section (creating a new filter)</span>
+                  <span>.Create a new filter</span>
                   <FaFilter className="icon" />
                 </button>
               </div>
             )}
-
             {playlist.groups.map((groupId, index) => (
               <Group
                 mode={playlist.groupModes[`${groupId}`]}
@@ -207,7 +204,7 @@ export function App() {
                 filters={savedFilters.state}
               />
             ))}
-          </div>
+          </section>
 
           <nav className="app__controls app__controls_bottom">
             <button
@@ -238,73 +235,7 @@ export function App() {
           </nav>
         </div>
       </main>
-      <div className={`player ${player.activeTrack ? "" : "player_disabled"}`}>
-        <Controls
-          className="player__artwork"
-          audioRef={player.audioRef}
-          progressBarRef={player.progressBarRef}
-          isPlaying={player.isPlaying}
-          setIsPlaying={player.setIsPlaying}
-          togglePlayPause={player.togglePlayPause}
-          duration={player.duration}
-          setTimeProgress={player.setTimeProgress}
-          setPlayingTrackIndex={player.setPlayingIndex}
-          handleNext={player.handleNext}
-          handlePrevious={player.handlePrevious}
-        />
-        <div className="player__meta">
-          <p className="player__artist">
-            {player.activeTrack?.artist.join(", ")}
-          </p>
-          <p>&nbsp;—&nbsp;</p>
-          <p className="player__title">{player.activeTrack?.title}</p>
-          <p>&nbsp;&middot;&nbsp;</p>
-          <p className="player__year">{player.activeTrack?.year}</p>
-          <audio
-            src={player.src}
-            ref={player.audioRef}
-            onLoadedMetadata={player.onLoadedMetadata}
-            onEnded={player.handleNext}
-          />
-        </div>
-        <div className="player__progressbar">
-          <span className="player__time player__time_current">
-            {toHourMinSec(player.timeProgress)}
-          </span>
-          <input
-            type="range"
-            ref={player.progressBarRef}
-            defaultValue="0"
-            onChange={player.handleProgressChange}
-            className="player__line"
-          />
-          <span className="player__time player__time_total">
-            {toHourMinSec(player.duration)}
-          </span>
-          <div className="player__volume">
-            <button onClick={() => player.setIsMuted((prev) => !prev)}>
-              {player.isMuted || player.volume < 5 ? (
-                <IoMdVolumeOff style={{ fill: "white" }} />
-              ) : player.volume < 40 ? (
-                <IoMdVolumeLow style={{ fill: "white" }} />
-              ) : (
-                <IoMdVolumeHigh style={{ fill: "white" }} />
-              )}
-            </button>
-            <input
-              type="range"
-              min={0}
-              max={100}
-              value={player.volume}
-              onChange={(e) => player.setVolume(Number(e.target.value))}
-              style={{
-                background: `linear-gradient(to right, #f50 ${player.volume}%, #ccc ${player.volume}%)`,
-              }}
-              className="player__volume-bar"
-            />
-          </div>
-        </div>
-      </div>
+      <Player tracks={playlist.tracks} {...player} />
     </ErrorBoundary>
   );
 }
