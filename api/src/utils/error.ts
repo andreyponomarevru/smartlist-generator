@@ -8,7 +8,7 @@ import {
 export class HttpError extends Error {
   status: HttpErrorCodes;
   // statusText: HttpErrorNames;
-  message: HttpErrorMessages;
+  message: string;
   moreInfo?: string;
 
   constructor({
@@ -17,7 +17,7 @@ export class HttpError extends Error {
     moreInfo = "https://github.com/ponomarevandrey/",
   }: {
     code?: any /*HttpErrorCodes*/;
-    message?: HttpErrorMessages;
+    message?: string;
     moreInfo?: string;
   }) {
     super();

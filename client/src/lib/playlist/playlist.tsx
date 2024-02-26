@@ -102,7 +102,7 @@ export function Playlist(props: PlaylistProps) {
                 name="b"
                 onClick={props.handleSubmit(
                   (e: FilterFormValues | SavedFilterFormValues) => {
-                    if ("templateId" in e && props.savedFilter) {
+                    if ("savedFilterId" in e && props.savedFilter) {
                       props.onReplaceTrack({
                         groupId: props.groupId,
                         trackId: track.trackId,
@@ -114,6 +114,8 @@ export function Playlist(props: PlaylistProps) {
                         trackId: track.trackId,
                         formValues: e,
                       });
+                    } else {
+                      throw new Error("Unknown type of select");
                     }
                   }
                 )}

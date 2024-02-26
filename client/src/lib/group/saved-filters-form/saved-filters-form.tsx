@@ -30,14 +30,14 @@ interface SavedFiltersForm extends React.HTMLAttributes<HTMLFormElement> {
 }
 
 export function SavedFiltersForm(props: SavedFiltersForm) {
-  const savedFilterIds = Object.values(props.filters.ids).map((id) => {
+  const options = Object.values(props.filters.ids).map((id) => {
     return { label: props.filters.names[id], value: id };
   });
 
   const { control, handleSubmit, watch } = useForm<{
     savedFilterId: OptionsList<string>;
   }>({
-    defaultValues: { savedFilterId: savedFilterIds[0] },
+    defaultValues: { savedFilterId: options[0] },
     mode: "onSubmit",
     shouldUnregister: false,
   });
@@ -72,7 +72,7 @@ export function SavedFiltersForm(props: SavedFiltersForm) {
             <Select
               {...field}
               className="saved-filters-form__select"
-              options={savedFilterIds}
+              options={options}
             />
           )}
         />
