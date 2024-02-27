@@ -1,21 +1,10 @@
 import React from "react";
-import {
-  Controller,
-  UseFormHandleSubmit,
-  Control,
-  UseFormResetField,
-  UseFormRegister,
-  UseFieldArrayRemove,
-  UseFieldArrayInsert,
-  UseFormSetValue,
-  useForm,
-  useFieldArray,
-} from "react-hook-form";
+import { Controller, useForm, useFieldArray } from "react-hook-form";
 import Select from "react-select";
 import { FaPlus, FaMinus } from "react-icons/fa";
 
 import { SubmitFormBtn } from "../submit-form-btn/submit-form-btn";
-import { FilterFormValues, OptionsList, TrackMeta } from "../../../types";
+import { FilterFormValues, OptionsList } from "../../../types";
 import {
   FILTER_NAMES,
   GENRE_CONDITIONS,
@@ -25,35 +14,25 @@ import {
 import { ConditionSelect } from "./condition-select";
 import { YearValueSelect } from "./year-value-select";
 import { GenreValueSelect } from "./genre-value-select";
-import { defaultValues } from "../../../config/constants";
-import { Stats as StatsType } from "../../../types";
-import { Filter } from "../../../hooks/use-saved-filters";
 import { Playlist } from "../../playlist/playlist";
-import { TrackToReorder, TrackToReplace } from "../../../hooks/use-playlist";
+import { useSavedFilters } from "../../../hooks/use-saved-filters";
+import { useGlobalState } from "../../../hooks/use-global-state";
 
 import "./filters-form.scss";
 
+export const DEFAULT_FILTER_VALUES: FilterFormValues = {
+  operator: OPERATORS[0],
+  filters: [
+    {
+      name: FILTER_NAMES[1],
+      condition: GENRE_CONDITIONS[0],
+      value: [],
+    },
+  ],
+};
+
 interface FiltersFormProps extends React.HTMLAttributes<HTMLFormElement> {
   groupId: number;
-  onGetTrack: (groupId: number, formValues: FilterFormValues) => void;
-  years?: StatsType[];
-  genres?: StatsType[];
-  onFiltersChange: (groupId: number) => void;
-  saveFilter: ({ id, name, settings }: Filter) => void;
-  name: string;
-
-  // Playlist props
-  setPlayingIndex: ({
-    groupId,
-    index,
-  }: {
-    groupId: number;
-    index: number;
-  }) => void;
-  tracks: Record<string, TrackMeta[]>;
-  onRemoveTrack: (groupId: number, trackId: number) => void;
-  onReplaceTrack: ({ groupId, trackId, formValues }: TrackToReplace) => void;
-  onReorderTrack: ({ index, direction, groupId }: TrackToReorder) => void;
 }
 
 type Stats = {
@@ -62,6 +41,9 @@ type Stats = {
 };
 
 export function FiltersForm(props: FiltersFormProps) {
+  const { playlist, statsQuery } = useGlobalState();
+  const savedFilters = useSavedFilters();
+
   const {
     formState,
     control,
@@ -70,7 +52,7 @@ export function FiltersForm(props: FiltersFormProps) {
     reset,
     watch,
   } = useForm<FilterFormValues>({
-    defaultValues,
+    defaultValues: DEFAULT_FILTER_VALUES,
     mode: "onSubmit",
     shouldUnregister: false,
   });
@@ -86,18 +68,18 @@ export function FiltersForm(props: FiltersFormProps) {
   const [stats, setStats] = React.useState<Stats>({ years: [], genres: [] });
 
   React.useEffect(() => {
-    if (!props.genres || !props.years) return;
+    if (!statsQuery.data?.genres || !statsQuery.data?.years) return;
 
-    const genres: OptionsList<number>[] = [...props.genres]
+    const genres: OptionsList<number>[] = [...statsQuery.data.genres.results]
       .sort((a, b) => a.name.localeCompare(b.name))
       .map((g) => ({ value: g.id as number, label: g.name }));
 
-    const years: OptionsList<number>[] = [...props.years]
+    const years: OptionsList<number>[] = [...statsQuery.data.years.results]
       .sort((a, b) => parseInt(b.name) - parseInt(a.name))
       .map((y) => ({ value: parseInt(y.name), label: String(y.name) }));
 
     setStats({ genres, years });
-  }, [props.genres, props.years]);
+  }, [statsQuery.data]);
 
   // Reset "filter constructor" mode's state on form update
 
@@ -106,7 +88,7 @@ export function FiltersForm(props: FiltersFormProps) {
   React.useEffect(() => {
     if (formState.isDirty) {
       setIsFiltersChanged(true);
-      props.onFiltersChange(props.groupId);
+      playlist.handleResetTracks(props.groupId);
     } else {
       setIsFiltersChanged(false);
     }
@@ -121,7 +103,7 @@ export function FiltersForm(props: FiltersFormProps) {
   //
 
   function onSubmit(groupId: number, formValues: FilterFormValues) {
-    props.onGetTrack(groupId, formValues);
+    playlist.handleAddTrack(groupId, formValues);
   }
 
   return (
@@ -130,9 +112,9 @@ export function FiltersForm(props: FiltersFormProps) {
         <button
           className="btn btn_theme_transparent-black group__save-filter-btn"
           onClick={() => {
-            props.saveFilter({
+            savedFilters.handleSave({
               id: JSON.stringify(watchedNewFilters),
-              name: props.name,
+              name: playlist.groupNames[`${props.groupId}`],
               settings: watchedNewFilters,
             });
           }}
@@ -155,7 +137,7 @@ export function FiltersForm(props: FiltersFormProps) {
               <Select
                 {...field}
                 options={OPERATORS}
-                defaultValue={defaultValues.operator}
+                defaultValue={DEFAULT_FILTER_VALUES.operator}
               />
             )}
           />
@@ -177,7 +159,7 @@ export function FiltersForm(props: FiltersFormProps) {
                       <Select
                         {...field}
                         options={FILTER_NAMES}
-                        defaultValue={defaultValues.filters[0].name}
+                        defaultValue={DEFAULT_FILTER_VALUES.filters[0].name}
                       />
                     );
                   }}
@@ -226,7 +208,7 @@ export function FiltersForm(props: FiltersFormProps) {
                 <button
                   type="button"
                   onClick={() => {
-                    insert(index + 1, defaultValues.filters);
+                    insert(index + 1, DEFAULT_FILTER_VALUES.filters);
                   }}
                   className="btn btn_theme_transparent-black filters-form__btn"
                 >
@@ -244,12 +226,7 @@ export function FiltersForm(props: FiltersFormProps) {
       <Playlist
         className="group__playlist"
         handleSubmit={handleSubmit}
-        tracks={props.tracks}
         groupId={props.groupId}
-        setPlayingIndex={props.setPlayingIndex}
-        onReorderTrack={props.onReorderTrack}
-        onReplaceTrack={props.onReplaceTrack}
-        onRemoveTrack={props.onRemoveTrack}
       />
     </>
   );

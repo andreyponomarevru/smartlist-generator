@@ -69,7 +69,7 @@ function savedFiltersReducer(state: State, action: Action): State {
   }
 }
 
-export function useSavedFilters() {
+function useSavedFilters() {
   const initialState: State = { ids: [], names: {}, settings: {} };
 
   function getInitialState() {
@@ -131,3 +131,28 @@ export function useSavedFilters() {
     handleImportAsJSON,
   };
 }
+
+type Context = ReturnType<typeof useSavedFilters>;
+
+const SavedFiltersContext = React.createContext<Context>({
+  state: { ids: [], names: {}, settings: {} },
+  handleSave: () => {},
+  handleDestroy: () => {},
+  handleRename: () => {},
+  handleImportAsJSON: async () => {},
+});
+
+function SavedFiltersProvider({ children }: { children: React.ReactNode }) {
+  const savedFilters = useSavedFilters();
+  return (
+    <SavedFiltersContext.Provider value={savedFilters}>
+      {children}
+    </SavedFiltersContext.Provider>
+  );
+}
+
+function SavedFiltersConsumer(): Context {
+  return React.useContext(SavedFiltersContext);
+}
+
+export { SavedFiltersProvider, SavedFiltersConsumer as useSavedFilters };

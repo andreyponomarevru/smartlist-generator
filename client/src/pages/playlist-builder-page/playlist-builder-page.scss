@@ -1,42 +1,10 @@
-@import "../global.scss";
+@import "../../global.scss";
 
-.app {
-  display: grid;
-  grid-template-areas: "Sidebar Playlists";
-  grid-template-columns: 15rem 1fr;
-
-  min-width: 840px;
-  max-width: 1440px;
-  margin: 0 auto;
-
+.playlist-builder-page {
   &__btns-group {
     display: flex;
     flex-flow: row nowrap;
     column-gap: 0.5rem;
-  }
-
-  &__header {
-    display: grid;
-    grid-template-columns: 15rem 1fr;
-    align-items: center;
-
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: $zindex-fixed;
-
-    border-bottom: 4px solid black;
-    min-width: 840px;
-    max-width: 1440px;
-    margin: 0 auto;
-  }
-
-  &__menu {
-    list-style-type: none;
-    display: flex;
-    flex-flow: row nowrap;
-    column-gap: 2rem;
   }
 
   &__controls {
@@ -57,18 +25,16 @@
   }
 
   &__sidebar {
-    position: fixed;
-    top: 0;
-    overflow-y: scroll;
+    margin-top: 2rem;
   }
 
   &__main {
     grid-area: Playlists;
     display: flex;
     flex-flow: column nowrap;
-    padding: 2rem 0 2rem 2rem;
-    margin: 4rem 1.5rem 1rem 1rem;
-    row-gap: 4rem;
+    padding: 0 0 2rem 2rem;
+    margin: 2rem 1.5rem 1rem 1rem;
+    row-gap: 2rem;
   }
 
   //
@@ -84,22 +50,6 @@
 
   &__title:hover &__edit-name-btn {
     display: inline-block;
-  }
-
-  // App header
-
-  &__logo {
-    font-weight: bold;
-    text-decoration: none;
-    padding: 0 0 0 1.5rem;
-    height: 100%;
-    padding: 1rem 1.5rem 1rem 1.5rem;
-    font-size: $font-size_h6;
-    border-radius: 0 0 0 $border_radius_btn;
-  }
-
-  &__logo:visited {
-    color: black;
   }
 
   // Playlist

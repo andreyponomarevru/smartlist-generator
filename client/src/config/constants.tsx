@@ -1,4 +1,4 @@
-import { OptionsList, FilterFormValues } from "../types";
+import { OptionsList } from "../types";
 
 export const OPERATORS: OptionsList<string>[] = [
   { label: "any", value: "or" },
@@ -20,14 +20,3 @@ export const YEAR_CONDITIONS: OptionsList<string>[] = [
   { label: "greater than or equal", value: "greater than or equal" },
   { label: "less than or equal", value: "less than or equal" },
 ];
-
-export const defaultValues: FilterFormValues = {
-  operator: OPERATORS[0],
-  filters: [
-    {
-      name: FILTER_NAMES[1],
-      condition: GENRE_CONDITIONS[0],
-      value: [],
-    },
-  ],
-};
