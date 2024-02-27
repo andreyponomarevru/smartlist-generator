@@ -8,7 +8,7 @@ import {
   TrackMeta,
   SavedFilterFormValues,
 } from "../../types";
-import { TrackToReorder, TrackToReplace } from "../../hooks/use-playlist";
+import { useGlobalState } from "../../hooks/use-global-state";
 
 import "./playlist.scss";
 
@@ -18,25 +18,15 @@ interface PlaylistProps extends React.HTMLAttributes<HTMLDivElement> {
     undefined
   >;
   groupId: number;
-  tracks: Record<string, TrackMeta[]>;
-  setPlayingIndex: ({
-    groupId,
-    index,
-  }: {
-    groupId: number;
-    index: number;
-  }) => void;
-  onReorderTrack: ({ index, direction, groupId }: TrackToReorder) => void;
-  onReplaceTrack: ({ groupId, trackId, formValues }: TrackToReplace) => void;
-  onRemoveTrack: (groupId: number, trackId: number) => void;
-
   savedFilter?: FilterFormValues;
 }
 
 export function Playlist(props: PlaylistProps) {
+  const { playlist, player } = useGlobalState();
+
   return (
     <ul className={`playlist ${props.className || ""}`}>
-      {props.tracks[`${props.groupId}`].map((track: TrackMeta, index) => {
+      {playlist.tracks[`${props.groupId}`].map((track: TrackMeta, index) => {
         return (
           <li
             key={track.trackId}
@@ -44,7 +34,7 @@ export function Playlist(props: PlaylistProps) {
             onClick={(e) => {
               e.stopPropagation();
               if ((e.target as HTMLLIElement).nodeName === "SPAN") {
-                props.setPlayingIndex({ groupId: props.groupId, index });
+                player.setPlayingIndex({ groupId: props.groupId, index });
               }
             }}
           >
@@ -52,14 +42,15 @@ export function Playlist(props: PlaylistProps) {
               <button
                 className="btn btn_theme_black"
                 onClick={() =>
-                  props.onReorderTrack({
+                  playlist.handleReorderTracks({
                     index,
                     direction: "UP",
                     groupId: props.groupId,
                   })
                 }
                 disabled={
-                  index === 0 || props.tracks[`${props.groupId}`].length === 1
+                  index === 0 ||
+                  playlist.tracks[`${props.groupId}`].length === 1
                 }
               >
                 <FaChevronUp style={{ fill: "white" }} />
@@ -67,15 +58,15 @@ export function Playlist(props: PlaylistProps) {
               <button
                 className="btn btn_theme_black"
                 onClick={() =>
-                  props.onReorderTrack({
+                  playlist.handleReorderTracks({
                     index,
                     direction: "DOWN",
                     groupId: props.groupId,
                   })
                 }
                 disabled={
-                  props.tracks[`${props.groupId}`].length - 1 === index ||
-                  props.tracks[`${props.groupId}`].length === 1
+                  playlist.tracks[`${props.groupId}`].length - 1 === index ||
+                  playlist.tracks[`${props.groupId}`].length === 1
                 }
               >
                 <FaChevronDown style={{ fill: "white" }} />
@@ -103,13 +94,13 @@ export function Playlist(props: PlaylistProps) {
                 onClick={props.handleSubmit(
                   (e: FilterFormValues | SavedFilterFormValues) => {
                     if ("savedFilterId" in e && props.savedFilter) {
-                      props.onReplaceTrack({
+                      playlist.handleReplaceTrack({
                         groupId: props.groupId,
                         trackId: track.trackId,
                         formValues: props.savedFilter,
                       });
                     } else if ("filters" in e) {
-                      props.onReplaceTrack({
+                      playlist.handleReplaceTrack({
                         groupId: props.groupId,
                         trackId: track.trackId,
                         formValues: e,
@@ -128,7 +119,7 @@ export function Playlist(props: PlaylistProps) {
               </button>
               <span
                 onClick={() =>
-                  props.onRemoveTrack(props.groupId, track.trackId)
+                  playlist.handleRemoveTrack(props.groupId, track.trackId)
                 }
                 className="btn btn_theme_black track__btn"
               >

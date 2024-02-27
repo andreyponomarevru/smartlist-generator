@@ -6,53 +6,22 @@ import {
   FaFileAlt,
   FaArrowDown,
   FaArrowUp,
+  FaRegTrashAlt,
+  FaSlidersH,
 } from "react-icons/fa";
 
-import { FilterFormValues, TrackMeta } from "../../types";
 import { useEditableText } from "../../hooks/use-editable-text";
 import { EditableText } from "../../lib/editable-text/editable-text";
-import { Filter } from "../../hooks/use-saved-filters";
 import { FiltersForm } from "./filters-form/filters-form";
-import { Stats as StatsType } from "../../types";
 import { SavedFiltersForm } from "./saved-filters-form/saved-filters-form";
-import { TrackToReorder, TrackToReplace } from "../../hooks/use-playlist";
+import { useGlobalState } from "../../hooks/use-global-state";
+import { SavedFiltersProvider } from "../../hooks/use-saved-filters";
 
 import "./group.scss";
 
 interface GroupProps extends React.HTMLAttributes<HTMLDivElement> {
   groupId: number;
-  name: string;
-  mode: string;
-  years?: StatsType[];
-  genres?: StatsType[];
-  isOpenGroupId: Record<string, boolean>;
-  onToggle: () => void;
-  onAddGroupWithSavedFilter: () => void;
-  onAddGroupWithNewFilter: () => void;
-  onDeleteGroup: () => void;
-  onRenameGroup: (groupId: number, newName: string) => void;
-  onGetTrack: (groupId: number, formValues: FilterFormValues) => void;
-  onRemoveTrack: (groupId: number, trackId: number) => void;
-  onReplaceTrack: ({ groupId, trackId, formValues }: TrackToReplace) => void;
-  onReorderTrack: ({ index, direction, groupId }: TrackToReorder) => void;
-  onFiltersChange: (groupId: number) => void;
-  onGroupReorderUp: () => void;
-  onGroupReorderDown: () => void;
-  setPlayingIndex: ({
-    groupId,
-    index,
-  }: {
-    groupId: number;
-    index: number;
-  }) => void;
-  tracks: Record<string, TrackMeta[]>;
-  saveFilter: ({ id, name, settings }: Filter) => void;
-  deleteFilter: (name: string) => void;
-  filters: {
-    ids: string[];
-    names: Record<string, string>;
-    settings: Record<string, FilterFormValues>;
-  };
+  index: number;
 }
 
 let renderCount = 0;
@@ -60,29 +29,37 @@ let renderCount = 0;
 export function Group(props: GroupProps) {
   // console.log(renderCount++);
 
-  const groupName = useEditableText(props.name);
+  const { playlist } = useGlobalState();
+
+  const groupName = useEditableText(playlist.groupNames[`${props.groupId}`]);
 
   React.useEffect(() => {
-    if (groupName.state.text !== props.name) {
-      props.onRenameGroup(props.groupId, groupName.state.text);
+    if (groupName.state.text !== playlist.groupNames[`${props.groupId}`]) {
+      playlist.handleRenameGroup(props.groupId, groupName.state.text);
     }
   }, [groupName.state.text]);
 
   return (
     <>
       <div className={`group ${props.className || ""}`}>
-        <header className="group__header" onClick={props.onToggle}>
+        <header
+          className="group__header"
+          onClick={() => playlist.toggleIsGroupOpen(props.groupId)}
+        >
+          <span className="group__index">{props.index + 1}.</span>
           <EditableText className="group__name" editable={groupName} />
           <button
-            onClick={props.onDeleteGroup}
+            onClick={() => playlist.handleDestroyGroup(props.groupId)}
             className="btn btn_theme_transparent-black"
           >
-            <span>Delete</span>
+            <span>
+              <FaRegTrashAlt className="icon" />
+            </span>
           </button>
           <button
             onClick={(e) => {
               e.stopPropagation();
-              props.onGroupReorderUp();
+              playlist.handleReorderGroups(props.index, "UP");
             }}
             className="btn btn_theme_transparent-black group__sort-btn"
           >
@@ -91,14 +68,14 @@ export function Group(props: GroupProps) {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              props.onGroupReorderDown();
+              playlist.handleReorderGroups(props.index, "DOWN");
             }}
             className="btn btn_theme_transparent-black group__sort-btn"
           >
             <FaArrowDown className="icon" />
           </button>
           <div className="group__toggle-group-btn">
-            {props.isOpenGroupId[`${props.groupId}`] ? (
+            {playlist.isGroupOpen[`${props.groupId}`] ? (
               <FaChevronUp className="icon" />
             ) : (
               <FaChevronDown className="icon" />
@@ -108,54 +85,34 @@ export function Group(props: GroupProps) {
 
         <div
           className={`group__body ${
-            props.isOpenGroupId[`${props.groupId}`] ? "" : "group__body_hidden"
+            playlist.isGroupOpen[`${props.groupId}`] ? "" : "group__body_hidden"
           }`}
         >
-          {props.mode === "saved-filter" ? (
-            <SavedFiltersForm
-              groupId={props.groupId}
-              filters={props.filters}
-              onGetTrack={props.onGetTrack}
-              setPlayingIndex={props.setPlayingIndex}
-              tracks={props.tracks}
-              onRemoveTrack={props.onRemoveTrack}
-              onReplaceTrack={props.onReplaceTrack}
-              onReorderTrack={props.onReorderTrack}
-              onFiltersChange={props.onFiltersChange}
-            />
-          ) : (
-            <FiltersForm
-              groupId={props.groupId}
-              name={groupName.state.text}
-              onGetTrack={props.onGetTrack}
-              years={props.years}
-              genres={props.genres}
-              onFiltersChange={props.onFiltersChange}
-              saveFilter={props.saveFilter}
-              setPlayingIndex={props.setPlayingIndex}
-              tracks={props.tracks}
-              onRemoveTrack={props.onRemoveTrack}
-              onReplaceTrack={props.onReplaceTrack}
-              onReorderTrack={props.onReorderTrack}
-              className="group__form"
-            />
-          )}
+          <SavedFiltersProvider>
+            {playlist.groupModes[`${props.groupId}`] === "saved-filter" ? (
+              <SavedFiltersForm groupId={props.groupId} />
+            ) : (
+              <FiltersForm groupId={props.groupId} className="group__form" />
+            )}
+          </SavedFiltersProvider>
         </div>
       </div>
       <div className="group__btns-group">
         <button
           className="btn btn_theme_transparent-black add-section-btn"
-          onClick={props.onAddGroupWithSavedFilter}
+          onClick={() =>
+            playlist.handleAddGroup(props.index + 1, "saved-filter")
+          }
         >
-          <span>Add new section (using saved filters)</span>
           <FaFileAlt className="icon" />
+          <span>Use saved filters</span>
         </button>
         <button
           className="btn btn_theme_transparent-black add-section-btn"
-          onClick={props.onAddGroupWithNewFilter}
+          onClick={() => playlist.handleAddGroup(props.index + 1, "new-filter")}
         >
-          <span>Add new section (creating a new filter)</span>
-          <FaFilter className="icon" />
+          <FaSlidersH className="icon" />
+          <span>Create a new filter</span>
         </button>
       </div>
     </>

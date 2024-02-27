@@ -9,8 +9,8 @@ import { useEditableText } from "./use-editable-text";
 import { useTrack } from "./api/use-track";
 import { useTrackIds } from "./api/use-track-ids";
 
-type Mode = "new-filter" | "saved-filter";
-type Direction = "UP" | "DOWN";
+export type Mode = "new-filter" | "saved-filter";
+export type Direction = "UP" | "DOWN";
 export type TrackToReorder = {
   index: number;
   direction: Direction;
@@ -22,7 +22,7 @@ export type TrackToReplace = {
   formValues: FilterFormValues;
 };
 
-type State = {
+export type State = {
   groups: number[];
   groupNames: Record<string, string>;
   groupModes: Record<string, Mode>;

@@ -1,0 +1,8 @@
+.main {
+  display: grid;
+  grid-template-columns: 15rem 1fr;
+
+  min-width: 840px;
+  max-width: 1440px;
+  margin: 0 auto;
+}
