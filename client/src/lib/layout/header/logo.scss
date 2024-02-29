@@ -1,0 +1,9 @@
+@import "../../../global.scss";
+
+.logo {
+  max-width: 120px;
+
+  &:hover {
+    fill: $color_brown-80;
+  }
+}
