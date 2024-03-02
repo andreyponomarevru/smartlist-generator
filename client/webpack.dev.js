@@ -110,7 +110,7 @@ const webpackConf = {
   output: {
     // the url to the output dir resolved relative to the HTML page;
     // "" means "relative to HTML file"
-    publicPath: "",
+    publicPath: "/",
   },
   // https://webpack.js.org/configuration/stats/
   stats: "errors-warnings",
@@ -120,6 +120,7 @@ const webpackConf = {
   // https://webpack.js.org/configuration/dev-server/
   // https://github.com/webpack/webpack-dev-server/blob/master/migration-v4.md
   devServer: {
+    historyApiFallback: true,
     /*
     proxy: {
       "/api/v1": {
