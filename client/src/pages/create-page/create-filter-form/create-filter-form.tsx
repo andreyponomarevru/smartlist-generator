@@ -148,6 +148,8 @@ export function NewFiltersForm(props: NewFiltersFormProps) {
   React.useEffect(() => {
     if (form.formState.isDirty) {
       tempPlaylist.handleReset();
+      setIsBtnDisabled(false);
+      console.log("IS DIRTY TRIGGERED", "dirty", form.formState.dirtyFields);
     }
   }, [form.formState.isDirty]);
 
@@ -157,8 +159,16 @@ export function NewFiltersForm(props: NewFiltersFormProps) {
     form.reset(inputs, { keepValues: true, keepDirty: false });
   }
 
+  function onSaveFilter(inputs: FilterFormValues) {
+    savedFilters.handleSave(savedFormId, watchedNewFilters);
+    form.reset(inputs, { keepValues: true, keepDirty: false });
+    setIsBtnDisabled(true);
+  }
+
   // Change filter/form ID (for storing in state) every time we update the filter title (watchedNewFilters.name).
   const [savedFormId] = useUUID(1, [watchedNewFilters.name]);
+
+  const [isBtnDisabled, setIsBtnDisabled] = React.useState(false);
 
   return (
     <>
@@ -176,6 +186,7 @@ export function NewFiltersForm(props: NewFiltersFormProps) {
                 keepDirty: false,
               });
               form.clearErrors();
+              setIsBtnDisabled(false);
               tempPlaylist.handleReset();
             }}
           >
@@ -183,14 +194,10 @@ export function NewFiltersForm(props: NewFiltersFormProps) {
           </button>
           <button
             className="btn btn_type_primary"
-            onClick={(e) => {
-              e.preventDefault();
-              // trigger validation
-              form.trigger(undefined, { shouldFocus: true });
-              savedFilters.handleSave(savedFormId, watchedNewFilters);
-            }}
+            onClick={form.handleSubmit(onSaveFilter)}
+            disabled={isBtnDisabled}
           >
-            Save filter
+            {isBtnDisabled ? "Saved" : "Save filter"}
           </button>
         </div>
 
