@@ -21,14 +21,14 @@ export function EditableText(props: EditableTextProps) {
     <div className="editable-text">
       {props.editable.state.isFormVisible ? (
         <form className={`editable-text__form ${props.className || ""}`}>
-          <label className="editable-text__label" htmlFor="editable-text" />
+          <label className="editable-text__label" htmlFor="editabletext" />
           <input
-            id="editable-text"
+            id="editabletext"
             className="editable-text__input"
             type="text"
             maxLength={255}
             minLength={1}
-            name="editable-text"
+            name="editabletext"
             autoComplete="off"
             placeholder="Type a new name..."
             value={props.editable.state.inputValue}
@@ -58,7 +58,7 @@ export function EditableText(props: EditableTextProps) {
           </button>
         </form>
       ) : (
-        <span
+        <button
           className={`editable-text ${props.className || ""}`}
           onClick={(e) => {
             e.stopPropagation();
@@ -71,7 +71,7 @@ export function EditableText(props: EditableTextProps) {
           <span className="editable-text__edit-btn">
             <FaPen />
           </span>
-        </span>
+        </button>
       )}
     </div>
   );

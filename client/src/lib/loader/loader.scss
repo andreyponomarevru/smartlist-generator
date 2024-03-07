@@ -38,7 +38,7 @@
   }
 
   &_color_pink {
-    background-color: pink;
+    background-color: $color_warning;
   }
 
   &_color_white {
@@ -46,6 +46,6 @@
   }
 
   &_color_black {
-    background-color: $color_brand_gray-80;
+    background-color: $color_grey-50;
   }
 }

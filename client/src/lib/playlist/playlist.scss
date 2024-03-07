@@ -1,20 +1,29 @@
 @import "../../global.scss";
 
+.playlist {
+  margin-bottom: 2rem;
+  background-color: red;
+}
+
 .track {
   box-sizing: border-box;
   display: grid;
   grid-template-columns: auto auto 0.6fr 0.4fr 3rem auto;
-  color: $color_gray_darkest;
-  padding: 0.5rem 1rem;
+  color: $color_black;
+  padding: 1rem 0;
   align-items: center;
   column-gap: 1rem;
-  box-shadow: 0px 0px 1rem $color_gray-lighten;
+  //box-shadow: 0px 0px 1rem $color_grey-50;
   overflow: hidden;
-  font-size: $font-size_sm;
-  background-color: white;
-  border-radius: $border_radius_block;
+  font-size: $font-size_tiny;
+  //border-radius: $border_radius_block;
   text-overflow: ellipsis;
   cursor: pointer;
+  border-bottom: 1px solid $color_grey-50;
+
+  &:last-child {
+    border-bottom: none;
+  }
 
   &__controls {
     display: flex;
@@ -52,11 +61,11 @@
     padding: 0.4rem 0.6rem 0.5rem 0.6rem;
     line-height: 1;
     border-radius: 0.7rem;
-    background-color: $color_gray-lighten;
+    background-color: $color_black;
   }
 
   &__duration {
-    font-size: $font-size_xs;
+    font-size: $font-size_tiny;
   }
 
   &__sort-btn-icon {

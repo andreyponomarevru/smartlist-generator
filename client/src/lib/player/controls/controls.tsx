@@ -37,7 +37,7 @@ export function Controls(props: ControlsProps) {
     progressBarRef.current.value = String(currentTime);
     progressBarRef.current.style.setProperty(
       "--range-progress",
-      `${Number(progressBarRef.current.value) / duration}`
+      `${Number(progressBarRef.current.value) / duration}`,
     );
     playAnimationRef.current = requestAnimationFrame(repeat);
   }, [audioRef, audioRef.current, progressBarRef]);

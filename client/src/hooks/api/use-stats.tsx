@@ -4,7 +4,7 @@ import { GetStatsRes } from "../../types";
 import { API_ROOT_URL } from "../../config/env";
 
 async function getStats(
-  excludedTracks: number[]
+  excludedTracks: number[],
 ): Promise<{ genres: GetStatsRes; years: GetStatsRes }> {
   const excluded =
     excludedTracks.length > 0
@@ -17,12 +17,15 @@ async function getStats(
 
   if (!yearsResponse.ok || !genresResponse.ok) {
     throw new Error(
-      `Failed to fetch stats. Years response: ${yearsResponse}, Genres res: ${genresResponse}`
+      `Failed to fetch stats. Years response: ${yearsResponse}, Genres res: ${genresResponse}`,
     );
   }
 
-  const genres = await genresResponse.json();
-  const years = await yearsResponse.json();
+  const [genres, years] = await Promise.all([
+    genresResponse.json(),
+    yearsResponse.json(),
+  ]);
+
   return { genres, years };
 }
 

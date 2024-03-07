@@ -11,7 +11,6 @@ export function usePlayer(tracks: Record<string, TrackMeta[]>) {
   }
 
   const [playingIndex, setPlayingIndex] = React.useState<{
-    groupId: number;
     index: number;
   } | null>(null);
 
@@ -19,7 +18,7 @@ export function usePlayer(tracks: Record<string, TrackMeta[]>) {
 
   React.useEffect(() => {
     if (playingIndex) {
-      setActiveTrack(tracks[playingIndex.groupId][playingIndex.index]);
+      // setActiveTrack(tracks[playingIndex.index]);
     }
   }, [playingIndex]);
 
@@ -79,6 +78,7 @@ export function usePlayer(tracks: Record<string, TrackMeta[]>) {
 
   function handleNext() {
     console.log(playingIndex, activeTrack);
+    /*
     if (!playingIndex || !activeTrack) return;
 
     if (tracks[playingIndex.groupId].length === 1) {
@@ -91,6 +91,7 @@ export function usePlayer(tracks: Record<string, TrackMeta[]>) {
         return prev ? { ...prev, index: 0 } : null;
       });
       setActiveTrack(tracks[playingIndex.groupId][playingIndex.index]);
+    
     } else {
       reset();
       // Allow looping:
@@ -98,10 +99,11 @@ export function usePlayer(tracks: Record<string, TrackMeta[]>) {
       //   return prev ? { ...prev, index: prev.index + 1 } : null;
       // });
       // setActiveTrack(tracks[playingIndex.groupId][playingIndex.index + 1]);
-    }
+    }*/
   }
 
   function handlePrevious() {
+    /*
     if (Object.values(tracks).flat().length === 0) return;
     if (!playingIndex) return;
 
@@ -117,7 +119,7 @@ export function usePlayer(tracks: Record<string, TrackMeta[]>) {
         return prev ? { ...prev, index: prev.index - 1 } : null;
       });
       setActiveTrack(tracks[playingIndex.groupId][playingIndex.index - 1]);
-    }
+    }*/
   }
 
   //
