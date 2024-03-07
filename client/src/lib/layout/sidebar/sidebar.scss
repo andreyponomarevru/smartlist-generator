@@ -1,0 +1,58 @@
+@import "./../../../global";
+
+.sidebar {
+  &__logo {
+    margin-left: 0.8rem;
+  }
+
+  &__menu {
+    display: flex;
+    flex-flow: column nowrap;
+    row-gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  &__list-item {
+    display: flex;
+    column-gap: 0.5rem;
+    list-style-type: none;
+    font-size: 1.5rem;
+    align-items: center;
+
+    &:link,
+    &:visited {
+      color: $color_black;
+      text-decoration: none;
+    }
+
+    &:hover {
+      color: $color_link;
+      text-decoration: none;
+    }
+
+    &:focus,
+    &:active {
+      color: $color_black;
+      text-decoration: none;
+    }
+
+    &_active {
+      & .sidebar__icon-wrapper {
+        background-color: $color_blue-20;
+      }
+
+      & .sidebar__item-name {
+        color: $color_link;
+      }
+    }
+  }
+
+  &__icon-wrapper {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border-radius: 50%;
+    height: 3.2rem;
+    width: 3.2rem;
+  }
+}

@@ -1,0 +1,48 @@
+@import "../../global.scss";
+
+.database-page {
+  display: flex;
+  flex-flow: column nowrap;
+  font-size: $font-size_regular-text;
+
+  &__input {
+    font-size: $font-size_controls;
+    height: $controls_btn-height;
+  }
+
+  &__row {
+    display: grid;
+    grid-template-columns: 25% 1fr auto;
+    align-items: center;
+    column-gap: 2rem;
+    border-bottom: 1px solid $color_grey-50;
+    padding: 1rem 0;
+  }
+
+  &__buttons {
+    display: flex;
+    flex-flow: column nowrap;
+    row-gap: 1rem;
+    align-items: flex-end;
+  }
+
+  &__name {
+    font-weight: bold;
+  }
+
+  &__row:last-child {
+    border-bottom: none;
+  }
+
+  &__icon {
+    font-size: 2rem;
+
+    &_success {
+      fill: $color_success;
+    }
+
+    &_error {
+      fill: $color_danger;
+    }
+  }
+}

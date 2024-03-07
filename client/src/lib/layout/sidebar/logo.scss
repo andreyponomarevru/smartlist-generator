@@ -1,0 +1,9 @@
+@import "./../../../global";
+
+.logo {
+  max-width: 120px;
+
+  &:hover {
+    fill: $color_link;
+  }
+}

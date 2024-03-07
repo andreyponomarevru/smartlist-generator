@@ -1,4 +1,11 @@
-import { Control, UseFormResetField } from "react-hook-form";
+import {
+  Control,
+  UseFormResetField,
+  UseFormReset,
+  FieldArrayWithId,
+  UseFormSetValue,
+  UseFormGetValues,
+} from "react-hook-form";
 
 export type TrackMeta = {
   year: number;
@@ -21,11 +28,12 @@ export type OptionsList<Value> = {
 };
 
 export interface FilterFormValues {
+  name: string;
   operator: { label: string; value: string };
   filters: {
     name: { label: string; value: string };
-    condition?: { label: string; value: string };
-    value?: OptionsList<number> | OptionsList<number>[];
+    condition: { label: string; value: string } | null;
+    value: OptionsList<number> | OptionsList<number>[] | null;
   }[];
 }
 
@@ -51,17 +59,23 @@ export type SelectProps<OptionsValue> = {
   name?: string;
   control: Control<FilterFormValues>;
   index: number;
-  resetField: UseFormResetField<FilterFormValues>;
-  options: OptionsList<OptionsValue>[];
-  defaultValue?: OptionsList<OptionsValue>;
+  options?: OptionsList<OptionsValue>[];
+  conditionOptions?: OptionsList<OptionsValue>[];
+  valueOptions?: Record<string, OptionsList<OptionsValue>[]>;
+
+  defaultValue?: OptionsList<OptionsValue> | null;
+  closeMenuOnSelect?: boolean;
+  resetField?: UseFormResetField<FilterFormValues>;
+  isMulti?: boolean;
+  isDirty?: boolean;
 };
 
 export type SearchQuery = {
   operator: string;
   filters: {
-    value: number | (number | undefined)[] | undefined;
     name: string;
     condition?: string;
+    value: number | (number | undefined)[] | undefined;
   }[];
   excludeTracks: number[];
 };

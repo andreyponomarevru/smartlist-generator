@@ -3,65 +3,28 @@ import React from "react";
 import { FilterFormValues } from "../types";
 import { readFileAsString } from "../utils/misc";
 
-export type Filter = { id: string; name: string; settings: FilterFormValues };
-
-export type State = {
-  ids: string[];
-  names: Record<string, string>;
-  settings: Record<string, FilterFormValues>;
-};
+export type State = Record<string, FilterFormValues>;
 
 type Action =
-  | {
-      type: "SAVE";
-      payload: { id: string; name: string; settings: FilterFormValues };
-    }
-  | { type: "DELETE"; payload: { id: string } }
-  | { type: "RENAME"; payload: { id: string; newName: string } }
-  | { type: "RESET_TO_IMPORTED"; payload: State };
+  | { type: "SAVE"; payload: { formId: string; inputs: FilterFormValues } }
+  | { type: "DELETE"; payload: { formId: string } }
+  | { type: "UPDATE"; payload: { formId: string; inputs: FilterFormValues } }
+  | { type: "IMPORT"; payload: State };
 
 function savedFiltersReducer(state: State, action: Action): State {
   switch (action.type) {
     case "SAVE": {
-      // If the user haven't changed the form but clicks "Save" again - do nothing
-      if (state.ids.includes(action.payload.id)) return state;
-
-      return {
-        ids: [...state.ids, action.payload.id],
-        names: {
-          ...state.names,
-          [`${action.payload.id}`]: action.payload.name,
-        },
-        settings: {
-          ...state.settings,
-          [`${action.payload.id}`]: action.payload.settings,
-        },
-      };
+      return { ...state, [`${action.payload.formId}`]: action.payload.inputs };
     }
     case "DELETE": {
-      const { [`${action.payload.id}`]: _, ...updatedNames } = state.names;
-      const {
-        [`${action.payload.id}`]: __,
-        ...updatedSettings
-      } = state.settings;
-
-      return {
-        ids: state.ids.filter((id) => id != action.payload.id),
-        names: updatedNames,
-        settings: updatedSettings,
-      };
+      const { [`${action.payload.formId}`]: _, ...filters } = state;
+      return filters;
     }
-    case "RENAME": {
-      return {
-        ...state,
-        names: {
-          ...state.names,
-          [`${action.payload.id}`]: action.payload.newName,
-        },
-      };
+    case "UPDATE": {
+      return { ...state, [`${action.payload.formId}`]: action.payload.inputs };
     }
-    case "RESET_TO_IMPORTED": {
-      return action.payload;
+    case "IMPORT": {
+      return { ...state, ...action.payload };
     }
     default: {
       throw new Error(`Unknown action ${action}`);
@@ -70,7 +33,7 @@ function savedFiltersReducer(state: State, action: Action): State {
 }
 
 function useSavedFilters() {
-  const initialState: State = { ids: [], names: {}, settings: {} };
+  const initialState: State = {};
 
   function getInitialState() {
     const saved = localStorage.getItem("filters");
@@ -80,26 +43,26 @@ function useSavedFilters() {
   const [state, dispatch] = React.useReducer(
     savedFiltersReducer,
     initialState,
-    getInitialState
+    getInitialState,
   );
 
   React.useEffect(() => {
     localStorage.setItem("filters", JSON.stringify(state));
   }, [state]);
 
-  function save({ id, name, settings }: Filter) {
-    dispatch({ type: "SAVE", payload: { id, name, settings } });
+  function save(formId: string, inputs: FilterFormValues) {
+    dispatch({ type: "SAVE", payload: { formId, inputs } });
   }
 
-  function destroy(id: string) {
-    dispatch({ type: "DELETE", payload: { id } });
+  function destroy(formId: string) {
+    dispatch({ type: "DELETE", payload: { formId } });
   }
 
-  function rename(id: string, newName: string) {
-    dispatch({ type: "RENAME", payload: { id, newName } });
+  function rename(formId: string, inputs: FilterFormValues) {
+    dispatch({ type: "UPDATE", payload: { formId, inputs } });
   }
 
-  async function handleImportAsJSON(e: React.ChangeEvent<HTMLInputElement>) {
+  async function importAsJSON(e: React.ChangeEvent<HTMLInputElement>) {
     if (!e.target.files || !(e.target.files.length > 0)) {
       throw new Error("No file(s)");
     }
@@ -113,14 +76,12 @@ function useSavedFilters() {
     }
 
     const stringifiedFiles = await Promise.all(files.map(readFileAsString));
-    const newState: State = { ids: [], names: {}, settings: {} };
+    let importedFilters: State = {};
     stringifiedFiles.forEach((str) => {
       const state: State = JSON.parse(str);
-      newState.ids = [...newState.ids, ...state.ids];
-      newState.names = { ...newState.names, ...state.names };
-      newState.settings = { ...newState.settings, ...state.settings };
+      importedFilters = { ...importedFilters, ...state };
     });
-    dispatch({ type: "RESET_TO_IMPORTED", payload: newState });
+    dispatch({ type: "IMPORT", payload: importedFilters });
   }
 
   return {
@@ -128,14 +89,14 @@ function useSavedFilters() {
     handleSave: save,
     handleDestroy: destroy,
     handleRename: rename,
-    handleImportAsJSON,
+    handleImportAsJSON: importAsJSON,
   };
 }
 
 type Context = ReturnType<typeof useSavedFilters>;
 
 const SavedFiltersContext = React.createContext<Context>({
-  state: { ids: [], names: {}, settings: {} },
+  state: {},
   handleSave: () => {},
   handleDestroy: () => {},
   handleRename: () => {},

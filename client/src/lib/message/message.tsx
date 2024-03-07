@@ -8,8 +8,8 @@ interface Props extends React.HTMLAttributes<HTMLSpanElement> {
 
 export function Message(props: PropsWithChildren<Props>): ReactElement {
   return (
-    <span className={`message message_${props.type} ${props.className || ""}`}>
+    <div className={`message message_${props.type} ${props.className || ""}`}>
       {props.children}
-    </span>
+    </div>
   );
 }

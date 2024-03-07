@@ -25,7 +25,6 @@ export type TrackToReplace = {
 export type State = {
   groups: number[];
   groupNames: Record<string, string>;
-  groupModes: Record<string, Mode>;
   tracks: Record<string, TrackMeta[]>;
   excludedTracks: Set<number>;
   isGroupOpen: Record<string, boolean>;
@@ -71,10 +70,6 @@ function playlistReducer(state: State, action: Action): State {
           ...state.groupNames,
           [`${newGroupId}`]: new Date().toLocaleTimeString(),
         },
-        groupModes: {
-          ...state.groupModes,
-          [`${newGroupId}`]: action.payload.mode,
-        },
         tracks: { ...state.tracks, [`${newGroupId}`]: [] },
         isGroupOpen: { ...state.isGroupOpen, [`${newGroupId}`]: true },
       };
@@ -94,14 +89,10 @@ function playlistReducer(state: State, action: Action): State {
       };
     }
     case "DESTROY_GROUP": {
-      const {
-        [`${action.payload.groupId}`]: _,
-        ...updatedGroupNames
-      } = state.groupNames;
-      const {
-        [`${action.payload.groupId}`]: __,
-        ...updatedTracks
-      } = state.tracks;
+      const { [`${action.payload.groupId}`]: _, ...updatedGroupNames } =
+        state.groupNames;
+      const { [`${action.payload.groupId}`]: __, ...updatedTracks } =
+        state.tracks;
 
       return {
         ...state,
@@ -115,7 +106,6 @@ function playlistReducer(state: State, action: Action): State {
         ...state,
         groups: [],
         groupNames: {},
-        groupModes: {},
         tracks: {},
         excludedTracks: state.excludedTracks,
         isGroupOpen: {},
@@ -150,11 +140,11 @@ function playlistReducer(state: State, action: Action): State {
       };
     }
     case "REPLACE_TRACK": {
-      let removedIndex = state.tracks[`${action.payload.groupId}`].findIndex(
-        (track) => track.trackId === action.payload.trackId
+      const removedIndex = state.tracks[`${action.payload.groupId}`].findIndex(
+        (track) => track.trackId === action.payload.trackId,
       );
       const filtered = state.tracks[`${action.payload.groupId}`].filter(
-        (track) => track.trackId !== action.payload.trackId
+        (track) => track.trackId !== action.payload.trackId,
       );
       const updatedTracks = [
         ...filtered.slice(0, removedIndex),
@@ -181,7 +171,6 @@ function playlistReducer(state: State, action: Action): State {
           ...action.payload.trackIds,
         ]),
         isGroupOpen: {},
-        groupModes: {},
       };
     }
     case "OPEN_GROUP": {
@@ -189,9 +178,8 @@ function playlistReducer(state: State, action: Action): State {
         ...state,
         isGroupOpen: {
           ...state.isGroupOpen,
-          [`${action.payload.groupId}`]: !state.isGroupOpen[
-            `${action.payload.groupId}`
-          ],
+          [`${action.payload.groupId}`]:
+            !state.isGroupOpen[`${action.payload.groupId}`],
         },
       };
     }
@@ -200,10 +188,10 @@ function playlistReducer(state: State, action: Action): State {
       const newIndex = oldIndex + (action.payload.direction === "UP" ? -1 : 1);
 
       const movedItem = state.groups.find(
-        (item, index) => index === oldIndex
+        (item, index) => index === oldIndex,
       ) as number;
       const remainingItems = state.groups.filter(
-        (item, index) => index !== oldIndex
+        (item, index) => index !== oldIndex,
       );
 
       return {
@@ -220,10 +208,10 @@ function playlistReducer(state: State, action: Action): State {
       const newIndex = oldIndex + (action.payload.direction === "UP" ? -1 : 1);
 
       const movedItem = state.tracks[`${action.payload.groupId}`].find(
-        (item, index) => index === oldIndex
+        (item, index) => index === oldIndex,
       ) as TrackMeta;
       const remainingItems = state.tracks[`${action.payload.groupId}`].filter(
-        (item, index) => index !== oldIndex
+        (item, index) => index !== oldIndex,
       );
       return {
         ...state,
@@ -247,7 +235,6 @@ export function usePlaylist() {
   const initialState: State = {
     groups: [],
     groupNames: {},
-    groupModes: {},
     tracks: {},
     excludedTracks: new Set<number>(),
     isGroupOpen: {},
@@ -268,7 +255,7 @@ export function usePlaylist() {
   const [state, dispatch] = React.useReducer(
     playlistReducer,
     initialState,
-    getInitialState
+    getInitialState,
   );
   const playlistName = useEditableText(`Playlist ${new Date().toDateString()}`);
   const getTrackQuery = useTrack();
@@ -277,7 +264,7 @@ export function usePlaylist() {
   React.useEffect(() => {
     localStorage.setItem(
       "excludedTracks",
-      JSON.stringify([...state.excludedTracks])
+      JSON.stringify([...state.excludedTracks]),
     );
   }, [state.excludedTracks]);
 
@@ -295,7 +282,7 @@ export function usePlaylist() {
 
   function handleRenameGroup(
     groupId: number,
-    newName: string = `${new Date().toLocaleTimeString()}`
+    newName: string = `${new Date().toLocaleTimeString()}`,
   ) {
     dispatch({ type: "RENAME_GROUP", payload: { groupId, newName } });
   }
@@ -322,7 +309,7 @@ export function usePlaylist() {
             .flat()
             .map((t) => t.trackId),
           ...state.excludedTracks,
-        ])
+        ]),
       );
       dispatch({
         type: "REPLACE_TRACK",
@@ -333,7 +320,7 @@ export function usePlaylist() {
     }
   }
 
-  async function handleAddTrack(groupId: number, formValues: FilterFormValues) {
+  async function handleAddTrack(formValues: FilterFormValues) {
     try {
       const track = await getTrackQuery.mutateAsync(
         buildSearchQuery(formValues, [
@@ -341,16 +328,16 @@ export function usePlaylist() {
             .flat()
             .map((t) => t.trackId),
           ...state.excludedTracks,
-        ])
+        ]),
       );
-      dispatch({ type: "ADD_TRACK", payload: { groupId, tracks: track } });
+      //dispatch({ type: "ADD_TRACK", payload: { groupId, tracks: track } });
     } catch (err) {
       console.error(err);
     }
   }
 
   async function handleImportExcludedTracks(
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) {
     if (!e.target.files || !(e.target.files.length > 0)) {
       throw new Error("No file(s)");
