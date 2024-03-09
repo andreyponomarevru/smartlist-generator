@@ -38,11 +38,12 @@
 
     &_active {
       & .sidebar__icon-wrapper {
-        background-color: $color_blue-20;
+        background-color: $color_black;
       }
 
       & .sidebar__item-name {
-        color: $color_link;
+        text-decoration: underline;
+        text-underline-offset: 0.5rem;
       }
     }
   }

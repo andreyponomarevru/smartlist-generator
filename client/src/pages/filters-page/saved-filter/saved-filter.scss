@@ -4,15 +4,19 @@
   display: grid;
   align-items: flex-start;
   align-content: flex-start;
-  padding: 1rem 0;
+  padding: 0 0 1rem 0;
   column-gap: 1rem;
-  row-gap: 2rem;
+  row-gap: 1rem;
   width: 100%;
   text-overflow: ellipsis;
-  border-bottom: 1px solid $color_grey-50;
 
   &__operator {
-    font-weight: bold;
+    font-size: $font-size_regular-text;
+  }
+
+  &__operator-name {
+    font-style: italic;
+    padding: 0 0.4rem;
   }
 
   &__col1 {
@@ -55,12 +59,16 @@
     font-size: $font-size_h2;
     grid-template-columns: auto 1fr auto;
     column-gap: 1rem;
+    background-color: $color_black;
+    color: $color_grey-20;
+    padding: 0.5rem 1rem;
+    border-radius: $border_radius_btn;
   }
 
   &__body {
     display: flex;
     flex-flow: column nowrap;
-    row-gap: 1rem;
+    padding: 0 1rem;
   }
 
   &__row {
@@ -85,7 +93,7 @@
     padding: 0.5rem;
 
     &:hover {
-      background-color: $color_blue-20;
+      background-color: $color_grey-70;
     }
   }
 

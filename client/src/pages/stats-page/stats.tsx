@@ -45,7 +45,7 @@ export function Stats(props: StatsProps) {
         {props.name} ({stats.length})
         <span className="stats__icons">
           <button
-            className="btn btn_type_icon"
+            className="btn btn_hover_grey-20 btn_type_icon"
             onClick={() => setSortByAlpha((prev) => !prev)}
           >
             {sortedByAlpha ? (
@@ -55,7 +55,7 @@ export function Stats(props: StatsProps) {
             )}
           </button>
           <button
-            className="btn btn_type_icon"
+            className="btn btn_hover_grey-20 btn_type_icon"
             onClick={() => setSortByNum((prev) => !prev)}
           >
             {sortedByNum ? (

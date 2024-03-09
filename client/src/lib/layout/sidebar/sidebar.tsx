@@ -4,7 +4,6 @@ import { FaFilter } from "react-icons/fa";
 import { NavLink } from "react-router-dom";
 import { RiPlayList2Fill } from "react-icons/ri";
 import { IoIosStats } from "react-icons/io";
-import { MdAddToPhotos } from "react-icons/md";
 
 import { PATHS } from "../../../config/routes";
 import { Logo } from "./logo";
@@ -13,7 +12,6 @@ import "./sidebar.scss";
 
 export function Sidebar() {
   const items = [
-    { Icon: MdAddToPhotos, name: "Create", to: PATHS.create },
     { Icon: FaFilter, name: "Filters", to: PATHS.filters },
     { Icon: RiPlayList2Fill, name: "Playlist", to: PATHS.playlist },
     { Icon: FaDatabase, name: "Database", to: PATHS.database },
@@ -38,10 +36,18 @@ export function Sidebar() {
                 : "sidebar__list-item";
             }}
           >
-            <span className="sidebar__icon-wrapper">
-              <Icon />
-            </span>
-            <span className="sidebar__item-name">{name}</span>
+            {({ isActive, isPending }) => {
+              return isPending ? (
+                "Loading...."
+              ) : (
+                <>
+                  <span className="sidebar__icon-wrapper">
+                    <Icon style={{ fill: isActive ? "white" : "black" }} />
+                  </span>
+                  <span className="sidebar__item-name">{name}</span>
+                </>
+              );
+            }}
           </NavLink>
         ))}
       </nav>

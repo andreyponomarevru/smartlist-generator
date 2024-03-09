@@ -100,7 +100,7 @@ $zindex-tooltip: 1070 !default;
 // Misc
 //
 
-$border_radius_btn: 6px;
+$border_radius_btn: 8px;
 $border_radius_block: 8px;
 
 $controls_btn-height: 2.75rem;
@@ -110,7 +110,9 @@ $controls_btn-height: 2.75rem;
   margin: 0;
   /* Paths and strokes that overflow the viewBox can show in IE11. */
   overflow: hidden;
-  transition: fill 0.2s ease, background-color 0.2s ease;
+  transition:
+    fill 0.2s ease,
+    background-color 0.2s ease;
   outline: none;
   cursor: pointer;
 }
@@ -134,7 +136,6 @@ $controls_btn-height: 2.75rem;
   padding: 0.5rem 1.2rem;
   box-sizing: border-box;
 
-  font-size: $font-size_controls;
   line-height: 1;
   text-decoration: none;
   white-space: nowrap;
@@ -143,7 +144,9 @@ $controls_btn-height: 2.75rem;
 
   outline: none;
   border: 0;
-  transition: transform 0.2s ease, background-color 0.2s ease,
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease,
     box-shadow 0.2s ease;
   border: 1px solid transparent;
   height: $controls_btn-height;
@@ -158,6 +161,7 @@ $controls_btn-height: 2.75rem;
   }
 
   &_type_primary {
+    font-size: $font-size_controls;
     color: white;
     background-color: $color_black;
 
@@ -167,6 +171,7 @@ $controls_btn-height: 2.75rem;
   }
 
   &_type_secondary {
+    font-size: $font-size_controls;
     color: $color_black;
     border: 1px solid $color_grey-50;
     background-color: transparent;
@@ -176,7 +181,18 @@ $controls_btn-height: 2.75rem;
     }
   }
 
+  &_type_tertiary {
+    font-size: $font-size_tiny;
+    background-color: $color_grey-20;
+    color: $color_black;
+
+    &:hover {
+      background-color: $color_grey-50;
+    }
+  }
+
   &_type_danger {
+    font-size: $font-size_controls;
     border-color: $color_danger;
     background-color: transparent;
     color: $color_danger;
@@ -190,9 +206,17 @@ $controls_btn-height: 2.75rem;
     border: none;
     background-color: transparent;
     padding: 0 0.5rem;
+  }
 
+  &_hover_grey-70 {
     &:hover {
-      background-color: $color_blue-20;
+      background-color: $color_grey-70;
+    }
+  }
+
+  &_hover_grey-20 {
+    &:hover {
+      background-color: $color_grey-20;
     }
   }
 }
@@ -254,3 +278,7 @@ $controls_btn-height: 2.75rem;
   }
 }
 
+.header1 {
+  font-size: $font-size_h1;
+  margin-bottom: 1rem;
+}

@@ -3,7 +3,6 @@ import { FaRegTrashAlt, FaChevronUp, FaChevronDown } from "react-icons/fa";
 
 import { MdModeEdit } from "react-icons/md";
 import { FilterFormValues } from "../../../types";
-import { useEditableText } from "../../../hooks/use-editable-text";
 
 import "./saved-filter.scss";
 
@@ -11,21 +10,13 @@ interface SavedFilterProps extends React.HTMLAttributes<HTMLDivElement> {
   name: string;
   filterId: string;
   filter: FilterFormValues;
-  handleEdit: () => void;
-  handleDestroy: () => void;
-  handleRename: (id: string, inputs: FilterFormValues) => void;
+  onEdit: () => void;
+  onDestroy: () => void;
+  onRename: (id: string, inputs: FilterFormValues) => void;
 }
 
 export function SavedFilter(props: SavedFilterProps) {
-  const savedFilterName = useEditableText(props.name);
-
   const [isOpen, setIsOpen] = React.useState(false);
-
-  React.useEffect(() => {
-    if (savedFilterName.state.text !== props.name) {
-      //props.handleRename(props.savedFilterId, savedFilterName.state.text);
-    }
-  }, [savedFilterName.state.text, props.name]);
 
   return (
     <div className="saved-filter">
@@ -34,8 +25,7 @@ export function SavedFilter(props: SavedFilterProps) {
         onClick={() => setIsOpen((prev) => !prev)}
         role="presentation"
       >
-        {savedFilterName.state.text}
-        {/*<EditableText editable={savedFilterName} />*/}
+        <span>{props.name}</span>
         <div className="saved-filter__toggle-btn">
           {isOpen ? (
             <FaChevronUp className="icon" />
@@ -48,29 +38,33 @@ export function SavedFilter(props: SavedFilterProps) {
             className="saved-filter__btn"
             onClick={(e) => {
               e.stopPropagation();
-              props.handleEdit();
+              props.onEdit();
             }}
           >
-            <MdModeEdit className="icon" />
+            <MdModeEdit className="icon" style={{ fill: "white" }} />
           </button>
           <button
             className="saved-filter__btn"
             onClick={(e) => {
               e.stopPropagation();
-              props.handleDestroy();
+              props.onDestroy();
             }}
           >
-            <FaRegTrashAlt className="icon" />
+            <FaRegTrashAlt className="icon" style={{ fill: "white" }} />
           </button>
         </div>
       </header>
 
       {isOpen && (
         <div className="saved-filter__body">
-          <div className="saved-filter__operator">
-            {props.filter.operator.value.toUpperCase()}
-          </div>
           <ul className="saved-filter__details-list">
+            <div className="saved-filter__operator">
+              Match
+              <span className="saved-filter__operator-name">
+                {props.filter.operator.label}
+              </span>
+              of the following rules:
+            </div>
             {props.filter.filters.map((f, index) => {
               return (
                 <li

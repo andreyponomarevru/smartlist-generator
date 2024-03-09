@@ -41,11 +41,11 @@ export function useEditableText(initialText: string) {
 
   const [state, dispatch] = React.useReducer(editableTextReducer, initialState);
 
-  function handleEdit() {
+  function handleInputEdit() {
     dispatch({ type: "SHOW_FORM" });
   }
 
-  function handleCancelEditing() {
+  function handleInputCancel() {
     dispatch({ type: "CANCEL_INPUT" });
   }
 
@@ -53,7 +53,7 @@ export function useEditableText(initialText: string) {
     dispatch({ type: "UPDATE_INPUT", payload: { inputValue: e.target.value } });
   }
 
-  function handleSave() {
+  function handleInputSave() {
     if (state.inputValue) {
       dispatch({ type: "SAVE_INPUT" });
     } else {
@@ -63,9 +63,9 @@ export function useEditableText(initialText: string) {
 
   return {
     state,
-    handleEdit,
-    handleCancelEditing,
+    handleInputEdit,
+    handleInputCancel,
     handleInputChange,
-    handleSave,
+    handleInputSave,
   };
 }

@@ -4,30 +4,33 @@ import { IoIosCloseCircleOutline } from "react-icons/io";
 import { FaFileImport, FaDownload } from "react-icons/fa";
 import { useForm, SubmitHandler } from "react-hook-form";
 
-import { Header } from "../../lib/header/header1";
 import { useGlobalState } from "../../hooks/use-global-state";
 
 import "./database-page.scss";
 
 type Input = { libPath: string };
 
+const INPUT_ERRORS = {
+  libPath: "This field is required",
+};
+
 export function DatabasePage() {
   const { playlist } = useGlobalState();
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<Input>();
+  const form = useForm<Input>();
 
-  const onSubmit: SubmitHandler<Input> = (data) => console.log(data);
+  const handleLibPathSubmit: SubmitHandler<Input> = (data) => console.log(data);
+
+  React.useEffect(() => {
+    console.log(playlist.excludedTracks);
+  }, [playlist.excludedTracks]);
 
   return (
     <div className="database-page">
-      <Header>Database</Header>
+      <header className="header1">Database</header>
 
       <form
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit(handleLibPathSubmit)}
         id="libpath"
         className="database-page__row"
       >
@@ -35,10 +38,10 @@ export function DatabasePage() {
         <span>
           <input
             defaultValue="Library path"
-            {...register("libPath", { required: true })}
+            {...form.register("libPath", { required: true })}
             className="input database-page__input"
           />
-          {errors.libPath && <span>This field is required</span>}
+          {form.formState.errors.libPath && <span>{INPUT_ERRORS.libPath}</span>}
         </span>
         <span className="database-page__buttons">
           <input
@@ -74,13 +77,13 @@ export function DatabasePage() {
 
       <div className="database-page__row">
         <span className="database-page__name">Excluded Tracks</span>
-        <span>0</span>
+        <span>{playlist.excludedTracks.size}</span>
         <span className="database-page__buttons">
           <label htmlFor="importblacklisted">
             <input
               id="importblacklisted"
               type="file"
-              onChange={playlist.handleImportExcludedTracks}
+              onChange={playlist.handleExcludedTracksImport}
               multiple
               hidden
             />

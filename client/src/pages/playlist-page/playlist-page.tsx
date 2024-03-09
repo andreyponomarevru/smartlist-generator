@@ -1,114 +1,73 @@
 import React from "react";
-import {
-  FaDownload,
-  FaFileImport,
-  FaFileAlt,
-  FaFilter,
-  FaRegWindowMaximize,
-  FaListUl,
-} from "react-icons/fa";
+import { FaDownload } from "react-icons/fa";
+import { IoMdAddCircle } from "react-icons/io";
 
-//import { Group } from "../../lib/group/group";
-import {
-  exportPlaylistAsJSON,
-  exportPlaylistToM3U,
-  exportSavedFiltersToJSON,
-} from "../../utils/misc";
-import { EditableText } from "../../lib/editable-text/editable-text";
+import { Group } from "./group/group";
+import { exportPlaylistToM3U } from "../../utils/misc";
 import { toHourMinSec } from "../../utils/misc";
 import { useGlobalState } from "../../hooks/use-global-state";
+import { SavedFiltersProvider } from "../../hooks/use-saved-filters";
 
 import "./playlist-page.scss";
 
 export function PlaylistPage() {
-  const { playlist } = useGlobalState();
+  const {
+    playlist: { groups, tracks, name, handleGroupAdd, handlePlaylistReset },
+  } = useGlobalState();
+
+  const totalDuration = toHourMinSec(
+    Object.values(tracks)
+      .flat()
+      .reduce((total, track) => track.duration + total, 0),
+  );
+
+  function handleExportPlaylistClick() {
+    exportPlaylistToM3U(name.state.text, tracks, groups);
+  }
 
   return (
-    <div className="playlist-builder-page">
-      <div></div>
-      <section className="playlist-builder-page__section">
-        <header className="playlist-builder-page__playlist-headers">
-          <div className="playlist-builder-page__playlist-header-one">
-            <EditableText
-              className="playlist-builder-page__playlist-name"
-              editable={playlist.name}
-            />
-            <div className="playlist-builder-page__duration">
-              {toHourMinSec(
-                Object.values(playlist.tracks)
-                  .flat()
-                  .reduce((total, track) => track.duration + total, 0),
-              )}
-            </div>
-          </div>
-          <div className="playlist-builder-page__playlist-header-two">
-            <button
-              onClick={playlist.handleResetGroups}
-              className="playlist-builder-page__btn btn btn_theme_transparent-black"
-            >
-              <span>Reset groups</span>
-            </button>
+    <div className="playlist-page">
+      <section className="playlist-page__section">
+        <div className="playlist-page__playlist-header">
+          <header className="header1 playlist-page__playlist-name">
+            {name.state.text}
+          </header>
+          <div className="playlist-page__duration">{totalDuration}</div>
+        </div>
 
-            <div>
-              <button
-                onClick={playlist.handleResetGroups}
-                className="playlist-builder-page__btn btn btn_theme_transparent-black"
-              >
-                <FaListUl /> <FaRegWindowMaximize />
-              </button>
-            </div>
-          </div>
-        </header>
+        <div className="playlist-page__btns-group">
+          <button
+            onClick={handlePlaylistReset}
+            className="btn btn_type_secondary"
+          >
+            <span>Reset</span>
+          </button>
+          <button
+            className="btn btn_type_primary add-section-btn"
+            onClick={() => handleGroupAdd(0)}
+          >
+            <IoMdAddCircle className="icon" />
+            <span>Add Group</span>
+          </button>
+        </div>
 
-        {playlist.groups.length === 0 && (
-          <div className="playlist-builder-page__add-new-group-btns">
-            <button
-              className="btn btn_theme_transparent-black add-section-btn"
-              onClick={() => playlist.handleAddGroup(0, "saved-filter")}
-            >
-              <FaFileAlt className="icon" />
-              <span>Use saved filters</span>
-            </button>
-            <button
-              className="btn btn_theme_transparent-black add-section-btn"
-              onClick={() => playlist.handleAddGroup(0, "new-filter")}
-            >
-              <FaFilter className="icon" />+<span>Create a new filter</span>
-            </button>
-          </div>
-        )}
-        {/*playlist.groups.map((groupId, index) => (
-          <Group groupId={groupId} key={groupId} index={index} />
-        ))*/}
+        <SavedFiltersProvider>
+          {groups.map((groupId, index) => (
+            <Group groupId={groupId} key={groupId} index={index} />
+          ))}
+        </SavedFiltersProvider>
       </section>
 
-      <nav className="playlist-builder-page__controls playlist-builder-page__controls_bottom">
+      <div className="playlist-page__btns-group">
         <button
-          onClick={() =>
-            exportPlaylistToM3U(
-              playlist.name.state.text,
-              playlist.tracks,
-              playlist.groups,
-            )
-          }
-          className="playlist-builder-page__btn btn btn_theme_transparent-black"
-          disabled={Object.values(playlist.tracks).flat().length === 0}
+          onClick={handleExportPlaylistClick}
+          className="btn btn_type_secondary"
+          disabled={Object.values(tracks).flat().length === 0}
         >
           <FaDownload className="icon" />
           <span>Export as M3U</span>
         </button>
-        <button
-          onClick={() =>
-            exportPlaylistAsJSON(playlist.name.state.text, playlist.tracks)
-          }
-          className="playlist-builder-page__btn btn btn_theme_transparent-black"
-          disabled={Object.values(playlist.tracks).flat().length === 0}
-        >
-          <FaDownload className="icon" />
-          <span>Export as JSON</span>
-        </button>
-        <div></div>
-      </nav>
+      </div>
     </div>
   );
 }

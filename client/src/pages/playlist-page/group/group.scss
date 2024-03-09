@@ -1,4 +1,4 @@
-@import "../../global.scss";
+@import "../../../global.scss";
 
 .group {
   display: flex;
@@ -7,13 +7,28 @@
   align-content: flex-start;
   border-radius: $border_radius_block;
   width: 100%;
-  box-shadow: 0px 0px 1rem $color_grey-50;
+  box-shadow:
+    0 0 1rem $color_grey-50,
+    0 -0.7rem 0 $color_black;
   font-size: $font-size_regular-text;
   background-color: white;
+  margin-top: 1rem;
 
   &__index {
-    font-size: $font-size_regular-text;
+    font-size: $font-size_h2;
     font-weight: bold;
+    border-right: 2px solid $color_black;
+    padding: 0 1rem 0 0;
+  }
+
+  &__name {
+    font-weight: bold;
+    font-size: $font-size_h2;
+
+    & .editable-text__name {
+      font-size: $font-size_regular-text;
+      font-weight: bold;
+    }
   }
 
   &__btns-group {
@@ -25,18 +40,21 @@
   &__header {
     display: grid;
     column-gap: 1rem;
-    grid-template-columns: auto auto 1fr auto auto auto;
+    grid-template-columns: auto auto auto 1fr auto;
     align-items: center;
     justify-content: space-between;
-    padding: 1rem 1.5rem 1rem 1.5rem;
+    padding: 0.5rem 1.5rem 0.5rem 1.5rem;
     cursor: pointer;
+  }
+
+  &__header-btns {
+    display: flex;
+    align-items: center;
   }
 
   &__body {
     display: flex;
     flex-flow: column nowrap;
-    row-gap: 1rem;
-    padding: 0 1.5rem 1rem 1.5rem;
   }
 
   &__body_hidden {
@@ -47,15 +65,6 @@
     align-self: flex-start;
   }
 
-  &__name {
-    grid-area: Name;
-
-    & .editable-text__name {
-      font-size: $font-size_regular-text;
-      font-weight: bold;
-    }
-  }
-
   &__save-filter-btn {
     align-self: flex-start;
   }
@@ -63,6 +72,10 @@
   &__btns-group {
     display: flex;
     column-gap: 1rem;
+  }
+
+  &__find-track-btn {
+    margin: 0 1rem 1rem 1rem;
   }
 
   &__edit-name-btn {
@@ -75,11 +88,6 @@
     column-gap: 1rem;
     align-items: center;
     border-radius: $border_radius_block;
-  }
-
-  &__playlist {
-    display: grid;
-    row-gap: 0.5rem;
   }
 
   &__rule:last-child {
@@ -106,17 +114,4 @@
     flex-flow: row nowrap;
     column-gap: 1rem;
   }
-}
-
-.add-section-btn {
-  display: flex;
-  flex-flow: row nowrap;
-  column-gap: 0.5rem;
-  align-items: center;
-  justify-content: center;
-  font-size: $font-size_regular-text;
-  padding: 1rem 0;
-  transition: transform 0.2s ease, border 0.2s ease, color 0.2s ease,
-    box-shadow 0.2s ease;
-  font-size: 1.2rem;
 }

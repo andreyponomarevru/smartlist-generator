@@ -4,7 +4,6 @@ import { Stats } from "./stats";
 import { Loader } from "../../lib/loader/loader";
 import { useGlobalState } from "../../hooks/use-global-state";
 import { Message } from "../../lib/message/message";
-import { Header } from "../../lib/header/header1";
 
 import "./stats-page.scss";
 
@@ -23,7 +22,7 @@ export function StatsPage() {
 
   return (
     <div className="stats-page">
-      <Header>Statistics</Header>
+      <header className="header1">Statistics</header>
 
       <section>
         <h2 className="stats-page__header2">

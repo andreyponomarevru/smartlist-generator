@@ -1,11 +1,4 @@
-import {
-  Control,
-  UseFormResetField,
-  UseFormReset,
-  FieldArrayWithId,
-  UseFormSetValue,
-  UseFormGetValues,
-} from "react-hook-form";
+import { Control, UseFormResetField } from "react-hook-form";
 
 export type TrackMeta = {
   year: number;
@@ -38,7 +31,7 @@ export interface FilterFormValues {
 }
 
 export interface SavedFilterFormValues {
-  savedFilterId: OptionsList<string>;
+  filterId: OptionsList<string>;
 }
 
 //

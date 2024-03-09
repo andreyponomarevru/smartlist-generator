@@ -5,11 +5,9 @@ import { DatabasePage } from "../pages/database-page/database-page";
 import { PlaylistPage } from "../pages/playlist-page/playlist-page";
 import { SavedFiltersProvider } from "../hooks/use-saved-filters";
 import { StatsPage } from "../pages/stats-page/stats-page";
-import { CreatePage } from "../pages/create-page/create-page";
 
 export const PATHS = {
   index: "/",
-  create: "/create",
   playlist: "/playlist",
   database: "/lib",
   filters: "/filters",
@@ -19,9 +17,12 @@ export const PATHS = {
 export const ROUTES = [
   {
     path: PATHS.index,
-    element: <CreatePage />,
+    element: (
+      <SavedFiltersProvider>
+        <FiltersPage />
+      </SavedFiltersProvider>
+    ),
   },
-  { path: PATHS.create, element: <CreatePage /> },
   { path: PATHS.playlist, element: <PlaylistPage /> },
   {
     path: PATHS.filters,

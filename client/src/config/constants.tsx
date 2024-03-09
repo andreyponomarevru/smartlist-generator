@@ -34,3 +34,4 @@ export const FILTER_CONDITIONS: Record<
 
 export const CREATE_FILTER_FORM_ID = "create-filter-form";
 export const EDIT_FILTER_FORM_ID = "edit-filter-form";
+export const CHOOSE_FILTER_FORM_ID = "choose-filter-form";

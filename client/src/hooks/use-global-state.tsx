@@ -1,7 +1,7 @@
 import React from "react";
 
 import { usePlayer } from "./use-player";
-import { usePlaylist } from "./use-playlist";
+import { usePlaylist } from "./use-playlist-extended";
 import { useStats } from "./api/use-stats";
 
 type Context = {

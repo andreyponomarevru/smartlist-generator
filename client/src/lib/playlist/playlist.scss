@@ -1,74 +1,95 @@
 @import "../../global.scss";
 
 .playlist {
-  margin-bottom: 2rem;
-  background-color: red;
+  &_create-form-playlist {
+    display: grid;
+    box-shadow: 0px 0px 1rem $color_grey-50;
+    border-radius: $border_radius_block;
+    grid-template-columns: 100%;
+    margin-bottom: 2rem;
+  }
 }
 
 .track {
   box-sizing: border-box;
   display: grid;
-  grid-template-columns: auto auto 0.6fr 0.4fr 3rem auto;
+  grid-auto-flow: column;
+  grid-template-columns: auto auto 1fr auto auto;
   color: $color_black;
-  padding: 1rem 0;
+  padding: 0 0 1rem 0;
+  margin: 1rem 1rem 0 1rem;
+  justify-content: flex-start;
   align-items: center;
-  column-gap: 1rem;
-  //box-shadow: 0px 0px 1rem $color_grey-50;
+  column-gap: 2rem;
   overflow: hidden;
   font-size: $font-size_tiny;
-  //border-radius: $border_radius_block;
   text-overflow: ellipsis;
   cursor: pointer;
   border-bottom: 1px solid $color_grey-50;
+  max-width: 100%;
 
   &:last-child {
     border-bottom: none;
   }
 
+  &__sort-buttons {
+    display: flex;
+    flex-flow: column nowrap;
+    justify-self: flex-start;
+  }
+
   &__controls {
     display: flex;
     flex-flow: row nowrap;
-    column-gap: 0.5rem;
-    justify-content: flex-end;
+    align-items: center;
+    justify-self: flex-end;
   }
 
-  &__artist-and-title {
+  &__main-meta {
     display: flex;
     flex-flow: column nowrap;
+    row-gap: 0.5rem;
   }
 
   &__artists {
     font-size: 0.75rem;
     text-overflow: ellipsis;
     overflow: hidden;
+    color: $color_grey-70;
+    font-size: $font-size_controls;
+  }
+
+  &__year {
+    display: flex;
+    flex-flow: column nowrap;
+    justify-self: flex-start;
+    font-size: $font-size_controls;
   }
 
   &__title {
     text-overflow: ellipsis;
     overflow: hidden;
+    font-size: $font-size_controls;
   }
 
   &__genres {
     display: flex;
-    column-gap: 0.3rem;
+    flex-flow: row wrap;
+    row-gap: 0.5rem;
+    column-gap: 0.5rem;
     align-items: center;
     text-overflow: ellipsis;
     overflow: hidden;
   }
 
   &__genre {
-    font-size: 0.75rem;
-    padding: 0.4rem 0.6rem 0.5rem 0.6rem;
-    line-height: 1;
-    border-radius: 0.7rem;
-    background-color: $color_black;
+    font-size: $font-size_tiny;
+    border: 1px solid $color_grey-50;
+    border-radius: 1.375rem;
+    padding: 0.2rem 0.7rem;
   }
 
   &__duration {
-    font-size: $font-size_tiny;
-  }
-
-  &__sort-btn-icon {
-    fill: white;
+    font-size: $font-size_controls;
   }
 }

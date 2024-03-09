@@ -11,6 +11,7 @@ export function usePlayer(tracks: Record<string, TrackMeta[]>) {
   }
 
   const [playingIndex, setPlayingIndex] = React.useState<{
+    groupId: number;
     index: number;
   } | null>(null);
 
@@ -18,7 +19,7 @@ export function usePlayer(tracks: Record<string, TrackMeta[]>) {
 
   React.useEffect(() => {
     if (playingIndex) {
-      // setActiveTrack(tracks[playingIndex.index]);
+      setActiveTrack(tracks[playingIndex.groupId][playingIndex.index]);
     }
   }, [playingIndex]);
 
