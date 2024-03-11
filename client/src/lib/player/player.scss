@@ -83,99 +83,91 @@
     align-items: center;
   }
 
-  &__volume button {
-  }
+  //
+  // Custom input range (progress bar)
+  //
 
-  &__progressbar {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  // Input range - chrome and safari
+  &__progress-bar {
+    --range-progress: 0;
+
+    accent-color: black; // color of the native played part of progressbar
+    // -webkit-appearance: none; // hide chrome native progressbar
+    // appearance: none; // hide chrome native progressbar
+    position: relative;
     width: 100%;
+    height: 1rem;
+    border-radius: 2px;
+    cursor: pointer;
+    background: $color_grey-50;
+
+    border-radius: 1rem;
+    height: 0.5rem;
   }
-}
 
-//
-// Custom input range (progress bar)
-//
+  // Input range - firefox
+  &__progress-bar::-moz-range-track {
+    position: relative;
+    background: $color_grey-50;
+    width: 100%;
+    height: 0.5rem;
+    border-radius: 2px;
+    cursor: pointer;
+  }
 
-// Input range - chrome and safari
-input[type="range"] {
-  --range-progress: 0;
+  // played progress length - Chrome & safari
+  &__progress-bar::before {
+    content: "";
+    height: 0.5rem;
+    background: $color_black;
+    width: var(
+      --range-progress
+    ); // chrome doesnt see this var so it doesn't style anything
+    border-bottom-left-radius: 2px;
+    border-top-left-radius: 2px;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
 
-  //accent-color: black; // color of the played part of progressbar
-  -webkit-appearance: none; // hide chrome native progressbar
-  appearance: none; // hide chrome native progressbar
-  position: relative;
-  width: 100%;
-  height: 1rem;
-  border-radius: 2px;
-  cursor: pointer;
-  background: $color_grey-50;
+  // played progress length - firefox
+  &__progress-bar::-moz-range-progress {
+    background: $color_black;
+    border-bottom-left-radius: 2px;
+    border-top-left-radius: 2px;
+    height: 0.5rem;
+  }
 
-  border-radius: 1rem;
-  height: 0.5rem;
-}
+  // slider thumb - chrome and safari
+  &__progress-bar::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 8px;
+    width: 8px;
+    border-radius: 50%;
+    border: none;
+    background-color: $color_black;
+    cursor: pointer;
+    position: relative;
+  }
 
-// Input range - firefox
-input[type="range"]::-moz-range-track {
-  position: relative;
-  background: $color_grey-50;
-  width: 100%;
-  height: 0.5rem;
-  border-radius: 2px;
-  cursor: pointer;
-}
+  // dragging thumb - chrome and safari
+  &__progress-bar:active::-webkit-slider-thumb {
+    transform: scale(1.2);
+  }
 
-// played progress length - Chrome & safari
-input[type="range"]::before {
-  content: "";
-  height: 0.5rem;
-  background: $color_black;
-  width: var(--range-progress); // chrome doesnt see this var
-  border-bottom-left-radius: 2px;
-  border-top-left-radius: 2px;
-  position: absolute;
-  top: 0;
-  left: 0;
-}
+  // slider thumb - firefox
+  &__progress-bar::-moz-range-thumb {
+    height: 8px;
+    width: 8px;
+    border-radius: 50%;
+    background: $color_black;
+    cursor: pointer;
+    border: transparent;
+    position: relative;
+  }
 
-// played progress length - firefox
-input[type="range"]::-moz-range-progress {
-  background: $color_black;
-  border-bottom-left-radius: 2px;
-  border-top-left-radius: 2px;
-  height: 0.5rem;
-}
-
-// slider thumb - chrome and safari
-input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  height: 8px;
-  width: 8px;
-  border-radius: 50%;
-  border: none;
-  background-color: $color_black;
-  cursor: pointer;
-  position: relative;
-}
-
-// dragging thumb - chrome and safari
-input[type="range"]:active::-webkit-slider-thumb {
-  transform: scale(1.2);
-}
-
-// slider thumb - firefox
-input[type="range"]::-moz-range-thumb {
-  height: 8px;
-  width: 8px;
-  border-radius: 50%;
-  background: $color_black;
-  cursor: pointer;
-  border: transparent;
-  position: relative;
-}
-
-// dragging thumb - firefox
-input[type="range"]:active::-moz-range-thumb {
-  transform: scale(1.2);
+  // dragging thumb - firefox
+  &__progress-bar:active::-moz-range-thumb {
+    transform: scale(1.2);
+  }
 }

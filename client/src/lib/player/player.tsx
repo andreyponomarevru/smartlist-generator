@@ -36,7 +36,7 @@ export function Player() {
           ref={player.progressBarRef}
           defaultValue="0"
           onChange={player.handleProgressChange}
-          className="player__line"
+          className="player__progress-bar"
         />
         <span className="player__time player__time_total">
           {toHourMinSec(player.duration)}
@@ -64,7 +64,7 @@ export function Player() {
           style={{
             background: `linear-gradient(to right, #f50 ${player.volume}%, #ccc ${player.volume}%)`,
           }}
-          className="player__volume-bar"
+          className="player__progress-bar"
         />
       </div>
     </div>

@@ -43,10 +43,6 @@ export function Controls(props: ControlsProps) {
     playAnimationRef.current = requestAnimationFrame(repeat);
   }, [isPlaying, audioRef, repeat]);
 
-  React.useEffect(() => {
-    //console.log(progressBarRef?.current?.style.getPropertyValue("width"));
-  }, [progressBarRef]);
-
   return (
     <div className={`controls ${props.className || ""}`}>
       <button
