@@ -30,6 +30,7 @@ async function findTrack(reqBody: SearchQuery): Promise<TrackMeta[]> {
 export function useTrack() {
   const mutation = useMutation({
     mutationFn: (reqBody: SearchQuery) => findTrack(reqBody),
+    onError: (err) => console.log("[react-query error handler]", err),
   });
   return mutation;
 }

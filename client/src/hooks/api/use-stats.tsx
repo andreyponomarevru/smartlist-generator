@@ -33,6 +33,7 @@ export function useStats(excludedTracks: number[]) {
   const statsQuery = useQuery({
     queryKey: ["stats", excludedTracks],
     queryFn: () => getStats(excludedTracks),
+    onError: (err) => console.log("[react-query error handler]", err),
   });
 
   return statsQuery;

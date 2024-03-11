@@ -25,6 +25,7 @@ async function getTrackIds(filePaths: string[]): Promise<number[]> {
 export function useTrackIds() {
   const mutation = useMutation({
     mutationFn: (filePaths: string[]) => getTrackIds(filePaths),
+    onError: (err) => console.log("[react-query error handler]", err),
   });
   return mutation;
 }

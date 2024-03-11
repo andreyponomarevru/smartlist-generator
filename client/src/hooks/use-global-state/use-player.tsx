@@ -40,6 +40,9 @@ export function usePlayer() {
   const [state, dispatch] = React.useReducer(playerReducer, initialState);
 
   function play(track: TrackMeta) {
+    if (state.activeTrack) {
+      dispatch({ type: "RESET" });
+    }
     dispatch({
       type: "PLAY",
       payload: {
@@ -55,8 +58,13 @@ export function usePlayer() {
 
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
   React.useEffect(() => {
-    if (state.isPlaying) audioRef.current?.play();
-    else audioRef.current?.pause();
+    if (state.isPlaying) {
+      audioRef.current
+        ?.play()
+        .catch((err) => console.log("request aborted", err));
+    } else {
+      audioRef.current?.pause();
+    }
   }, [state.isPlaying, state.activeTrack, audioRef]);
 
   //
