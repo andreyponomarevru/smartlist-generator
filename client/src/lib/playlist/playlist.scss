@@ -28,6 +28,22 @@
   border-bottom: 1px solid $color_grey-50;
   max-width: 100%;
 
+  &_playing {
+    background: radial-gradient(yellow 0%, transparent 80%);
+
+    .track__artists,
+    .track__title {
+      font-weight: bold;
+    }
+  }
+
+  &_paused {
+    .track__artists,
+    .track__title {
+      font-weight: bold;
+    }
+  }
+
   &:last-child {
     border-bottom: none;
   }

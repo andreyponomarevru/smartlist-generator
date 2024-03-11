@@ -10,20 +10,22 @@ import "./database-page.scss";
 
 type Input = { libPath: string };
 
-const INPUT_ERRORS = {
-  libPath: "This field is required",
-};
+const INPUT_ERRORS = { libPath: "This field is required" };
 
 export function DatabasePage() {
-  const { playlist } = useGlobalState();
-
+  const { playlist, statsQuery } = useGlobalState();
   const form = useForm<Input>();
 
   const handleLibPathSubmit: SubmitHandler<Input> = (data) => console.log(data);
 
-  React.useEffect(() => {
-    console.log(playlist.excludedTracks);
-  }, [playlist.excludedTracks]);
+  const excludedCount = playlist.excludedTracks.state.trackIds.size;
+  const totalCount =
+    statsQuery.data?.years.results?.reduce(
+      (accumulator, currentValue) => accumulator + currentValue.count,
+      0,
+    ) || 0;
+  const excludedPercentage = ((100 * excludedCount) / totalCount).toFixed(1);
+  const tracksLeft = totalCount - excludedCount;
 
   return (
     <div className="database-page">
@@ -77,13 +79,26 @@ export function DatabasePage() {
 
       <div className="database-page__row">
         <span className="database-page__name">Excluded Tracks</span>
-        <span>{playlist.excludedTracks.size}</span>
+        <span>
+          <span className="database-page__highlighting database-page__highlighting_primary">
+            {excludedCount} ({excludedPercentage}%)
+          </span>{" "}
+          out of{" "}
+          <span className="database-page__highlighting database-page__highlighting_primary">
+            {totalCount}
+          </span>{" "}
+          tracks were excluded.{" "}
+          <span className="database-page__highlighting database-page__highlighting_primary">
+            {tracksLeft}
+          </span>{" "}
+          tracks left.
+        </span>
         <span className="database-page__buttons">
           <label htmlFor="importblacklisted">
             <input
               id="importblacklisted"
               type="file"
-              onChange={playlist.handleExcludedTracksImport}
+              onChange={playlist.excludedTracks.handleImport}
               multiple
               hidden
             />
@@ -92,7 +107,13 @@ export function DatabasePage() {
               <span>Import from M3U</span>
             </span>
           </label>
-          <span className="btn btn_type_danger">Clear</span>
+          <button
+            type="button"
+            onClick={playlist.excludedTracks.handleClear}
+            className="btn btn_type_danger"
+          >
+            Clear
+          </button>
         </span>
       </div>
     </div>

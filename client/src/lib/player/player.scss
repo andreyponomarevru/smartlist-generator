@@ -4,24 +4,18 @@
   position: fixed;
   bottom: 0;
   display: grid;
-  grid-template-columns: auto 1fr;
-  grid-template-areas:
-    "artwork meta"
-    "artwork progressbar";
-  align-items: center;
-
-  justify-content: center;
-  column-gap: 2rem;
+  grid-template-rows: 1fr;
+  grid-template-columns: 30% 1fr 10%;
   width: 100%;
-  padding: 0.5rem 1.5rem;
-  background-color: black;
+  align-items: center;
+  justify-content: flex-start;
+  column-gap: 2rem;
+
+  padding: 0rem 1rem;
+  background-color: white;
   border-radius: $border_radius_btn $border_radius_btn 0 0;
   font-size: 1.5rem;
-
-  left: 50%;
-  margin-left: -720px;
-  min-width: 840px;
-  max-width: 1440px;
+  box-shadow: 0px 0px 1rem $color_grey-50;
 
   &_disabled {
     pointer-events: none;
@@ -31,59 +25,49 @@
     opacity: 70%;
   }
 
-  &__artwork {
-    grid-area: artwork;
+  &__time {
+    color: $color_black;
+    font-size: $font-size_tiny;
+
+    &_current {
+      color: $color_black;
+    }
   }
 
   &__meta {
-    grid-area: meta;
     display: flex;
     flex-flow: row nowrap;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
-    color: white;
+    color: $color_black;
     font-size: 0.75rem;
+    column-gap: 1rem;
+
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
   }
 
   &__artist {
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
-    color: $color_grey-50;
   }
 
   &__title {
-    color: white;
+    color: $color_black;
   }
 
   &__year {
-    color: white;
+    color: $color_black;
   }
 
-  &__toggle-btn {
-    display: none;
-    align-items: center;
-    justify-content: center;
-    background: white;
-    color: black;
-    height: 2rem;
-    width: 2rem;
-    font-size: $font-size_regular-text;
-    border-radius: 50%;
-    overflow: hidden;
-    font-weight: bold;
-  }
-
-  &:hover &__toggle-btn {
-    display: flex;
-  }
-
-  &__progressbar {
-    grid-area: progressbar;
+  &__progress-bar-wrapper {
     display: grid;
-    grid-template-columns: auto 1fr auto 6rem;
+    grid-template-columns: auto 1fr auto;
     column-gap: 1rem;
     align-items: center;
+    width: 100%;
   }
 
   &__volume button {
@@ -102,7 +86,7 @@
   &__volume button {
   }
 
-  &__line {
+  &__progressbar {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -115,17 +99,18 @@
 //
 
 // Input range - chrome and safari
-
 input[type="range"] {
   --range-progress: 0;
 
-  -webkit-appearance: none;
+  //accent-color: black; // color of the played part of progressbar
+  -webkit-appearance: none; // hide chrome native progressbar
+  appearance: none; // hide chrome native progressbar
   position: relative;
   width: 100%;
   height: 1rem;
   border-radius: 2px;
   cursor: pointer;
-  background: $color_grey-20;
+  background: $color_grey-50;
 
   border-radius: 1rem;
   height: 0.5rem;
@@ -134,7 +119,7 @@ input[type="range"] {
 // Input range - firefox
 input[type="range"]::-moz-range-track {
   position: relative;
-  background: $color_grey-20;
+  background: $color_grey-50;
   width: 100%;
   height: 0.5rem;
   border-radius: 2px;
@@ -145,8 +130,8 @@ input[type="range"]::-moz-range-track {
 input[type="range"]::before {
   content: "";
   height: 0.5rem;
-  background: white;
-  width: var(--range-progress);
+  background: $color_black;
+  width: var(--range-progress); // chrome doesnt see this var
   border-bottom-left-radius: 2px;
   border-top-left-radius: 2px;
   position: absolute;
@@ -156,7 +141,7 @@ input[type="range"]::before {
 
 // played progress length - firefox
 input[type="range"]::-moz-range-progress {
-  background: white;
+  background: $color_black;
   border-bottom-left-radius: 2px;
   border-top-left-radius: 2px;
   height: 0.5rem;
@@ -169,7 +154,7 @@ input[type="range"]::-webkit-slider-thumb {
   width: 8px;
   border-radius: 50%;
   border: none;
-  background-color: white;
+  background-color: $color_black;
   cursor: pointer;
   position: relative;
 }
@@ -184,7 +169,7 @@ input[type="range"]::-moz-range-thumb {
   height: 8px;
   width: 8px;
   border-radius: 50%;
-  background: white;
+  background: $color_black;
   cursor: pointer;
   border: transparent;
   position: relative;

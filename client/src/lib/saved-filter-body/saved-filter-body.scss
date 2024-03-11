@@ -1,0 +1,54 @@
+@import "../../global.scss";
+
+.saved-filter-body {
+  display: flex;
+  flex-flow: column nowrap;
+
+  &__details-list {
+    display: flex;
+    flex-flow: column nowrap;
+    row-gap: 1rem;
+  }
+
+  &__operator {
+    font-size: $font-size_regular-text;
+  }
+
+  &__operator-name {
+    font-style: italic;
+    padding: 0 0.4rem;
+  }
+
+  &__row {
+    display: grid;
+    grid-template-columns: 8% 30% auto;
+    column-gap: 2rem;
+  }
+
+  &__genre {
+    font-size: $font-size_tiny;
+    border: 1px solid $color_grey-50;
+    border-radius: 1.375rem;
+    padding: 0.2rem 0.7rem;
+  }
+
+  &__col1 {
+    font-size: $font-size_regular-text;
+    font-weight: bold;
+  }
+
+  &__col2 {
+    font-size: $font-size_regular-text;
+  }
+
+  &__col3 {
+    font-size: $font-size_regular-text;
+    display: flex;
+    flex-flow: row wrap;
+    width: 100%;
+    overflow: auto;
+    column-gap: 0.5rem;
+    align-content: flex-start;
+    row-gap: 0.5rem;
+  }
+}

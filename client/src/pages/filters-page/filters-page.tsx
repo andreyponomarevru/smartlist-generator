@@ -3,7 +3,7 @@ import { FaDownload, FaFileImport } from "react-icons/fa";
 import { IoMdAddCircle } from "react-icons/io";
 
 import { useSavedFilters } from "../../hooks/use-saved-filters";
-import { SavedFilter } from "./saved-filter/saved-filter";
+import { SavedFilter } from "../../lib/saved-filter/saved-filter";
 import { exportSavedFiltersToJSON } from "../../utils/misc";
 import { CreateFilterForm } from "../../lib/create-filter-form/create-filter-form";
 import {
@@ -15,14 +15,13 @@ import "./filters-page.scss";
 
 export function FiltersPage() {
   const savedFilters = useSavedFilters();
-  // const { playlist } = useGlobalState();
-
   const [showCreateFilter, setShowCreateFilter] = React.useState(false);
-
   const [editableFilter, setEditableFilter] = React.useState<null | {
     filterId: string;
     isEditable: boolean;
   }>(null);
+
+  React.useEffect(() => console.log(savedFilters.state), [savedFilters]);
 
   return (
     <div className="filters-page">
@@ -43,6 +42,7 @@ export function FiltersPage() {
           </div>
         </label>
         <button
+          type="button"
           className="btn btn_type_primary"
           onClick={() => setShowCreateFilter(true)}
           disabled={showCreateFilter}
@@ -70,7 +70,7 @@ export function FiltersPage() {
                 formId={EDIT_FILTER_FORM_ID}
                 savedFormId={id}
                 className="filters-page__create-filter-form"
-                defaultValues={savedFilters.state[id]}
+                defaultValues={inputs}
                 onEditingCancel={() => setEditableFilter(null)}
               />
             );
@@ -79,8 +79,6 @@ export function FiltersPage() {
           return (
             <SavedFilter
               key={id}
-              filterId={id}
-              name={inputs.name}
               filter={savedFilters.state[`${id}`]}
               onEdit={() =>
                 setEditableFilter({ filterId: id, isEditable: true })
@@ -95,6 +93,7 @@ export function FiltersPage() {
       <div className="filters-page__controls">
         <span></span>
         <button
+          type="button"
           onClick={() =>
             exportSavedFiltersToJSON("Playlist name", savedFilters.state)
           }

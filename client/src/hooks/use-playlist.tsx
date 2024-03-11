@@ -15,7 +15,6 @@ export type TrackToReplace = {
 
 export type State = {
   tracks: TrackMeta[];
-  excludedTracks: Set<number>;
   isGroupOpen: boolean;
 };
 type Action =
@@ -43,7 +42,6 @@ function playlistReducer(state: State, action: Action): State {
       return {
         ...state,
         tracks: [],
-        excludedTracks: state.excludedTracks,
         isGroupOpen: !!action.payload.isGroupOpen,
       };
     }
@@ -100,35 +98,11 @@ function playlistReducer(state: State, action: Action): State {
 export function usePlaylist() {
   const initialState: State = {
     tracks: [],
-    excludedTracks: new Set<number>(),
     isGroupOpen: false,
   };
 
-  function getInitialState() {
-    const savedExcludedTracks = localStorage.getItem("excludedTracks");
-    if (savedExcludedTracks !== null) {
-      return {
-        ...initialState,
-        excludedTracks: JSON.parse(savedExcludedTracks),
-      };
-    } else {
-      return initialState;
-    }
-  }
-
-  const [state, dispatch] = React.useReducer(
-    playlistReducer,
-    initialState,
-    getInitialState,
-  );
+  const [state, dispatch] = React.useReducer(playlistReducer, initialState);
   const getTrackQuery = useTrack();
-
-  React.useEffect(() => {
-    localStorage.setItem(
-      "excludedTracks",
-      JSON.stringify([...state.excludedTracks]),
-    );
-  }, [state.excludedTracks]);
 
   //
 
@@ -147,7 +121,6 @@ export function usePlaylist() {
           ...Object.values(state.tracks)
             .flat()
             .map((t) => t.trackId),
-          ...state.excludedTracks,
         ]),
       );
       dispatch({
@@ -161,15 +134,18 @@ export function usePlaylist() {
 
   async function add(formValues: FilterFormValues) {
     try {
-      const track = await getTrackQuery.mutateAsync(
-        buildSearchQuery(formValues, [
-          ...Object.values(state.tracks)
-            .flat()
-            .map((t) => t.trackId),
-          ...state.excludedTracks,
-        ]),
-      );
-      dispatch({ type: "ADD_TRACK", payload: { track } });
+      const excludedTracks = Object.values(state.tracks)
+        .flat()
+        .map((t) => t.trackId);
+
+      dispatch({
+        type: "ADD_TRACK",
+        payload: {
+          track: await getTrackQuery.mutateAsync(
+            buildSearchQuery(formValues, excludedTracks),
+          ),
+        },
+      });
     } catch (err) {
       console.error(err);
     }

@@ -20,19 +20,18 @@ export function StatsPage() {
     );
   }
 
+  const totalCount =
+    statsQuery.data?.years.results?.reduce(
+      (accumulator, currentValue) => accumulator + currentValue.count,
+      0,
+    ) || 0;
+
   return (
     <div className="stats-page">
       <header className="header1">Statistics</header>
 
       <section>
-        <h2 className="stats-page__header2">
-          Tracks (
-          {statsQuery.data?.years.results?.reduce(
-            (accumulator, currentValue) => accumulator + currentValue.count,
-            0,
-          )}
-          )
-        </h2>
+        <h2 className="stats-page__header2">Tracks ({totalCount})</h2>
       </section>
       <Stats stats={statsQuery.data.years.results} name="Years" />
       <Stats stats={statsQuery.data.genres.results} name="Genres" />

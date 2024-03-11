@@ -206,6 +206,8 @@ $controls_btn-height: 2.75rem;
     border: none;
     background-color: transparent;
     padding: 0 0.5rem;
+    height: 2rem;
+    width: 2rem;
   }
 
   &_hover_grey-70 {
@@ -281,4 +283,20 @@ $controls_btn-height: 2.75rem;
 .header1 {
   font-size: $font-size_h1;
   margin-bottom: 1rem;
+}
+
+.overlay {
+  position: fixed;
+  z-index: $zindex-modal-backdrop;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(0.7rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
 }

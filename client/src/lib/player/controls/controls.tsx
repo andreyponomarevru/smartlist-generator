@@ -1,11 +1,7 @@
 import React from "react";
-import {
-  IoPlaySkipBackSharp,
-  IoPlaySkipForwardSharp,
-  IoPlaySharp,
-  IoPauseSharp,
-} from "react-icons/io5";
+import { IoPauseSharp } from "react-icons/io5";
 import { useGlobalState } from "../../../hooks/use-global-state";
+import { FaPlay } from "react-icons/fa";
 
 import "./controls.scss";
 
@@ -15,13 +11,12 @@ export function Controls(props: ControlsProps) {
   const {
     player: {
       duration,
-      handleNext,
-      handlePrevious,
       progressBarRef,
       audioRef,
       setTimeProgress,
       isPlaying,
-      togglePlayPause,
+      activeTrack,
+      togglePlay,
     },
   } = useGlobalState();
 
@@ -40,7 +35,7 @@ export function Controls(props: ControlsProps) {
       `${Number(progressBarRef.current.value) / duration}`,
     );
     playAnimationRef.current = requestAnimationFrame(repeat);
-  }, [audioRef, audioRef.current, progressBarRef]);
+  }, [duration, audioRef, progressBarRef, setTimeProgress]);
 
   React.useEffect(() => {
     if (isPlaying) audioRef.current?.play();
@@ -48,27 +43,27 @@ export function Controls(props: ControlsProps) {
     playAnimationRef.current = requestAnimationFrame(repeat);
   }, [isPlaying, audioRef, repeat]);
 
+  React.useEffect(() => {
+    //console.log(progressBarRef?.current?.style.getPropertyValue("width"));
+  }, [progressBarRef]);
+
   return (
     <div className={`controls ${props.className || ""}`}>
-      <div>
-        <button onClick={handlePrevious}>
-          <IoPlaySkipBackSharp style={{ fill: "white" }} />
-        </button>
-      </div>
-      <div>
-        <button onClick={togglePlayPause} className="controls__artwork">
-          {isPlaying ? (
-            <IoPauseSharp style={{ fill: "white" }} />
+      <button
+        type="button"
+        onClick={() => togglePlay(!isPlaying)}
+        className="btn btn_type_icon btn_hover_grey-20"
+      >
+        {activeTrack ? (
+          isPlaying ? (
+            <IoPauseSharp className="icon" />
           ) : (
-            <IoPlaySharp style={{ fill: "white" }} />
-          )}
-        </button>
-      </div>
-      <div>
-        <button onClick={handleNext}>
-          <IoPlaySkipForwardSharp style={{ fill: "white" }} />
-        </button>
-      </div>
+            <FaPlay className="icon" />
+          )
+        ) : (
+          ""
+        )}
+      </button>
     </div>
   );
 }

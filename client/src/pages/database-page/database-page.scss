@@ -45,4 +45,10 @@
       fill: $color_danger;
     }
   }
+
+  &__highlighting {
+    &_primary {
+      color: $color_info;
+    }
+  }
 }

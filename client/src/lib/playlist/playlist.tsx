@@ -1,9 +1,8 @@
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import { FaMinus, FaRedo, FaArrowDown, FaArrowUp } from "react-icons/fa";
-import { IoPlaySharp } from "react-icons/io5";
+import { IoPlaySharp, IoPauseSharp } from "react-icons/io5";
 import { LuCopy } from "react-icons/lu";
-import { IoMdInformationCircleOutline } from "react-icons/io";
 
 import { toHourMinSec } from "../../utils/misc";
 import {
@@ -12,7 +11,8 @@ import {
   SavedFilterFormValues,
 } from "../../types";
 import { useGlobalState } from "../../hooks/use-global-state";
-import { Direction } from "../../hooks/use-playlist-extended";
+import { Direction } from "../../hooks/use-global-state/use-playlist-extended";
+import { extractFilename } from "../../utils/misc";
 
 import "./playlist.scss";
 
@@ -35,7 +35,10 @@ interface PlaylistProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export function Playlist(props: PlaylistProps) {
-  const { player } = useGlobalState();
+  const {
+    player: { activeTrack, isPlaying, play, togglePlay },
+  } = useGlobalState();
+
   const form = useFormContext<FilterFormValues & SavedFilterFormValues>();
 
   return (
@@ -45,30 +48,42 @@ export function Playlist(props: PlaylistProps) {
           return (
             <li
               key={track.trackId + track.duration + track.title}
-              className="track"
+              className={`track ${
+                activeTrack?.trackId === track.trackId && isPlaying
+                  ? "track_playing"
+                  : activeTrack?.trackId === track?.trackId
+                    ? "track_paused"
+                    : ""
+              }`}
               onClick={(e) => {
                 e.stopPropagation();
-                if ((e.target as HTMLLIElement).nodeName === "SPAN") {
-                  //player.setPlayingIndex({ groupId: groupId, index });
+                if (activeTrack?.trackId === track.trackId) {
+                  togglePlay(!isPlaying);
+                } else {
+                  play(track);
                 }
               }}
               role="presentation"
             >
               <div className="track__sort-buttons">
                 <button
+                  type="button"
                   className="btn btn_type_icon btn_hover_grey-20"
-                  onClick={() =>
-                    props.onReorderTracks({ index, direction: "UP" })
-                  }
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    props.onReorderTracks({ index, direction: "UP" });
+                  }}
                   disabled={index === 0 || props.tracks.length === 1}
                 >
                   <FaArrowUp className="icon" />
                 </button>
                 <button
+                  type="button"
                   className="btn btn_type_icon btn_hover_grey-20"
-                  onClick={() =>
-                    props.onReorderTracks({ index, direction: "DOWN" })
-                  }
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    props.onReorderTracks({ index, direction: "DOWN" });
+                  }}
                   disabled={
                     props.tracks.length - 1 === index ||
                     props.tracks.length === 1
@@ -91,24 +106,30 @@ export function Playlist(props: PlaylistProps) {
                   ))}
                 </span>
               </span>
-              <span className="track__duration">
+              <div className="track__duration">
                 {toHourMinSec(track.duration)}
-              </span>
+              </div>
               <div className="track__controls">
-                <span className="btn btn_type_icon btn_hover_grey-20">
-                  <IoPlaySharp className="icon" />
-                </span>
-                <span className="btn btn_type_icon btn_hover_grey-20">
-                  <IoMdInformationCircleOutline className="icon" />
-                </span>
-                <span className="btn btn_type_icon btn_hover_grey-20">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigator.clipboard.writeText(
+                      extractFilename(track.filePath),
+                    );
+                  }}
+                  className="btn btn_type_icon btn_hover_grey-20"
+                >
                   <LuCopy className="icon" />
-                </span>
+                </button>
                 <button
                   name="resubmit"
-                  onClick={form.handleSubmit((formValues) =>
-                    props.onResubmit(formValues, track.trackId),
-                  )}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    form.handleSubmit((formValues) => {
+                      return props.onResubmit(formValues, track.trackId);
+                    })(e);
+                  }}
                   type="submit"
                   form={props.formId}
                   disabled={false}
@@ -117,7 +138,11 @@ export function Playlist(props: PlaylistProps) {
                   <FaRedo className="icon" />
                 </button>
                 <button
-                  onClick={() => props.onRemoveTrack(track.trackId)}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    props.onRemoveTrack(track.trackId);
+                  }}
                   className="btn btn_type_icon btn_hover_grey-20"
                 >
                   <FaMinus className="icon" />

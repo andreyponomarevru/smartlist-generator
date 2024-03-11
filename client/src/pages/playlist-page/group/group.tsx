@@ -9,13 +9,16 @@ import {
 import { IoMdAddCircle } from "react-icons/io";
 import { Controller, useForm, FormProvider } from "react-hook-form";
 import Select from "react-select";
+import { GrCircleInformation } from "react-icons/gr";
 
 import { useGlobalState } from "../../../hooks/use-global-state";
 import { OptionsList, SavedFilterFormValues } from "../../../types";
-import { Direction } from "../../../hooks/use-playlist-extended";
+import { Direction } from "../../../hooks/use-global-state/use-playlist-extended";
 import { useSavedFilters } from "../../../hooks/use-saved-filters";
 import { Playlist } from "../../../lib/playlist/playlist";
 import { CHOOSE_FILTER_FORM_ID } from "../../../config/constants";
+import { Modal } from "../../../lib/modal/modal";
+import { SavedFilterBody } from "../../../lib/saved-filter-body/saved-filter-body";
 
 import "./group.scss";
 
@@ -41,7 +44,9 @@ export function Group(props: GroupProps) {
     shouldUnregister: false,
   });
 
-  function onSavedFilterSubmit(formValues: { filterId: OptionsList<string> }) {
+  const watchedInput = form.watch("filterId.value");
+
+  function handleSubmit(formValues: { filterId: OptionsList<string> }) {
     playlist.handleTrackAdd(
       props.groupId,
       savedFilters.state[formValues.filterId.value],
@@ -85,7 +90,7 @@ export function Group(props: GroupProps) {
           <div className="group__name">
             <form
               className={`saved-filters-form ${props.className || ""}`}
-              onSubmit={form.handleSubmit(onSavedFilterSubmit)}
+              onSubmit={form.handleSubmit(handleSubmit)}
               onClick={(e) => e.stopPropagation()}
               id={`${CHOOSE_FILTER_FORM_ID}-${props.groupId}`}
             >
@@ -113,9 +118,32 @@ export function Group(props: GroupProps) {
             )}
           </div>
           <span></span>
-          <div className="group__header-btns">
+          <div
+            className="group__header-btns"
+            onClick={(e) => e.stopPropagation()}
+            role="presentation"
+          >
+            <Modal
+              title={savedFilters.state[watchedInput].name}
+              activator={({ setIsVisible }) => (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsVisible(true);
+                  }}
+                  className="btn btn_type_icon btn_hover_grey-20"
+                >
+                  <GrCircleInformation className="icon" />
+                </button>
+              )}
+            >
+              <SavedFilterBody filter={savedFilters.state[watchedInput]} />
+            </Modal>
             <button
-              onClick={() => playlist.handleGroupRemove(props.groupId)}
+              type="button"
+              onClick={() => {
+                playlist.handleGroupRemove(props.groupId);
+              }}
               className="btn btn_type_icon btn_hover_grey-20"
             >
               <span>
@@ -123,8 +151,8 @@ export function Group(props: GroupProps) {
               </span>
             </button>
             <button
-              onClick={(e) => {
-                e.stopPropagation();
+              type="button"
+              onClick={() => {
                 playlist.handleGroupReorder(props.index, "UP");
               }}
               className="btn btn_type_icon btn_hover_grey-20 group__sort-btn"
@@ -132,8 +160,8 @@ export function Group(props: GroupProps) {
               <FaArrowUp className="icon" />
             </button>
             <button
-              onClick={(e) => {
-                e.stopPropagation();
+              type="button"
+              onClick={() => {
                 playlist.handleGroupReorder(props.index, "DOWN");
               }}
               className="btn btn_type_icon btn_hover_grey-20 group__sort-btn"
@@ -171,6 +199,7 @@ export function Group(props: GroupProps) {
         </div>
       </div>
       <button
+        type="button"
         className="btn btn_type_secondary"
         onClick={() => playlist.handleGroupAdd(props.index + 1)}
       >

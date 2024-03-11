@@ -37,12 +37,14 @@ export function PlaylistPage() {
 
         <div className="playlist-page__btns-group">
           <button
+            type="button"
             onClick={handlePlaylistReset}
             className="btn btn_type_secondary"
           >
             <span>Reset</span>
           </button>
           <button
+            type="button"
             className="btn btn_type_primary add-section-btn"
             onClick={() => handleGroupAdd(0)}
           >
@@ -60,6 +62,7 @@ export function PlaylistPage() {
 
       <div className="playlist-page__btns-group">
         <button
+          type="button"
           onClick={handleExportPlaylistClick}
           className="btn btn_type_secondary"
           disabled={Object.values(tracks).flat().length === 0}

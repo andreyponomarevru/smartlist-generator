@@ -1,13 +1,10 @@
 import React from "react";
-import { TrackMeta, FilterFormValues } from "../types";
-import {
-  buildSearchQuery,
-  m3uToFilePaths,
-  readFileAsString,
-} from "../utils/misc";
-import { useEditableText } from "./use-editable-text";
-import { useTrack } from "./api/use-track";
-import { useTrackIds } from "./api/use-track-ids";
+
+import { TrackMeta, FilterFormValues } from "../../types";
+import { buildSearchQuery } from "../../utils/misc";
+import { useEditableText } from "../use-editable-text";
+import { useTrack } from "../api/use-track";
+import { useExcludedTracks } from "./use-excluded-tracks";
 
 export type Direction = "UP" | "DOWN";
 export type TrackToReorder = {
@@ -20,11 +17,9 @@ export type TrackToReplace = {
   trackId: number;
   formValues: FilterFormValues;
 };
-
 export type State = {
   groups: number[];
   tracks: Record<string, TrackMeta[]>;
-  excludedTracks: Set<number>;
   isGroupOpen: Record<string, boolean>;
 };
 type Action =
@@ -46,8 +41,7 @@ type Action =
   | {
       type: "REORDER_TRACK";
       payload: { index: number; direction: Direction; groupId: number };
-    }
-  | { type: "IMPORT_BLACKLISTED_TRACKS"; payload: { trackIds: number[] } };
+    };
 
 let counter = 0;
 
@@ -95,7 +89,6 @@ function playlistReducer(state: State, action: Action): State {
         ...state,
         groups: [],
         tracks: {},
-        excludedTracks: state.excludedTracks,
         isGroupOpen: {},
       };
     }
@@ -137,18 +130,6 @@ function playlistReducer(state: State, action: Action): State {
           ...state.tracks,
           [`${action.payload.groupId}`]: updatedTracks,
         },
-      };
-    }
-    case "IMPORT_BLACKLISTED_TRACKS": {
-      return {
-        ...state,
-        groups: [],
-        tracks: {},
-        excludedTracks: new Set([
-          ...state.excludedTracks,
-          ...action.payload.trackIds,
-        ]),
-        isGroupOpen: {},
       };
     }
     case "OPEN_GROUP": {
@@ -213,37 +194,13 @@ export function usePlaylist() {
   const initialState: State = {
     groups: [],
     tracks: {},
-    excludedTracks: new Set<number>(),
     isGroupOpen: {},
   };
 
-  function getInitialState() {
-    const savedExcludedTracks = localStorage.getItem("excludedTracks");
-    if (savedExcludedTracks !== null) {
-      return {
-        ...initialState,
-        excludedTracks: JSON.parse(savedExcludedTracks),
-      };
-    } else {
-      return initialState;
-    }
-  }
-
-  const [state, dispatch] = React.useReducer(
-    playlistReducer,
-    initialState,
-    getInitialState,
-  );
+  const [state, dispatch] = React.useReducer(playlistReducer, initialState);
   const playlistName = useEditableText(`Playlist ${new Date().toDateString()}`);
   const getTrackQuery = useTrack();
-  const getTrackIdsQuery = useTrackIds();
-
-  React.useEffect(() => {
-    localStorage.setItem(
-      "excludedTracks",
-      JSON.stringify([...state.excludedTracks]),
-    );
-  }, [state.excludedTracks]);
+  const excludedTracks = useExcludedTracks();
 
   function handleGroupAdd(insertAt = 0) {
     dispatch({ type: "ADD_GROUP", payload: { insertAt } });
@@ -278,7 +235,7 @@ export function usePlaylist() {
           ...Object.values(state.tracks)
             .flat()
             .map((t) => t.trackId),
-          ...state.excludedTracks,
+          ...excludedTracks.state.trackIds,
         ]),
       );
       dispatch({
@@ -291,46 +248,20 @@ export function usePlaylist() {
   }
 
   async function handleTrackAdd(groupId: number, formValues: FilterFormValues) {
+    console.log(groupId, formValues);
     try {
       const track = await getTrackQuery.mutateAsync(
         buildSearchQuery(formValues, [
           ...Object.values(state.tracks)
             .flat()
             .map((t) => t.trackId),
-          ...state.excludedTracks,
+          ...excludedTracks.state.trackIds,
         ]),
       );
       dispatch({ type: "ADD_TRACK", payload: { groupId, tracks: track } });
     } catch (err) {
       console.error(err);
     }
-  }
-
-  async function handleExcludedTracksImport(
-    e: React.ChangeEvent<HTMLInputElement>,
-  ) {
-    if (!e.target.files || !(e.target.files.length > 0)) {
-      throw new Error("No file(s)");
-    }
-
-    const files = Array.from(e.target.files);
-    const isValidExtension = files.every((file) => {
-      return file.name.split(".").pop()?.toLowerCase() === "m3u";
-    });
-    if (!isValidExtension) {
-      throw new Error("Only M3U files are allowed.");
-    }
-
-    const stringifiedFiles = await Promise.all(files.map(readFileAsString));
-    const excludedPaths = stringifiedFiles.map(m3uToFilePaths).flat();
-    await getTrackIdsQuery.mutateAsync(excludedPaths, {
-      onSuccess: (data) => {
-        dispatch({
-          type: "IMPORT_BLACKLISTED_TRACKS",
-          payload: { trackIds: data },
-        });
-      },
-    });
   }
 
   //
@@ -360,6 +291,6 @@ export function usePlaylist() {
     handleTrackReplace,
     handleTrackReorder,
     handleTracksReset,
-    handleExcludedTracksImport,
+    excludedTracks,
   };
 }

@@ -182,6 +182,7 @@ export function CreateFilterForm(props: CreateFilterFormProps) {
         >
           <div>
             <button
+              type="button"
               className="btn btn_type_secondary"
               onClick={(e) => {
                 e.preventDefault();
@@ -298,6 +299,7 @@ export function CreateFilterForm(props: CreateFilterFormProps) {
 
           <div className="create-filter-form__controls">
             <button
+              type="button"
               className="btn btn_type_primary"
               onClick={form.handleSubmit(handleFilterSave)}
               disabled={isSaveBtnDisabled}
@@ -307,6 +309,7 @@ export function CreateFilterForm(props: CreateFilterFormProps) {
 
             <div className="create-filter-form__row">
               <button
+                type="button"
                 className="btn btn_type_secondary"
                 onClick={props.onEditingCancel}
               >

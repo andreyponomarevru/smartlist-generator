@@ -1,8 +1,8 @@
 import React from "react";
 
 import { usePlayer } from "./use-player";
+import { useStats } from "../api/use-stats";
 import { usePlaylist } from "./use-playlist-extended";
-import { useStats } from "./api/use-stats";
 
 type Context = {
   statsQuery: ReturnType<typeof useStats>;
@@ -14,8 +14,8 @@ const GlobalStateContext = React.createContext<Context>({} as Context);
 
 function GlobalStateProvider({ children }: { children: React.ReactNode }) {
   const playlist = usePlaylist();
-  const statsQuery = useStats(Array.from(playlist.excludedTracks));
-  const player = usePlayer(playlist.tracks);
+  const statsQuery = useStats([...playlist.excludedTracks.state.trackIds]);
+  const player = usePlayer();
 
   return (
     <GlobalStateContext.Provider value={{ playlist, statsQuery, player }}>
