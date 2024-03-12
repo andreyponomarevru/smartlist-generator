@@ -1,7 +1,6 @@
-import { ValidationError } from "joi";
+import Joi, { ValidationError } from "joi";
 import { TrackMetadataParser } from "../../utils/utilities";
-import { schemaCreateTrack } from "./validation-schemas";
-import { Track } from "../../types";
+import { Track, ValidatedTrack } from "../../types";
 
 type Errors = {
   filePath: string;
@@ -14,21 +13,23 @@ type DB = { [key: string]: Set<string | number> };
 export class TrackValidator {
   public errors: Errors;
   public db: DB;
+  #schema: Joi.ObjectSchema<ValidatedTrack>;
 
-  constructor() {
+  constructor(schema: Joi.ObjectSchema<ValidatedTrack>) {
     this.errors = [];
     this.db = {
       artist: new Set(),
       genre: new Set(),
       year: new Set(),
     };
+    this.#schema = schema;
     this.validate = this.validate.bind(this);
   }
 
   public async validate(filePath: string) {
     const trackMetadataParser = new TrackMetadataParser(filePath);
     try {
-      const parsedTrack: Track = await schemaCreateTrack.validateAsync(
+      const parsedTrack: Track = await this.#schema.validateAsync(
         await trackMetadataParser.parseAudioFile(),
       );
       this.db.year.add(parsedTrack.year);
