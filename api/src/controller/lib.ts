@@ -3,6 +3,7 @@ import { traverseDirs } from "../utils/utilities";
 import { MUSIC_LIB_DIR } from "../config/env";
 import * as tracksModel from "../model/track/index";
 import * as libModel from "../model/lib/queries";
+import { schemaCreateTrack } from "../model/track/validation-schemas";
 
 const router = express.Router();
 
@@ -41,7 +42,7 @@ export async function validateLib(
       status: "running",
     });*/
 
-    const tracksValidator = new tracksModel.TrackValidator();
+    const tracksValidator = new tracksModel.TrackValidator(schemaCreateTrack);
     await traverseDirs(MUSIC_LIB_DIR, tracksValidator.validate);
     validationResults = {
       errors: tracksValidator.errors,
