@@ -25,7 +25,6 @@ export async function getTracksCountByYear(
   next: NextFunction,
 ) {
   try {
-    console.log(await statsModel.countTracksByYear(req.query.excluded || []));
     res.json({
       results: await statsModel.countTracksByYear(req.query.excluded || []),
     });
