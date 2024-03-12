@@ -83,7 +83,7 @@ _source/
 
 !.prettierrc
 
-!.eslintrc.js
+!.eslintrc
 !.eslintignore
 
 !.dockerignore
