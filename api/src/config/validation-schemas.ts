@@ -32,14 +32,6 @@ export const schemaIdParam = Joi.object<{ id: number }>({
   id: schemaId,
 });
 
-export const schemaCreatePlaylist = Joi.object<{ name: string }>({
-  name: playlistName,
-});
-
-export const schemaUpdatePlaylist = Joi.object<{ name: string }>({
-  name: playlistName,
-});
-
 export const schemaAddTrackToPlaylist = Joi.object<{
   trackId: number;
   subplaylistId: number;
