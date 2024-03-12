@@ -9,8 +9,8 @@ services:
     volumes:
       - ./api/src:/node/src
       - ./api/tsconfig.json:/api/tsconfig.json
+      # ":/tracks" should match the MUSIC_LIB_DIR env var in .common.env
       - /mnt/CE64EB6A64EB53AD/music-lib/tracks:/tracks
-
     expose:
       - "8080"
     ports:
