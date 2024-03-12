@@ -48,6 +48,7 @@ type Stats = Record<string, OptionsList<number>[]>;
 function createSingleSelectStyles(
   hasError?: boolean,
 ): StylesConfig<OptionsList<string | number>, false> {
+  console.log(hasError ? "ERROR" : "");
   return {
     control: (baseStyles, state) => ({
       ...baseStyles,
@@ -74,6 +75,7 @@ function createSingleSelectStyles(
 function createMultiSelectStyles(
   hasError?: boolean,
 ): StylesConfig<OptionsList<string | number>, true> {
+  console.log(hasError ? "ERROR" : "");
   return {
     control: (baseStyles, state) => ({
       ...baseStyles,
@@ -371,7 +373,7 @@ export function ConditionSelect(props: SelectProps<string | number>) {
                 {...field}
                 className="error"
                 options={props.optionsForCondition!}
-                styles={createSingleSelectStyles(error && isDirty)}
+                styles={createSingleSelectStyles(!!error)}
               />
               {error && isDirty && (
                 <Message type="danger" className="create-filter-form__error">
@@ -395,7 +397,7 @@ export function ConditionSelect(props: SelectProps<string | number>) {
                 closeMenuOnSelect={props.name === "year"}
                 isMulti={props.name === "genre" || undefined}
                 options={props.optionsForValue![props.name!]!}
-                styles={createMultiSelectStyles(error && isDirty)}
+                styles={createMultiSelectStyles(!!error)}
               />
               {error && isDirty && (
                 <Message type="danger" className="create-filter-form__error">
