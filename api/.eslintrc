@@ -30,7 +30,7 @@
     "no-console": "off",
     "prettier/prettier": ["error"],
     "no-multiple-empty-lines": ["error", { "max": 4 }],
-    "no-unused-vars": 1,
+    "no-unused-vars": 2,
     "no-warning-comments": [
       0,
       { "terms": ["todo", "fixme", "xxx"], "location": "anywhere" }
