@@ -148,7 +148,7 @@ export function CreateFilterForm(props: CreateFilterFormProps) {
       playlist.handleReset();
       setSaveBtnDisabled(false);
     }
-  }, [form.formState.isDirty]);
+  }, [form.formState.isDirty, playlist]);
 
   function handleFilterSubmit(formValues: FilterFormValues) {
     playlist.handleTrackAdd(formValues);
