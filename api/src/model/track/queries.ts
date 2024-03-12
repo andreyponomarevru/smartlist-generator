@@ -1,10 +1,8 @@
-import path from "path";
 import { connectDB } from "../../config/postgres";
 import { schemaCreateTrack } from "./validation-schemas";
 import { TrackMetadataParser, logDBError } from "../../utils/utilities";
 import { SearchParams, buildSQLQuery } from "../../utils/query-builder";
 import { FoundTrackDBResponse, FoundTrack } from "../../types";
-import { LOCAL_MUSIC_LIB_DIR } from "../../config/env";
 
 export async function create(filePath: string): Promise<void> {
   const trackMetadataParser = new TrackMetadataParser(filePath);
@@ -24,10 +22,12 @@ export async function create(filePath: string): Promise<void> {
     //
     const { track_id: trackId } = (
       await client.query({
-        text:
-          "INSERT INTO track (title, year, duration, file_path) \
-           VALUES ($1, $2, $3, $4) \
-           RETURNING track_id",
+        text: `\
+          INSERT INTO track 
+            (title, year, duration, file_path) 
+          VALUES 
+            ($1,    $2,   $3,       $4) 
+          RETURNING track_id`,
         values: [
           newTrack.title,
           newTrack.year,
@@ -44,32 +44,33 @@ export async function create(filePath: string): Promise<void> {
       // TODO: verify this query, I think it can be simplified
       const { genre_id } = (
         await client.query({
-          text:
-            "\
-					WITH \
-            input_rows (name) AS ( VALUES ($1) ), \
-            ins AS ( \
-							INSERT INTO genre (name) \
-                SELECT name FROM input_rows \
-              ON CONFLICT DO NOTHING \
-              RETURNING genre_id \
-            ) \
-          \
-					SELECT genre_id FROM ins \
-          \
-          UNION ALL \
-          \
-					SELECT g.genre_id FROM input_rows \
-          JOIN genre AS g USING (name);",
+          text: `\
+            WITH 
+              input_rows (name) AS ( VALUES ($1) ), 
+              ins AS ( 
+                INSERT INTO genre (name) 
+                  SELECT name FROM input_rows 
+                ON CONFLICT DO 
+                RETURNING genre_id 
+              ) 
+            
+            SELECT genre_id FROM ins 
+            
+            UNION ALL 
+            
+            SELECT g.genre_id FROM input_rows 
+            JOIN genre AS g USING (name);`,
           values: [genre],
         })
       ).rows[0];
 
       const inserTrackGenreQuery = {
-        text:
-          "INSERT INTO track_genre (track_id, genre_id) \
-				   VALUES ($1::integer, $2::integer) \
-           ON CONFLICT DO NOTHING;",
+        text: `\
+          INSERT INTO track_genre 
+            (track_id, genre_id) 
+          VALUES 
+            ($1::integer, $2::integer) 
+          ON CONFLICT DO NOTHING;`,
         values: [trackId, genre_id],
       };
       await client.query(inserTrackGenreQuery);
@@ -81,32 +82,34 @@ export async function create(filePath: string): Promise<void> {
     for (const artist of newTrack.artist) {
       const { artist_id } = (
         await client.query({
-          text:
-            "WITH \
-              input_rows (name) AS (VALUES ($1)), \
-              \
-              ins AS ( \
-                INSERT INTO artist (name) \
-                  SELECT name FROM input_rows \
-                ON CONFLICT DO NOTHING \
-                RETURNING artist_id \
-              ) \
-            \
-            SELECT artist_id FROM ins \
-            \
-            UNION ALL \
-            \
-            SELECT a.artist_id FROM input_rows \
-            JOIN artist AS a USING (name);",
+          text: `\
+            WITH 
+              input_rows (name) AS (VALUES ($1)), 
+              
+              ins AS ( 
+                INSERT INTO artist (name) 
+                  SELECT name FROM input_rows 
+                ON CONFLICT DO NOTHING 
+                RETURNING artist_id 
+              ) 
+            
+            SELECT artist_id FROM ins 
+            
+            UNION ALL 
+            
+            SELECT a.artist_id FROM input_rows 
+            JOIN artist AS a USING (name);`,
           values: [artist],
         })
       ).rows[0];
 
       await client.query({
-        text:
-          "INSERT INTO track_artist (track_id, artist_id) \
-					 VALUES ($1::integer, $2::integer) \
-           ON CONFLICT DO NOTHING",
+        text: `\
+          INSERT INTO track_artist 
+            (track_id, artist_id) 
+          VALUES 
+            ($1::integer, $2::integer) 
+          ON CONFLICT DO NOTHING`,
         values: [trackId, artist_id],
       });
     }
