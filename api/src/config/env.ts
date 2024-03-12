@@ -1,7 +1,6 @@
 export const HTTP_PORT = process.env.HTTP_PORT!;
 export const NODE_ENV = process.env.NODE_ENV!;
 export const MUSIC_LIB_DIR = process.env.MUSIC_LIB_DIR!;
-export const LOCAL_MUSIC_LIB_DIR = process.env.LOCAL_MUSIC_LIB_DIR!;
 export const SUPPORTED_CODEC = (process.env.SUPPORTED_CODEC! as string)
   .split(",")
   .map((name) => name.toLowerCase());
