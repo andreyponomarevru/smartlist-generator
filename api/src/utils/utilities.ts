@@ -58,7 +58,9 @@ export function parseFilterIDs(arr: unknown): number[] | null {
 }
 
 export function filterByExtension(filepath: string) {
-  return /\.(mp3|flac)$/.test(filepath);
+  return new RegExp(`\\.(${SUPPORTED_CODEC.join("|")})$`).test(
+    filepath.toLowerCase(),
+  );
 }
 
 export class TrackMetadataParser {
@@ -114,9 +116,7 @@ export class TrackMetadataParser {
       return [...new Set(arr.filter((str) => str !== ""))];
     } else {
       console.debug(
-        `${
-          this.#filePath
-        }: ID3 tag value which is either not an array or an empty array is set to "Unknown"`,
+        `${this.#filePath}: ID3 tag value which is either not an array or an empty array is set to "Unknown"`,
       );
       return [];
     }
