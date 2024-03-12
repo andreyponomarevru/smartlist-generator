@@ -21,13 +21,6 @@ const schemaId = Joi.number().positive().integer().min(1).required().messages({
   "any.required": `"id" is required`,
 });
 
-const playlistName = Joi.string().min(1).max(255).required().messages({
-  "string.base": `"name" should be a type of 'string'`,
-  "number.min": `"name" min length is 1 symbol`,
-  "number.max": `"name" max length is 255 symbols`,
-  "any.required": `"name" is required`,
-});
-
 export const schemaIdParam = Joi.object<{ id: number }>({
   id: schemaId,
 });
