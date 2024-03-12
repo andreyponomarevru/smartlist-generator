@@ -24,8 +24,6 @@ import { usePlaylist } from "../../hooks/use-playlist";
 
 import "./create-filter-form.scss";
 
-const ERROR_MESSAGE = "Required";
-
 const DEFAULT_FILTER_VALUES: FilterFormValues = {
   name: "New Filter Name ...",
   operator: OPERATORS.any,
@@ -146,9 +144,9 @@ export function CreateFilterForm(props: CreateFilterFormProps) {
   React.useEffect(() => {
     if (form.formState.isDirty) {
       playlist.handleReset();
-      setSaveBtnDisabled(false);
+      form.reset(watchedFilters, { keepValues: true, keepDirty: false });
     }
-  }, [form.formState.isDirty, playlist]);
+  }, [form, playlist, watchedFilters]);
 
   function handleFilterSubmit(formValues: FilterFormValues) {
     playlist.handleTrackAdd(formValues);
@@ -162,15 +160,12 @@ export function CreateFilterForm(props: CreateFilterFormProps) {
   function handleFilterSave(formValues: FilterFormValues) {
     savedFilters.handleSave(props.savedFormId || savedFormId, watchedFilters);
     form.reset(formValues, { keepValues: true, keepDirty: false });
-    setSaveBtnDisabled(true);
     props.onEditingCancel();
   }
 
   // Change filter/form ID (for storing in state) every time we update the filter title (watchedFilters.name). If name is untouched, filter is just
   // resaved
   const [savedFormId] = useUUID(1, [watchedFilters.name]);
-
-  const [isSaveBtnDisabled, setSaveBtnDisabled] = React.useState(false);
 
   return (
     <FormProvider {...form}>
@@ -191,7 +186,6 @@ export function CreateFilterForm(props: CreateFilterFormProps) {
                   keepDirty: false,
                 });
                 form.clearErrors();
-                setSaveBtnDisabled(false);
                 playlist.handleReset();
               }}
             >
@@ -200,7 +194,7 @@ export function CreateFilterForm(props: CreateFilterFormProps) {
           </div>
           <div className="create-filter-form__title">
             <input
-              {...form.register("name", { required: ERROR_MESSAGE })}
+              {...form.register("name", { required: true })}
               className={`input create-filter-form__input ${
                 form.formState.errors.name ? "input_error" : ""
               }`}
@@ -301,9 +295,8 @@ export function CreateFilterForm(props: CreateFilterFormProps) {
               type="button"
               className="btn btn_type_primary"
               onClick={form.handleSubmit(handleFilterSave)}
-              disabled={isSaveBtnDisabled}
             >
-              {isSaveBtnDisabled ? "Saved" : "Save Filter"}
+              Save Filter
             </button>
 
             <div className="create-filter-form__row">
@@ -370,7 +363,7 @@ export function ConditionSelect(props: SelectProps<string | number>) {
         name={`filters.${props.index}.condition`}
         defaultValue={null}
         control={props.control}
-        rules={{ required: ERROR_MESSAGE }}
+        rules={{ required: true }}
         render={({ field, fieldState: { error }, formState: { isDirty } }) => {
           return (
             <div className="create-filter-form__select-wrapper">
@@ -393,7 +386,7 @@ export function ConditionSelect(props: SelectProps<string | number>) {
         name={`filters.${props.index}.value`}
         defaultValue={null}
         control={props.control}
-        rules={{ required: ERROR_MESSAGE }}
+        rules={{ required: true }}
         render={({ field, fieldState: { error }, formState: { isDirty } }) => {
           return (
             <div className="create-filter-form__select-wrapper">
