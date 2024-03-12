@@ -11,15 +11,9 @@ export type TrackMeta = {
   filePath: string;
 };
 
-//
 // Forms
-//
 
-export type OptionsList<Value> = {
-  label: string;
-  value: Value;
-};
-
+export type OptionsList<Value> = { label: string; value: Value };
 export interface FilterFormValues {
   name: string;
   operator: { label: string; value: string };
@@ -29,40 +23,26 @@ export interface FilterFormValues {
     value: OptionsList<number> | OptionsList<number>[] | null;
   }[];
 }
-
 export interface SavedFilterFormValues {
   filterId: OptionsList<string>;
 }
 
-//
 // API
-//
 
 export type APIError = { status: number; moreInfo: string; message: string };
-
 export type Stats = { id?: number; name: string; count: number };
-
 export type GetStatsRes = { results: Stats[] };
-
 export type GetTrackRes = { results: TrackMeta[] };
-
 export type FindTrackIdsRes = { results: number[] };
-
 export type SelectProps<OptionsValue> = {
-  name?: string;
+  name: string;
   control: Control<FilterFormValues>;
   index: number;
-  options?: OptionsList<OptionsValue>[];
-  conditionOptions?: OptionsList<OptionsValue>[];
-  valueOptions?: Record<string, OptionsList<OptionsValue>[]>;
-
-  defaultValue?: OptionsList<OptionsValue> | null;
-  closeMenuOnSelect?: boolean;
+  optionsForCondition: OptionsList<OptionsValue>[];
+  optionsForValue: Record<string, OptionsList<OptionsValue>[]>;
   resetField?: UseFormResetField<FilterFormValues>;
-  isMulti?: boolean;
   isDirty?: boolean;
 };
-
 export type SearchQuery = {
   operator: string;
   filters: {

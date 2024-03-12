@@ -253,7 +253,6 @@ export function CreateFilterForm(props: CreateFilterFormProps) {
                     control={form.control}
                     index={index}
                     resetField={form.resetField}
-                    defaultValue={null}
                     isDirty={
                       !!(
                         form.formState.dirtyFields.filters &&
@@ -261,12 +260,12 @@ export function CreateFilterForm(props: CreateFilterFormProps) {
                         form.formState.dirtyFields.filters[index].name
                       )
                     }
-                    conditionOptions={Object.values(
+                    optionsForCondition={Object.values(
                       FILTER_CONDITIONS[
                         watchedFilters.filters[index].name.value
                       ],
                     )}
-                    valueOptions={{ year: stats.year, genre: stats.genre }}
+                    optionsForValue={{ year: stats.year, genre: stats.genre }}
                   />
                 </div>
                 <div></div>
@@ -378,7 +377,7 @@ export function ConditionSelect(props: SelectProps<string | number>) {
               <Select
                 {...field}
                 className="error"
-                options={props.conditionOptions!}
+                options={props.optionsForCondition!}
                 styles={createSingleSelectStyles(error && isDirty)}
               />
               {error && isDirty && (
@@ -402,7 +401,7 @@ export function ConditionSelect(props: SelectProps<string | number>) {
                 {...field}
                 closeMenuOnSelect={props.name === "year"}
                 isMulti={props.name === "genre" || undefined}
-                options={props.valueOptions![props.name!]!}
+                options={props.optionsForValue![props.name!]!}
                 styles={createMultiSelectStyles(error && isDirty)}
               />
               {error && isDirty && (
