@@ -235,7 +235,7 @@ export function usePlaylist() {
           ...Object.values(state.tracks)
             .flat()
             .map((t) => t.trackId),
-          ...excludedTracks.state.trackIds,
+          ...[...excludedTracks.state.tracks].map(({ trackId }) => trackId),
         ]),
       );
       dispatch({
@@ -255,7 +255,7 @@ export function usePlaylist() {
           ...Object.values(state.tracks)
             .flat()
             .map((t) => t.trackId),
-          ...excludedTracks.state.trackIds,
+          ...[...excludedTracks.state.tracks].map(({ trackId }) => trackId),
         ]),
       );
       dispatch({ type: "ADD_TRACK", payload: { groupId, tracks: track } });

@@ -30,6 +30,7 @@ async function getStats(
 }
 
 export function useStats(excludedTracks: number[]) {
+  console.log(excludedTracks);
   const statsQuery = useQuery({
     queryKey: ["stats", excludedTracks],
     queryFn: () => getStats(excludedTracks),

@@ -14,7 +14,10 @@ const GlobalStateContext = React.createContext<Context>({} as Context);
 
 function GlobalStateProvider({ children }: { children: React.ReactNode }) {
   const playlist = usePlaylist();
-  const statsQuery = useStats([...playlist.excludedTracks.state.trackIds]);
+  const statsQuery = useStats([
+    ...[...playlist.excludedTracks.state.tracks].map(({ trackId }) => trackId),
+  ]);
+
   const player = usePlayer();
 
   return (

@@ -1,21 +1,33 @@
 import React from "react";
 
 import { m3uToFilePaths, readFileAsString } from "../../utils/misc";
-import { useTrackIds } from "../api/use-track-ids";
+import { useTracksSearch } from "../api/use-tracks-search";
+import { useLocalStorage } from "../use-local-storage";
 
-type State = { trackIds: Set<number> };
+type ImportedTrack = { trackId: number; filePath: string };
+
+type State = { tracks: Set<ImportedTrack>; errors: Error[] };
 type Action =
   | { type: "CLEAR" }
-  | { type: "IMPORT"; payload: { trackIds: number[] } };
+  | { type: "IMPORT"; payload: { tracks: ImportedTrack[] } }
+  | { type: "ADD_ERROR"; payload: { error: Error } };
 
 function tracksReducer(state: State, action: Action): State {
   switch (action.type) {
     case "CLEAR": {
-      return { trackIds: new Set() };
+      return { ...state, tracks: new Set(), errors: [] };
     }
     case "IMPORT": {
       return {
-        trackIds: new Set([...state.trackIds, ...action.payload.trackIds]),
+        ...state,
+        tracks: new Set([...state.tracks, ...action.payload.tracks]),
+        errors: [],
+      };
+    }
+    case "ADD_ERROR": {
+      return {
+        ...state,
+        errors: [action.payload.error],
       };
     }
     default: {
@@ -25,16 +37,14 @@ function tracksReducer(state: State, action: Action): State {
 }
 
 export function useExcludedTracks() {
-  const initialState: State = { trackIds: new Set<number>() };
+  const initialState: State = { tracks: new Set<ImportedTrack>(), errors: [] };
 
-  function getInitialState(): State {
-    const saved = localStorage.getItem("excludedTracks");
+  const [saved, setSaved] = useLocalStorage<ImportedTrack[]>("excludedTracks", [
+    ...initialState.tracks,
+  ]);
 
-    if (saved !== null) {
-      return { trackIds: new Set(JSON.parse(saved)) };
-    } else {
-      return initialState;
-    }
+  function getInitialState() {
+    return { tracks: new Set(saved), errors: initialState.errors };
   }
 
   const [state, dispatch] = React.useReducer(
@@ -43,13 +53,17 @@ export function useExcludedTracks() {
     getInitialState,
   );
   React.useEffect(() => {
-    localStorage.setItem("excludedTracks", JSON.stringify([...state.trackIds]));
-  }, [state.trackIds]);
+    setSaved([...state.tracks]);
+  }, [state.tracks, setSaved]);
 
-  const getTrackIdsQuery = useTrackIds();
+  const getTracksQuery = useTracksSearch();
 
   function clear() {
     dispatch({ type: "CLEAR" });
+  }
+
+  function addError(err: Error) {
+    dispatch({ type: "ADD_ERROR", payload: { error: err } });
   }
 
   async function importFromM3U(e: React.ChangeEvent<HTMLInputElement>) {
@@ -62,14 +76,15 @@ export function useExcludedTracks() {
       return file.name.split(".").pop()?.toLowerCase() === "m3u";
     });
     if (!isValidExtension) {
-      throw new Error("Only M3U files are allowed.");
+      addError(new Error("Only M3U files are allowed"));
+      return;
     }
 
     const stringifiedFiles = await Promise.all(files.map(readFileAsString));
     const excludedPaths = stringifiedFiles.map(m3uToFilePaths).flat();
-    await getTrackIdsQuery.mutateAsync(excludedPaths, {
+    await getTracksQuery.mutateAsync(excludedPaths, {
       onSuccess: (data) => {
-        dispatch({ type: "IMPORT", payload: { trackIds: data } });
+        dispatch({ type: "IMPORT", payload: { tracks: data } });
       },
     });
   }
@@ -78,5 +93,5 @@ export function useExcludedTracks() {
     state,
     handleClear: clear,
     handleImport: importFromM3U,
-  };
+  } as const;
 }

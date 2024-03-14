@@ -1,10 +1,12 @@
 import { useMutation } from "react-query";
 
 import { API_ROOT_URL } from "../../config/env";
-import { FindTrackIdsRes } from "../../types";
+import { GetTrackIdsByFilePaths } from "../../types";
 
-async function getTrackIds(filePaths: string[]): Promise<number[]> {
-  const response = await fetch(`${API_ROOT_URL}/tracks/ids`, {
+async function getTracksByFilePaths(
+  filePaths: string[],
+): Promise<GetTrackIdsByFilePaths["results"]> {
+  const response = await fetch(`${API_ROOT_URL}/tracks/searches`, {
     method: "POST",
     headers: {
       "content-type": "application/json",
@@ -17,14 +19,13 @@ async function getTrackIds(filePaths: string[]): Promise<number[]> {
     throw new Error(`Failed finding track ids. Response: ${response}`);
   }
 
-  const parsedRes: FindTrackIdsRes = await response.json();
-
+  const parsedRes: GetTrackIdsByFilePaths = await response.json();
   return parsedRes.results;
 }
 
-export function useTrackIds() {
+export function useTracksSearch() {
   const mutation = useMutation({
-    mutationFn: (filePaths: string[]) => getTrackIds(filePaths),
+    mutationFn: (filePaths: string[]) => getTracksByFilePaths(filePaths),
     onError: (err) => console.log("[react-query error handler]", err),
   });
   return mutation;

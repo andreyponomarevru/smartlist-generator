@@ -186,16 +186,21 @@ export async function findTrack(
 
 export async function findTrackIdsByFilePaths(
   filePaths: string[],
-): Promise<number[]> {
+): Promise<{ trackId: number; filePath: string }[]> {
   const pool = await connectDB();
 
   try {
-    const sql = `SELECT track_id FROM track WHERE file_path = ANY($1);`;
+    const sql = `SELECT track_id, file_path FROM track WHERE file_path = ANY($1);`;
     const response = await pool.query<FoundTrackDBResponse>(sql, [filePaths]);
-
+    console.log("RESPONSE ROWS: ", response);
     return response.rows.length === 0
       ? []
-      : response.rows.map(({ track_id }) => track_id);
+      : response.rows.map(({ track_id, file_path }) => {
+          return {
+            trackId: track_id,
+            filePath: file_path,
+          };
+        });
   } catch (err) {
     logDBError("Can't find tracks", err);
     throw err;

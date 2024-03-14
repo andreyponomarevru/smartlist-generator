@@ -16,7 +16,7 @@ export interface ValidatedTrack {
   artist: string[];
   year: number;
   title: string;
-  genre: typeof GENRES[number][];
+  genre: (typeof GENRES)[number][];
 }
 
 export type FoundTrackDBResponse = {

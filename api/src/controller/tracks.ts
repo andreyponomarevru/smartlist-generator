@@ -41,7 +41,7 @@ async function getTrack(
 
 async function getTrackIdsByFilePaths(
   req: Request<any, any, { filePaths: string[] }>,
-  res: Response,
+  res: Response<{ results: { trackId: number; filePath: string }[] }>,
   next: NextFunction,
 ) {
   try {
@@ -59,7 +59,7 @@ router.get(
 );
 router.post("/api/tracks", validate(schemaFindTrackReqBody, "body"), getTrack);
 router.post(
-  "/api/tracks/ids",
+  "/api/tracks/searches",
   validate(schemaFindTrackIdsByFilePathsReqBody, "body"),
   getTrackIdsByFilePaths,
 );

@@ -2,7 +2,7 @@ import path from "path";
 import fs from "fs-extra";
 import * as mm from "music-metadata";
 import { Track } from "../types";
-import { SUPPORTED_CODEC, MUSIC_LIB_DIR } from "../config/env";
+import { SUPPORTED_CODEC } from "../config/env";
 
 export function logDBError(msg: string, err: unknown) {
   if (err instanceof Error) {
@@ -17,7 +17,7 @@ export function logDBError(msg: string, err: unknown) {
 }
 
 export async function traverseDirs(
-  dirpath: string = MUSIC_LIB_DIR,
+  dirpath: string,
   callback: (nodePath: string) => Promise<void>,
 ) {
   const fileSystemNodes = await fs.readdir(dirpath);
