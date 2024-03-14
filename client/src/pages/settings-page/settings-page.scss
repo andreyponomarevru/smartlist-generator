@@ -1,13 +1,33 @@
 @import "../../global.scss";
 
-.database-page {
+.settings-page {
   display: flex;
   flex-flow: column nowrap;
   font-size: $font-size_regular-text;
 
+  &__input-wrapper {
+    display: flex;
+    flex-flow: column nowrap;
+    row-gap: 0.5rem;
+    align-items: first baseline;
+    justify-content: center;
+  }
+
   &__input {
     font-size: $font-size_controls;
     height: $controls_btn-height;
+  }
+
+  &__subsection {
+    display: flex;
+    flex-flow: column nowrap;
+    row-gap: 1rem;
+    border-bottom: 1px solid $color_grey-50;
+    padding: 1rem 0;
+  }
+
+  &__subsection:last-child {
+    border-bottom: none;
   }
 
   &__row {
@@ -15,8 +35,6 @@
     grid-template-columns: 25% 1fr auto;
     align-items: center;
     column-gap: 2rem;
-    border-bottom: 1px solid $color_grey-50;
-    padding: 1rem 0;
   }
 
   &__buttons {
@@ -28,10 +46,6 @@
 
   &__name {
     font-weight: bold;
-  }
-
-  &__row:last-child {
-    border-bottom: none;
   }
 
   &__icon {

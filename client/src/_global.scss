@@ -50,6 +50,7 @@ $color_red-50: #d45d47;
 $color_red-10: #ffe8e3;
 $color_yellow-50: #c19b4e;
 $color_green-50: #6f9158;
+$color_green-20: #dfe7ca;
 $color_black: black;
 
 $color_text: $color_black;
@@ -299,4 +300,12 @@ $controls_btn-height: 2.75rem;
   justify-content: center;
   height: 100%;
   width: 100%;
+}
+
+.input-error {
+  padding: 0.5rem 1rem;
+  background-color: $color_red-10;
+  color: $color_black;
+  border-radius: $border_radius_block;
+  font-size: $font-size_controls;
 }

@@ -1,13 +1,13 @@
 import { Control, UseFormResetField } from "react-hook-form";
 
 export type TrackMeta = {
-  year: number;
   artist: string[];
-  title: string;
   duration: number;
   genre: string[];
   genreId: number[];
+  title: string;
   trackId: number;
+  year: number;
   filePath: string;
 };
 
@@ -26,6 +26,7 @@ export interface FilterFormValues {
 export interface SavedFilterFormValues {
   filterId: OptionsList<string>;
 }
+export type LibPathInput = { libPath: string };
 
 // API
 
@@ -33,6 +34,9 @@ export type APIError = { status: number; moreInfo: string; message: string };
 export type Stats = { id?: number; name: string; count: number };
 export type GetStatsRes = { results: Stats[] };
 export type GetTrackRes = { results: TrackMeta[] };
+export type GetTrackIdsByFilePaths = {
+  results: { trackId: number; filePath: string }[];
+};
 export type FindTrackIdsRes = { results: number[] };
 export type SelectProps<OptionsValue> = {
   name: string;
