@@ -131,5 +131,5 @@ export function usePlayer() {
     setTimeProgress,
     onLoadedMetadata: handleMetadataLoaded,
     handleProgressChange,
-  };
+  } as const;
 }
