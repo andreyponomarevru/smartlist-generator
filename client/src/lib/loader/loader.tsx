@@ -4,7 +4,7 @@ import "./loader.scss";
 
 interface Props extends React.HTMLAttributes<HTMLSpanElement> {
   for?: "page" | "btn";
-  color: "white" | "black" | "pink";
+  color: "white" | "black";
 }
 
 export function Loader(props: Props): ReactElement {

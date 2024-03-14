@@ -2,23 +2,45 @@ import React from "react";
 import { IoIosCheckmarkCircleOutline } from "react-icons/io";
 import { IoIosCloseCircleOutline } from "react-icons/io";
 import { FaFileImport, FaDownload } from "react-icons/fa";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
+import { Message } from "../../lib/message/message";
 import { useGlobalState } from "../../hooks/use-global-state";
+import { useLibPath } from "../../hooks/api/use-lib-path";
+import { LibPathInput } from "../../types";
 
-import "./database-page.scss";
+import "./settings-page.scss";
 
-type Input = { libPath: string };
+const INPUT_ERROR_MESSAGE = "Required";
 
-const INPUT_ERRORS = { libPath: "This field is required" };
-
-export function DatabasePage() {
+export function SettingsPage() {
   const { playlist, statsQuery } = useGlobalState();
-  const form = useForm<Input>();
+  const [libPath, setLibPath] = useLibPath();
 
-  const handleLibPathSubmit: SubmitHandler<Input> = (data) => console.log(data);
+  const form = useForm<LibPathInput>({ defaultValues: libPath });
+  const {
+    formState: { isSubmitted, isDirty },
+    reset,
+  } = form;
+  React.useEffect(() => {
+    if (isSubmitted && isDirty) {
+      reset(libPath, {
+        keepValues: true,
+        keepErrors: true,
+        keepIsSubmitSuccessful: true,
+        keepDirty: false,
+        keepIsSubmitted: false,
+      });
+    }
+  }, [isSubmitted, reset, isDirty, libPath]);
 
-  const excludedCount = playlist.excludedTracks.state.trackIds.size;
+  function handleLibPathSubmit(input: LibPathInput) {
+    setLibPath(input);
+  }
+
+  //
+
+  const excludedCount = playlist.excludedTracks.state.tracks.size;
   const totalCount =
     statsQuery.data?.years.results?.reduce(
       (accumulator, currentValue) => accumulator + currentValue.count,
@@ -28,93 +50,122 @@ export function DatabasePage() {
   const tracksLeft = totalCount - excludedCount;
 
   return (
-    <div className="database-page">
+    <div className="settings-page">
       <header className="header1">Database</header>
 
-      <form
-        onSubmit={form.handleSubmit(handleLibPathSubmit)}
-        id="libpath"
-        className="database-page__row"
-      >
-        <span className="database-page__name">Music Library Path</span>
-        <span>
-          <input
-            defaultValue="Library path"
-            {...form.register("libPath", { required: true })}
-            className="input database-page__input"
-          />
-          {form.formState.errors.libPath && <span>{INPUT_ERRORS.libPath}</span>}
-        </span>
-        <span className="database-page__buttons">
-          <input
-            className="btn btn_type_secondary"
-            type="submit"
-            value="Save"
-          />
-        </span>
-      </form>
-
-      <div className="database-page__row">
-        <span className="database-page__name">Validation Status</span>
-        <span>
-          <IoIosCheckmarkCircleOutline className="database-page__icon database-page__icon_success" />
-          <IoIosCloseCircleOutline className="database-page__icon database-page__icon_error" />
-        </span>
-        <span className="database-page__buttons">
-          <span className="btn btn_type_secondary">Validate</span>
-          <span className="btn btn_type_secondary">
-            <FaDownload className="icon" /> Download report
-          </span>
-        </span>
-      </div>
-
-      <div className="database-page__row">
-        <span className="database-page__name">Initialization</span>
-        <span>{new Date().toDateString()}</span>
-        <span className="database-page__buttons">
-          <span className="btn btn_type_secondary">Initialize</span>
-          <span className="btn btn_type_danger">Drop database</span>
-        </span>
-      </div>
-
-      <div className="database-page__row">
-        <span className="database-page__name">Excluded Tracks</span>
-        <span>
-          <span className="database-page__highlighting database-page__highlighting_primary">
-            {excludedCount} ({excludedPercentage}%)
-          </span>{" "}
-          out of{" "}
-          <span className="database-page__highlighting database-page__highlighting_primary">
-            {totalCount}
-          </span>{" "}
-          tracks were excluded.{" "}
-          <span className="database-page__highlighting database-page__highlighting_primary">
-            {tracksLeft}
-          </span>{" "}
-          tracks left.
-        </span>
-        <span className="database-page__buttons">
-          <label htmlFor="importblacklisted">
+      <div className="settings-page__subsection">
+        <form
+          onSubmit={form.handleSubmit(handleLibPathSubmit)}
+          id="libpath"
+          className="settings-page__row"
+        >
+          <span className="settings-page__name">Lib Path</span>
+          <span className="settings-page__input-wrapper">
             <input
-              id="importblacklisted"
-              type="file"
-              onChange={playlist.excludedTracks.handleImport}
-              multiple
-              hidden
+              {...form.register("libPath", { required: INPUT_ERROR_MESSAGE })}
+              className={`input settings-page__input ${
+                form.formState.errors.libPath ? "input_error" : ""
+              }`}
             />
+          </span>
+          <span className="settings-page__buttons">
+            <input
+              className="btn btn_type_secondary"
+              type="submit"
+              value="Save"
+            />
+          </span>
+        </form>
+
+        {form.formState.errors.libPath && (
+          <Message type="danger">
+            {form.formState.errors.libPath?.message}
+          </Message>
+        )}
+        {form.formState.isSubmitSuccessful && (
+          <Message type="success">Saved</Message>
+        )}
+      </div>
+
+      <div className="settings-page__subsection">
+        <div className="settings-page__row">
+          <span className="settings-page__name">Files Validation</span>
+          <span>
+            <IoIosCheckmarkCircleOutline className="settings-page__icon settings-page__icon_success" />
+            <IoIosCloseCircleOutline className="settings-page__icon settings-page__icon_error" />
+          </span>
+          <span className="settings-page__buttons">
+            <span className="btn btn_type_secondary">Validate</span>
             <span className="btn btn_type_secondary">
-              <FaFileImport className="icon" />
-              <span>Import from M3U</span>
+              <FaDownload className="icon" /> Download report
             </span>
-          </label>
-          <button
-            type="button"
-            onClick={playlist.excludedTracks.handleClear}
-            className="btn btn_type_danger"
-          >
-            Clear
-          </button>
-        </span>
+          </span>
+        </div>
+      </div>
+
+      <div className="settings-page__subsection">
+        <div className="settings-page__row">
+          <span className="settings-page__name">Database</span>
+          <span>
+            Created on{" "}
+            <span className="settings-page__highlighting settings-page__highlighting_primary">
+              {new Date().toDateString()}
+            </span>
+          </span>
+          <span className="settings-page__buttons">
+            <span className="btn btn_type_secondary">Populate</span>
+            <span className="btn btn_type_danger">Drop</span>
+          </span>
+        </div>
+      </div>
+
+      <div className="settings-page__subsection">
+        <div className="settings-page__row">
+          <span className="settings-page__name">Excluded Tracks</span>
+          <span>
+            <span className="settings-page__highlighting settings-page__highlighting_primary">
+              {excludedCount} ({excludedPercentage}%)
+            </span>{" "}
+            out of{" "}
+            <span className="settings-page__highlighting settings-page__highlighting_primary">
+              {totalCount}
+            </span>{" "}
+            tracks were excluded.{" "}
+            <span className="settings-page__highlighting settings-page__highlighting_primary">
+              {tracksLeft}
+            </span>{" "}
+            tracks left
+          </span>
+          <span className="settings-page__buttons">
+            <label htmlFor="importblacklisted">
+              <input
+                id="importblacklisted"
+                type="file"
+                onChange={playlist.excludedTracks.handleImport}
+                multiple
+                hidden
+              />
+              <span className="btn btn_type_secondary">
+                <FaFileImport className="icon" />
+                <span>Import from M3U</span>
+              </span>
+            </label>
+            <button
+              type="button"
+              onClick={playlist.excludedTracks.handleClear}
+              className="btn btn_type_danger"
+            >
+              Clear
+            </button>
+          </span>
+        </div>
+        <div className="settings-page__messages">
+          {playlist.excludedTracks.state.errors.map((err) => (
+            <Message key={err.message} type="danger">
+              {err.message}
+            </Message>
+          ))}
+        </div>
       </div>
     </div>
   );
