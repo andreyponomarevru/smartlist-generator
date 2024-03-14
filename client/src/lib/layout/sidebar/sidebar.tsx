@@ -14,7 +14,7 @@ export function Sidebar() {
   const items = [
     { Icon: FaFilter, name: "Filters", to: PATHS.filters },
     { Icon: RiPlayList2Fill, name: "Playlist", to: PATHS.playlist },
-    { Icon: FaDatabase, name: "Database", to: PATHS.database },
+    { Icon: FaDatabase, name: "Settings", to: PATHS.settings },
     { Icon: IoIosStats, name: "Stats", to: PATHS.stats },
   ];
 
