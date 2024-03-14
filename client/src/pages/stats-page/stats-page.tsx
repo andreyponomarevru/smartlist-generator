@@ -10,7 +10,7 @@ import "./stats-page.scss";
 export function StatsPage() {
   const { statsQuery } = useGlobalState();
 
-  if (statsQuery.isLoading) return <Loader for="page" color="pink" />;
+  if (statsQuery.isLoading) return <Loader for="page" color="black" />;
 
   if (statsQuery.error || !statsQuery.data) {
     return (
