@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS track_artist (
 
 CREATE TABLE IF NOT EXISTS genre (
   PRIMARY KEY (genre_id),
-  genre_id         integer          GENERATED ALWAYS AS IDENTITY,
+  genre_id         integer          NOT NULL,
   name             varchar(200)     NOT NULL,
   								                  UNIQUE (name),
   							                    CHECK (name != '')

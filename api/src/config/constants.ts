@@ -1,41 +1,37 @@
 import { HttpError } from "../utils/error";
 
 export const GENRES = [
+  "[Soundtrack]",
   "2-Step",
-  "Garage House",
-  "Hip-Hop",
-  "Italo House",
-  "Latin",
-  "Pop",
-  "Pop House",
-  "R&B",
-  "UK Garage",
   "Acid House",
   "Ambient",
   "Balearic",
   "Beatless",
   "Breakbeat",
   "Closer",
-  "House",
   "Disco",
   "Downtempo",
   "Dub",
   "Electro",
-  "Guitar",
-  "Indie",
+  "Garage House",
+  "House",
+  "Italo House",
   "Jungle",
+  "Latin",
   "Opener",
-  "Rock",
+  "Pop",
+  "Pop House",
   "Psytrance",
-  "Sample",
+  "R&B",
+  "Rock",
   "Soul",
   "Techno",
   "Trance",
   "Trip-Hop",
+  "UK Garage",
   "Vocal",
   "World Music",
-  "[Soundtrack]",
-] as const;
+];
 
 export const DEFAULT_COVER_URL = ".";
 
@@ -104,5 +100,5 @@ export const HTTP_ERRORS = {
 } as const;
 
 export type HttpErrorCodes = keyof typeof HTTP_ERRORS;
-export type HttpErrorNames = typeof HTTP_ERRORS[HttpErrorCodes];
-export type HttpErrorMessages = typeof HTTP_ERROR_MESSAGES[number];
+export type HttpErrorNames = (typeof HTTP_ERRORS)[HttpErrorCodes];
+export type HttpErrorMessages = (typeof HTTP_ERROR_MESSAGES)[number];

@@ -4,6 +4,7 @@ import { MUSIC_LIB_DIR } from "../config/env";
 import * as tracksModel from "../model/track/index";
 import * as libModel from "../model/lib/queries";
 import { schemaCreateTrack } from "../model/track/validation-schemas";
+import { GENRES } from "../config/constants";
 
 const router = express.Router();
 
@@ -11,6 +12,7 @@ async function populateLib(req: Request, res: Response, next: NextFunction) {
   try {
     res.sendStatus(200);
     console.log("Starting populating db ...");
+    await libModel.createGenres(GENRES);
     await traverseDirs(MUSIC_LIB_DIR, tracksModel.create);
     console.log("Done. Database populated.");
   } catch (err) {
