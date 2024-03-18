@@ -33,8 +33,8 @@ export class TrackValidator {
         await trackMetadataParser.parseAudioFile(),
       );
       this.db.year.add(parsedTrack.year);
-      parsedTrack.genre.forEach((genre) => this.db.genre.add(genre));
-      parsedTrack.artist.forEach((artist) => this.db.artist.add(artist));
+      parsedTrack.genres.forEach((genre) => this.db.genre.add(genre));
+      parsedTrack.artists.forEach((artist) => this.db.artist.add(artist));
     } catch (err) {
       if (err instanceof ValidationError) {
         err.details.forEach((err) =>

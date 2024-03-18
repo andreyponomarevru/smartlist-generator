@@ -1,5 +1,3 @@
-import express, { Express, Request, Response } from "express";
-// import { router as tracksRouter } from "./controller/tracks";
 import {
   onUncaughtException,
   onUnhandledRejection,

@@ -53,13 +53,13 @@ const year = Joi.number()
 
 export const schemaCreateTrack = Joi.object<ValidatedTrack>({
   filePath,
-  artist: Joi.array().min(1).unique().items(artistName).messages({
+  artists: Joi.array().min(1).unique().items(artistName).messages({
     "array.min": '"artist" array should contains at least 1 item',
     "array.unique": '"artist" array should contains only unique values',
   }),
   duration,
   title,
-  genre: Joi.array().min(1).unique().items(genreName).messages({
+  genres: Joi.array().min(1).unique().items(genreName).messages({
     "array.min": '"artist" array should contains at least 1 item',
     "array.unique": '"artist" array should contains only unique values',
   }),

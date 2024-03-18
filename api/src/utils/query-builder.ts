@@ -103,9 +103,9 @@ export function buildSQLQuery({
       tr.duration,
       tr.year,
       tr.file_path,
-      array_agg(DISTINCT ar.name) AS artist,
-      array_agg(DISTINCT ge.genre_id) AS genre_id,
-      array_agg(DISTINCT ge.name) AS genre
+      array_agg(DISTINCT ar.name) AS artists,
+      array_agg(DISTINCT ge.genre_id) AS genre_ids,
+      array_agg(DISTINCT ge.name) AS genres
     FROM track AS tr 
       INNER JOIN track_genre AS tr_ge ON tr.track_id = tr_ge.track_id 
       INNER JOIN genre AS ge ON ge.genre_id = tr_ge.genre_id  

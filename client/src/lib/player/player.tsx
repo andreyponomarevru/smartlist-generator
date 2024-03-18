@@ -17,7 +17,7 @@ export function Player() {
       <div className="player__meta">
         <Controls />
         <span>
-          {player.activeTrack?.artist.join(", ")}&nbsp;—&nbsp;
+          {player.activeTrack?.artists.join(", ")}&nbsp;—&nbsp;
           {player.activeTrack?.title}
         </span>
         <audio

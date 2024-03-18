@@ -74,24 +74,24 @@ export class TrackMetadataParser {
     const trackMetadata = await mm.parseFile(this.#filePath);
 
     const duration = this.parseDuration(trackMetadata.format.duration);
-    const artist = this.parseTrackArtist(trackMetadata.common.artists);
+    const artists = this.parseTrackArtist(trackMetadata.common.artists);
     const year = this.parseYear(trackMetadata.common.year);
     const title = this.parseTrackTitle(trackMetadata.common.title);
-    const genre = this.parseGenre(trackMetadata.common.genre);
+    const genres = this.parseGenre(trackMetadata.common.genre);
 
     const extendedMetadata = {
       filePath: this.#filePath,
       duration,
-      artist,
+      artists,
       year,
       title,
-      genre,
+      genres,
     };
     return extendedMetadata;
   }
 
-  private parseGenre(genre?: string[]): string[] {
-    return this.parseArray(genre);
+  private parseGenre(genres?: string[]): string[] {
+    return this.parseArray(genres);
   }
 
   private parseYear(year?: number): number {
@@ -106,8 +106,8 @@ export class TrackMetadataParser {
     return this.parseNumber(duration);
   }
 
-  private parseTrackArtist(artist?: string[]): string[] {
-    return this.parseArray(artist);
+  private parseTrackArtist(artists?: string[]): string[] {
+    return this.parseArray(artists);
   }
 
   private parseArray(arr?: string[]): string[] {
