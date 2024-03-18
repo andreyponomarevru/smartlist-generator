@@ -35,7 +35,7 @@ export async function create(filePath: string): Promise<void> {
       })
     ).rows[0];
 
-    for (const genre of newTrack.genre) {
+    for (const genre of newTrack.genres) {
       const inserTrackGenreQuery = {
         text: `
           INSERT INTO track_genre 
@@ -50,7 +50,7 @@ export async function create(filePath: string): Promise<void> {
 
     // Insert artists
 
-    for (const artist of newTrack.artist) {
+    for (const artist of newTrack.artists) {
       const { artist_id } = (
         await client.query({
           text: `
@@ -128,20 +128,20 @@ export async function findTrack(
       ? []
       : response.rows.map(
           ({
-            artist,
+            artists,
             duration,
-            genre,
-            genre_id,
+            genres,
+            genre_ids,
             title,
             track_id,
             year,
             file_path,
           }) => {
             return {
-              artist,
+              artists,
               duration: parseFloat(duration),
-              genre,
-              genreId: genre_id,
+              genres,
+              genreIds: genre_ids,
               title,
               trackId: track_id,
               year,

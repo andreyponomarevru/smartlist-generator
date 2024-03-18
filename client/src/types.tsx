@@ -1,10 +1,10 @@
 import { Control, UseFormResetField } from "react-hook-form";
 
 export type TrackMeta = {
-  artist: string[];
+  artists: string[];
   duration: number;
-  genre: string[];
-  genreId: number[];
+  genres: string[];
+  genreIds: number[];
   title: string;
   trackId: number;
   year: number;

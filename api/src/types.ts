@@ -3,37 +3,37 @@ import { GENRES } from "./config/constants";
 export interface Track {
   trackId?: number;
   duration: number;
-  artist: string[];
+  artists: string[];
   year: number;
   title: string;
-  genre: string[];
+  genres: string[];
 }
 
 export interface ValidatedTrack {
   trackId?: number;
   filePath: string;
   duration: number;
-  artist: string[];
+  artists: string[];
   year: number;
   title: string;
-  genre: (typeof GENRES)[number][];
+  genres: (typeof GENRES)[number][];
 }
 
 export type FoundTrackDBResponse = {
-  artist: string[];
+  artists: string[];
   duration: string;
-  genre: string[];
-  genre_id: number[];
+  genres: string[];
+  genre_ids: number[];
   title: string;
   track_id: number;
   year: number;
   file_path: string;
 };
 export type FoundTrack = {
-  artist: string[];
+  artists: string[];
   duration: number;
-  genre: string[];
-  genreId: number[];
+  genres: string[];
+  genreIds: number[];
   title: string;
   trackId: number;
   year: number;

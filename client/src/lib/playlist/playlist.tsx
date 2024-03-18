@@ -1,7 +1,6 @@
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import { FaMinus, FaRedo, FaArrowDown, FaArrowUp } from "react-icons/fa";
-import { IoPlaySharp, IoPauseSharp } from "react-icons/io5";
 import { LuCopy } from "react-icons/lu";
 
 import { toHourMinSec } from "../../utils/misc";
@@ -95,11 +94,11 @@ export function Playlist(props: PlaylistProps) {
               <span className="track__year">{track.year}</span>
               <span className="track__main-meta">
                 <span className="track__artists">
-                  {track.artist.join(", ")}
+                  {track.artists.join(", ")}
                 </span>
                 <span className="track__title">{track.title}</span>
                 <span className="track__genres">
-                  {track.genre.map((name) => (
+                  {track.genres.map((name) => (
                     <span key={name} className="track__genre">
                       {name}
                     </span>
