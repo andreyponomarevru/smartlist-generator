@@ -62,7 +62,7 @@ function Header(props: HeaderProps) {
       <div className="saved-filter__btns">
         <button
           type="button"
-          className="saved-filter__btn"
+          className="btn btn_type_icon btn_hover_grey-70"
           onClick={(e) => {
             e.stopPropagation();
             props.onEdit();

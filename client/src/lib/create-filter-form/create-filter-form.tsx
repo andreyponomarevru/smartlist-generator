@@ -314,7 +314,7 @@ export function CreateFilterForm(props: CreateFilterFormProps) {
                 type="submit"
                 disabled={false}
                 form={props.formId}
-                className={`btn btn_type_primary ${props.className || ""}`}
+                className="btn btn_type_primary"
               >
                 Add Track
               </button>
