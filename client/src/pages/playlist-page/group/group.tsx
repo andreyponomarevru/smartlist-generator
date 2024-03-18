@@ -89,7 +89,7 @@ export function Group(props: GroupProps) {
           <span className="group__index">{props.index + 1}</span>
           <div className="group__name">
             <form
-              className={`saved-filters-form ${props.className || ""}`}
+              className={`group__saved-filters-form ${props.className || ""}`}
               onSubmit={form.handleSubmit(handleSubmit)}
               onClick={(e) => e.stopPropagation()}
               id={`${CHOOSE_FILTER_FORM_ID}-${props.groupId}`}
@@ -100,7 +100,7 @@ export function Group(props: GroupProps) {
                 render={({ field }) => (
                   <Select
                     {...field}
-                    className="saved-filters-form__select"
+                    className="group__select"
                     options={options}
                     onInputChange={() =>
                       playlist.handleTracksReset(props.groupId)
