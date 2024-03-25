@@ -1,5 +1,9 @@
 import { HttpError } from "../utils/error";
 
+export const API_PREFIX = "/api";
+
+//
+
 export const GENRES = [
   "[Soundtrack]",
   "2-Step",
@@ -33,13 +37,7 @@ export const GENRES = [
   "World Music",
 ];
 
-export const DEFAULT_COVER_URL = ".";
-
-export const DATABASE_ERROR_CODES: {
-  [key: string]: { httpStatusCode: number; response: HttpError };
-} = {
-  "23505": { httpStatusCode: 409, response: new HttpError({ code: "409" }) },
-};
+//
 
 // 'as const' allows us to use this array as type
 export const HTTP_ERROR_MESSAGES = [
@@ -54,7 +52,6 @@ export const HTTP_ERROR_MESSAGES = [
   "Sorry, this username is already taken",
   "Something went wrong",
 ] as const;
-
 export const HTTP_ERRORS = {
   "400": "BadRequest",
   "401": "Unauthorized",
@@ -98,7 +95,14 @@ export const HTTP_ERRORS = {
   "510": "NotExtended",
   "511": "NetworkAuthenticationRequired",
 } as const;
-
 export type HttpErrorCodes = keyof typeof HTTP_ERRORS;
 export type HttpErrorNames = (typeof HTTP_ERRORS)[HttpErrorCodes];
 export type HttpErrorMessages = (typeof HTTP_ERROR_MESSAGES)[number];
+
+//
+
+export const DATABASE_ERROR_CODES: {
+  [key: string]: { httpStatusCode: number; response: HttpError };
+} = {
+  "23505": { httpStatusCode: 409, response: new HttpError({ code: "409" }) },
+};

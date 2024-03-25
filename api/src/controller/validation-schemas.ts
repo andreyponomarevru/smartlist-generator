@@ -1,4 +1,5 @@
 import Joi from "joi";
+
 import { SearchParams } from "../utils/query-builder";
 import { Filter } from "../types";
 
@@ -79,6 +80,10 @@ export const schemaFindTrackIdsByFilePathsReqBody = Joi.object<{
   filePaths: Joi.array().items(Joi.string()),
 });
 
-export const getStats = Joi.object<{ excluded: number[] }>({
+export const schemaGetStats = Joi.object<{ excluded: number[] }>({
   excluded: Joi.array().items(Joi.number().positive().min(1)).single(),
 }).optional();
+
+export const schemaLibPath = Joi.object<{ libPath: string }>({
+  libPath: Joi.string().max(255).required(),
+});

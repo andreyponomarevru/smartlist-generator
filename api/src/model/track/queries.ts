@@ -1,3 +1,5 @@
+import format from "pg-format";
+
 import { connectDB } from "../../config/postgres";
 import { schemaCreateTrack } from "./validation-schemas";
 import { TrackMetadataParser, logDBError } from "../../utils/utilities";
@@ -10,7 +12,6 @@ export async function create(filePath: string): Promise<void> {
   const newTrack = await schemaCreateTrack.validateAsync(
     await trackMetadataParser.parseAudioFile(),
   );
-  console.log(newTrack);
 
   const pool = await connectDB();
   const client = await pool.connect();
@@ -19,12 +20,10 @@ export async function create(filePath: string): Promise<void> {
     await client.query("BEGIN");
 
     const { track_id: trackId } = (
-      await client.query({
+      await client.query<{ track_id: number }>({
         text: `
-          INSERT INTO track 
-            (title, year, duration, file_path) 
-          VALUES 
-            ($1, $2, $3, $4) 
+          INSERT INTO track (title, year, duration, file_path) 
+          VALUES ($1, $2, $3, $4) 
           RETURNING track_id`,
         values: [
           newTrack.title,
@@ -36,7 +35,7 @@ export async function create(filePath: string): Promise<void> {
     ).rows[0];
 
     for (const genre of newTrack.genres) {
-      const inserTrackGenreQuery = {
+      await client.query({
         text: `
           INSERT INTO track_genre 
             (track_id, genre_id) 
@@ -44,8 +43,7 @@ export async function create(filePath: string): Promise<void> {
             ($1::integer, $2::integer) 
           ON CONFLICT DO NOTHING;`,
         values: [trackId, GENRES.findIndex((name) => name === genre)],
-      };
-      await client.query(inserTrackGenreQuery);
+      });
     }
 
     // Insert artists
@@ -98,7 +96,7 @@ export async function create(filePath: string): Promise<void> {
   }
 }
 
-export async function readFilePath(trackId: number) {
+export async function findFilePathById(trackId: number) {
   const pool = await connectDB();
 
   try {
@@ -115,9 +113,7 @@ export async function readFilePath(trackId: number) {
   }
 }
 
-export async function findTrack(
-  searchParams: SearchParams,
-): Promise<FoundTrack[]> {
+export async function find(searchParams: SearchParams): Promise<FoundTrack[]> {
   const pool = await connectDB();
 
   try {
@@ -155,7 +151,7 @@ export async function findTrack(
   }
 }
 
-export async function findTrackIdsByFilePaths(
+export async function findIdsByFilePaths(
   filePaths: string[],
 ): Promise<{ trackId: number; filePath: string }[]> {
   const pool = await connectDB();
@@ -174,6 +170,36 @@ export async function findTrackIdsByFilePaths(
         });
   } catch (err) {
     logDBError("Can't find tracks", err);
+    throw err;
+  }
+}
+
+export async function destroyAll() {
+  const pool = await connectDB();
+
+  try {
+    await pool.query({
+      text: `
+        TRUNCATE track, artist, track_artist, genre, track_genre;`,
+    });
+  } catch (err) {
+    logDBError("An error occured while clearing all db tables.", err);
+    throw err;
+  }
+}
+
+export async function createGenres(genres: string[]) {
+  const pool = await connectDB();
+
+  try {
+    await pool.query({
+      text: format(
+        `INSERT INTO genre (genre_id, name) VALUES %L;`,
+        genres.map((genre, index) => [index, genre]),
+      ),
+    });
+  } catch (err) {
+    logDBError("An error occured while adding genres to db", err);
     throw err;
   }
 }

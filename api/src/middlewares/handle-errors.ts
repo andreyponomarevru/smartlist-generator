@@ -1,9 +1,11 @@
 import util from "util";
+
 import Joi from "joi";
 import { Request, Response, NextFunction } from "express";
 import { DatabaseError } from "pg";
+
 import { DATABASE_ERROR_CODES } from "../config/constants";
-import { HttpError } from "../utils/error";
+import { CustomDatabaseError, HttpError } from "../utils/error";
 
 // Main error handler (this is a centralized error handler — all error handling logic is here)
 // - handle errors passed to next() handler
@@ -13,6 +15,8 @@ export function handleErrors(
   err: Error | HttpError,
   req: Request,
   res: Response,
+  // DO NOT REMOVE THE UNUSED 'next' PARAMETER, OTHERWISE EXPRESS WON'T TRIGGER
+  // THIS ERROR HANDLER
   next: NextFunction,
 ) {
   console.error(`Express Main Error Handler\n${util.inspect(err)}`);
@@ -23,27 +27,25 @@ export function handleErrors(
     res
       .status(DATABASE_ERROR_CODES[err.code].httpStatusCode)
       .json(DATABASE_ERROR_CODES[err.code].response);
-    return;
-  }
-
-  if (err instanceof HttpError) {
+  } else if (err instanceof CustomDatabaseError) {
+    if (err.message === "No record with given ID") {
+      res.status(404).json(new HttpError({ code: 404, message: err.message }));
+    } else {
+      // TODO: fix this (HttpError first arg should be code)
+      res.status(500).json(new HttpError(err));
+    }
+  } else if (err instanceof HttpError) {
     res.status(Number(err.status)).json(err);
-    return;
-  }
-
-  if (err instanceof Joi.ValidationError) {
+  } else if (err instanceof Joi.ValidationError) {
     res.status(400).json(
       new HttpError({
         code: 400,
         message: err.details.map((err) => err.message).join("; "),
       }),
     );
-    return;
-  }
-
-  if (err instanceof Error) {
+  } else if (err instanceof Error) {
     console.error(err);
-    res.status(500).json(new HttpError({}));
-    return;
+    res.status(500).json(new HttpError({ code: 500 }));
   }
+  return;
 }

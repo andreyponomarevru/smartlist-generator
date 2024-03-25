@@ -7,9 +7,8 @@ import { HTTP_PORT } from "./config/env";
 import * as env from "./config/env";
 import { handle404Error } from "./middlewares/handle-404-error";
 import { handleErrors } from "./middlewares/handle-errors";
-import { router as tracksRouter } from "./controller/tracks";
-import { router as libRouter } from "./controller/lib";
-import { router as statsRouter } from "./controller/stats";
+import { router } from "./controller/routes";
+import { API_PREFIX } from "./config/constants";
 
 //
 // Express app
@@ -28,9 +27,7 @@ expressApp.use((req, res, next) => {
 expressApp.use(express.json());
 expressApp.use(express.urlencoded({ extended: true }));
 expressApp.use(express.static(path.join(__dirname, "public")));
-expressApp.use("/", libRouter);
-expressApp.use("/", tracksRouter);
-expressApp.use("/", statsRouter);
+expressApp.use(API_PREFIX, router);
 // If request doesn't match the routes above, it is past to 404 error handler
 expressApp.use(handle404Error);
 expressApp.use(handleErrors);

@@ -30,11 +30,10 @@ export async function traverseDirs(
       await traverseDirs(nodePath, callback);
     } else if (SUPPORTED_CODEC.includes(getExtensionName(nodePath))) {
       try {
-        console.log(nodePath);
         await callback(nodePath);
       } catch (err) {
         if (err instanceof Error) {
-          console.error(`[Error. Skip track] ${err}, ${err.stack}`);
+          console.error(`[Error. Skip file ${nodePath}] ${err}, ${err.stack}`);
         }
       }
     }

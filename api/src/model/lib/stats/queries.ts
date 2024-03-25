@@ -1,5 +1,5 @@
-import { connectDB } from "../../config/postgres";
-import { logDBError } from "../../utils/utilities";
+import { connectDB } from "../../../config/postgres";
+import { logDBError } from "../../../utils/utilities";
 
 export async function countTracksByGenre(excludedTracks: number[]) {
   const pool = await connectDB();

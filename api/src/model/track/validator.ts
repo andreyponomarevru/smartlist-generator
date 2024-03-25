@@ -1,17 +1,11 @@
 import Joi, { ValidationError } from "joi";
 import { TrackMetadataParser } from "../../utils/utilities";
-import { Track, ValidatedTrack } from "../../types";
+import { Track, ValidatedTrack, TrackValidatorError } from "../../types";
 
-type Errors = {
-  filePath: string;
-  tag: string | number;
-  value?: string | string[] | number;
-  msg: string;
-}[];
 type DB = { [key: string]: Set<string | number> };
 
 export class TrackValidator {
-  public errors: Errors;
+  public errors: TrackValidatorError[];
   public db: DB;
   #schema: Joi.ObjectSchema<ValidatedTrack>;
 

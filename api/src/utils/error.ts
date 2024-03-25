@@ -28,3 +28,13 @@ export class HttpError extends Error {
     this.moreInfo = moreInfo;
   }
 }
+
+export class CustomDatabaseError extends Error {
+  message: string;
+
+  constructor(message: string) {
+    super();
+
+    this.message = message;
+  }
+}

@@ -1,12 +1,16 @@
 import util from "util";
-import { RequestHandler } from "express";
+
+import { RequestHandler, Request, Response, NextFunction } from "express";
+
 import Joi from "joi";
 
-export function validate(
-  schema: Joi.AnySchema,
-  location: "body" | "headers" | "query" | "params",
-): RequestHandler {
-  return async function (req, res, next): Promise<void> {
+type Location = "body" | "headers" | "query" | "params";
+
+export function validate<T>(
+  schema: Joi.AnySchema<T>,
+  location: Location,
+): RequestHandler<any, any, any, any> {
+  async function reqHandler(req: Request, res: Response, next: NextFunction) {
     console.log(
       `${__filename}: [before validation] ${util.inspect(req[location])}`,
     );
@@ -23,5 +27,7 @@ export function validate(
     }
 
     next();
-  };
+  }
+
+  return reqHandler;
 }

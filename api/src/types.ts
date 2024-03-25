@@ -8,7 +8,6 @@ export interface Track {
   title: string;
   genres: string[];
 }
-
 export interface ValidatedTrack {
   trackId?: number;
   filePath: string;
@@ -18,7 +17,6 @@ export interface ValidatedTrack {
   title: string;
   genres: (typeof GENRES)[number][];
 }
-
 export type FoundTrackDBResponse = {
   artists: string[];
   duration: string;
@@ -39,9 +37,46 @@ export type FoundTrack = {
   year: number;
   filePath: string;
 };
-
 export type Filter = {
   name: string;
   condition: string;
   value: number | number[];
+};
+export type TrackValidatorError = {
+  filePath: string;
+  tag: string | number;
+  value?: string | string[] | number;
+  msg: string;
+};
+export type TaskStatus = "pending" | "success" | "failure" | null;
+type ValidationStats = {
+  names: (string | number)[];
+  count: number;
+};
+type ValidationResult = {
+  errors: TrackValidatorError[];
+  artists: ValidationStats;
+  years: ValidationStats;
+  genres: ValidationStats;
+};
+export type TaskResult = ValidationResult | null;
+export type TaskName = "validation" | "seeding";
+export type TaskDBResponse = {
+  name: TaskName;
+  created_at: number;
+  updated_at: number;
+  status: TaskStatus;
+  result: TaskResult;
+};
+export type Task = {
+  name: TaskName;
+  createdAt: number;
+  updatedAt: number;
+  status: TaskStatus;
+  result: TaskResult;
+};
+export type ProcessMessage = {
+  name: TaskName;
+  status: TaskStatus;
+  result?: TaskResult;
 };
