@@ -1,7 +1,6 @@
 import express from "express";
 
 import { validate } from "../middlewares/validate";
-import * as jobsController from "./tasks";
 import {
   schemaLibPath,
   schemaIdParam,
@@ -11,7 +10,8 @@ import {
 } from "./validation-schemas";
 import * as tracksController from "./tracks";
 import * as statsController from "./lib/stats";
-import * as jobController from "./tasks";
+import * as processesController from "./processes";
+import { validationSSE } from "./processes/validation";
 import { isLibPathExist } from "../middlewares/is-libpath-exist";
 
 const router = express.Router();
@@ -21,21 +21,25 @@ const router = express.Router();
 // Tasks
 
 router.post(
-  "/tasks/validation",
+  "/processes/validation",
   validate(schemaLibPath, "body"),
   isLibPathExist,
-  jobController.startValidation,
+  processesController.startValidation,
 );
-router.get("/tasks/validation", jobsController.getValidation);
-router.delete("/tasks/validation", jobsController.stopValidation);
+router.get(
+  "/processes/validation",
+  validationSSE.init,
+  processesController.getValidationStatusAsSSE,
+);
+router.delete("/processes/validation", processesController.stopValidation);
 
 router.post(
-  "/tasks/seeding",
+  "/processes/seeding",
   validate(schemaLibPath, "body"),
-  jobsController.startSeeding,
+  processesController.startSeeding,
 );
-router.get("/tasks/seeding", jobsController.getSeeding);
-router.delete("/tasks/seeding", jobsController.stopSeeding);
+router.get("/processes/seeding", processesController.getSeedingStatusAsSSE);
+router.delete("/processes/seeding", processesController.stopSeeding);
 
 // Tracks
 

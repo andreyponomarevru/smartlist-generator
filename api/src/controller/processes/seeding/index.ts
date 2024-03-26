@@ -2,32 +2,35 @@ import { ChildProcess, spawn } from "child_process";
 
 import { Request, Response, NextFunction } from "express";
 
-import {
-  SCRIPT_EXTENSION,
-  NODE_PROCESS,
-  PROCESS_OPTS,
-} from "../../../config/tasks";
-import * as taskModel from "../../../model/task";
+import { NODE_PROCESS, PROCESSES } from "../../../config/processes";
+import * as processModel from "../../../model/processes";
 import * as trackModel from "../../../model/track";
 import { ProcessMessage } from "../../../types";
 import { HttpError } from "../../../utils/error";
+import { SSE } from "../../../middlewares/sse";
 
-// We need to keep the job in memory in order to be able to kill it later
-let job: ChildProcess | null = null;
-const SCRIPT_PATH = `./src/jobs/seed.${SCRIPT_EXTENSION}`;
+export const seedingSSE = new SSE({
+  status:
+    "Test message. The connection for SSE of type 'seeding' is established",
+});
+
+// We need to keep the process in memory in order to be able to kill it later
+let process: ChildProcess | null = null;
 
 async function onMessage(message: ProcessMessage) {
-  await taskModel.update(message);
+  const processState = await processModel.update(message);
+  seedingSSE.send(processState, "seeding");
   console.log("[message] Done. Database has been seeded");
 }
 
 async function onError(err: Error) {
   console.log("[error] (child process - seeding)", err);
-  await taskModel.destroy("seeding");
+  seedingSSE.send({ name: "seeding", status: "failure" }, "seeding");
+  await processModel.destroy("seeding");
 }
 
 function onJobClose() {
-  job = null;
+  process = null;
 }
 
 export async function startSeeding(
@@ -38,15 +41,22 @@ export async function startSeeding(
   try {
     console.log("Starting db seeding ...");
 
-    if (job && job.pid) {
+    if (process && process.pid) {
       res.status(500).json({ message: "Db seeding is already running ..." });
     } else {
-      await taskModel.destroy("seeding");
-      res
-        .status(202)
-        .json(await taskModel.update({ name: "seeding", status: "pending" }));
+      await processModel.destroy("seeding");
+      const processState = await processModel.create({
+        name: "seeding",
+        status: "pending",
+      });
+      res.status(202).json({ results: processState });
+      seedingSSE.send(processState);
 
-      job = spawn(NODE_PROCESS, [SCRIPT_PATH, req.body.libPath], PROCESS_OPTS)
+      process = spawn(
+        NODE_PROCESS,
+        [PROCESSES.seeding.scriptPath, req.body.libPath],
+        PROCESSES.seeding.processOpts,
+      )
         .on("message", onMessage)
         .on("error", onError)
         .on("close", onJobClose);
@@ -56,13 +66,13 @@ export async function startSeeding(
   }
 }
 
-export async function getSeeding(
+export async function getSeedingStatusAsSSE(
   req: Request,
   res: Response,
   next: NextFunction,
 ) {
   try {
-    res.json(await taskModel.read("seeding"));
+    seedingSSE.send(await processModel.read("seeding"), "seeding");
   } catch (err) {
     next(err);
   }
@@ -74,16 +84,16 @@ export async function stopSeeding(
   next: NextFunction,
 ) {
   try {
-    if (!job || !job.pid) {
+    if (!process || !process.pid) {
       throw new HttpError({
         code: 404,
         message: `Nothing to stop — the seeding process is not running`,
       });
     } else {
-      job.kill("SIGTERM");
+      process.kill("SIGTERM");
 
-      job = null;
-      await taskModel.destroy("seeding");
+      process = null;
+      await processModel.destroy("seeding");
       await trackModel.destroyAll();
       res.status(200).end();
     }

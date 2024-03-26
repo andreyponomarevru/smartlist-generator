@@ -1,16 +1,18 @@
+import EventEmitter from "events";
+
 import { Request, Response, NextFunction } from "express";
 
 import * as trackModel from "../../model/track/queries";
 import { streamChunked } from "../../utils/stream-audio";
 import { HttpError } from "../../utils/error";
 import { SearchParams } from "../../utils/query-builder";
-/*
-function emitSSE(res: Response, data: string, id: string) {
+
+/*function emitSSE(res: Response, data: string, id: string) {
   res.write(`data: ${JSON.stringify(data)}\nid: ${id}\n\n`);
   // flush the headers to establish SSE connection  with client
   res.flushHeaders();
-}
-
+}*/
+/*
 export function handleSSE(req: Request, res: Response) {
   res.writeHead(200, {
     "cache-control": "no-cache",
@@ -20,27 +22,15 @@ export function handleSSE(req: Request, res: Response) {
   });
 
   const messageId = new Date().toLocaleTimeString();
-
-  let counter = 0;
-  const intervalId = setInterval(() => {
-    counter++;
-    if (counter >= 5) {
-      clearInterval(intervalId);
-      res.end(); // terminates SSE session
-      return;
-    }
-    emitSSE(res, JSON.stringify({ newData: "some data" + counter }), messageId);
-  }, 1000);
+  emitSSE(res, JSON.stringify({ newData: "some data" }), messageId);
 
   // If client closes connection, stop sending events
   res.on("close", () => {
     console.log("Client closed connection");
-    clearInterval(intervalId);
     res.end();
   });
   res.on("error", (err) => {
     console.log("[SSE error]", err);
-    clearInterval(intervalId);
     res.end();
   });
 }*/
