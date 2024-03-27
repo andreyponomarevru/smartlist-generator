@@ -48,7 +48,6 @@ export type TrackValidatorError = {
   value?: string | string[] | number;
   msg: string;
 };
-export type TaskStatus = "pending" | "success" | "failure" | null;
 type ValidationStats = {
   names: (string | number)[];
   count: number;
@@ -59,24 +58,26 @@ type ValidationResult = {
   years: ValidationStats;
   genres: ValidationStats;
 };
-export type TaskResult = ValidationResult | null;
-export type TaskName = "validation" | "seeding";
-export type TaskDBResponse = {
-  name: TaskName;
+export type ProcessStatus = "pending" | "success" | "failure" | null;
+export type ProcessResult = ValidationResult | null;
+export type ProcessName = "validation" | "seeding";
+export type ProcessDBResponse = {
+  name: ProcessName;
   created_at: number;
   updated_at: number;
-  status: TaskStatus;
-  result: TaskResult;
+  status: ProcessStatus;
+  result: ProcessResult;
 };
-export type Task = {
-  name: TaskName;
+export type Process = {
+  name: ProcessName;
   createdAt: number;
   updatedAt: number;
-  status: TaskStatus;
-  result: TaskResult;
+  status: ProcessStatus;
+  result: ProcessResult;
 };
 export type ProcessMessage = {
-  name: TaskName;
-  status: TaskStatus;
-  result?: TaskResult;
+  name: ProcessName;
+  status: ProcessStatus;
+  result?: ProcessResult;
 };
+export type SSEname = ProcessName | "test";

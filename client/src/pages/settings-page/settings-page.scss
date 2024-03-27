@@ -5,14 +5,6 @@
   flex-flow: column nowrap;
   font-size: $font-size_regular-text;
 
-  &__input-wrapper {
-    display: flex;
-    flex-flow: column nowrap;
-    row-gap: 0.5rem;
-    align-items: first baseline;
-    justify-content: center;
-  }
-
   &__input {
     font-size: $font-size_controls;
     height: $controls_btn-height;
@@ -24,6 +16,7 @@
     row-gap: 1rem;
     border-bottom: 1px solid $color_grey-50;
     padding: 1rem 0;
+    align-items: flex-start;
   }
 
   &__subsection:last-child {
@@ -31,20 +24,26 @@
   }
 
   &__row {
-    display: grid;
-    grid-template-columns: 25% 1fr auto;
-    align-items: center;
-    column-gap: 2rem;
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: flex-start;
+    row-gap: 1rem;
   }
 
-  &__buttons {
+  &__column {
     display: flex;
     flex-flow: column nowrap;
     row-gap: 1rem;
-    align-items: flex-end;
+    align-items: flex-start;
   }
 
-  &__name {
+  &__inputs-group {
+    display: flex;
+    flex-flow: row nowrap;
+    column-gap: 1rem;
+  }
+
+  &__header {
     font-weight: bold;
   }
 
@@ -64,5 +63,39 @@
     &_primary {
       color: $color_info;
     }
+  }
+
+  &__btn-loader {
+    background-color: $color_black;
+  }
+}
+
+.process {
+  display: flex;
+  flex-flow: row nowrap;
+  row-gap: 1rem;
+  column-gap: 1rem;
+  align-items: center;
+  padding: 1rem 1rem 1rem 1rem;
+  border-radius: $border_radius_block;
+
+  &__time {
+    display: flex;
+    flex-flow: column nowrap;
+
+    font-size: $font-size_tiny;
+  }
+
+  &_status_failure {
+    background-color: $color_red-10;
+  }
+
+  &_status_success {
+    background-color: $color_green-20;
+  }
+
+  &_status_pending,
+  &_status_initial {
+    background-color: $color_grey-20;
   }
 }

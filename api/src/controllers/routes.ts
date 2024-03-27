@@ -13,6 +13,7 @@ import * as statsController from "./lib/stats";
 import * as processesController from "./processes";
 import { validationSSE } from "./processes/validation";
 import { isLibPathExist } from "../middlewares/is-libpath-exist";
+import { streamChunked } from "../middlewares/stream-chunked";
 
 const router = express.Router();
 
@@ -24,22 +25,28 @@ router.post(
   "/processes/validation",
   validate(schemaLibPath, "body"),
   isLibPathExist,
-  processesController.startValidation,
+  processesController.validation.startValidation,
 );
 router.get(
   "/processes/validation",
   validationSSE.init,
-  processesController.getValidationStatusAsSSE,
+  processesController.validation.getValidationStatusAsSSE,
 );
-router.delete("/processes/validation", processesController.stopValidation);
+router.delete(
+  "/processes/validation",
+  processesController.validation.stopValidation,
+);
 
 router.post(
   "/processes/seeding",
   validate(schemaLibPath, "body"),
-  processesController.startSeeding,
+  processesController.seeding.startSeeding,
 );
-router.get("/processes/seeding", processesController.getSeedingStatusAsSSE);
-router.delete("/processes/seeding", processesController.stopSeeding);
+router.get(
+  "/processes/seeding",
+  processesController.seeding.getSeedingStatusAsSSE,
+);
+router.delete("/processes/seeding", processesController.seeding.stopSeeding);
 
 // Tracks
 
@@ -58,7 +65,8 @@ router.post(
 router.get(
   "/tracks/:id/stream",
   validate(schemaIdParam, "params"),
-  tracksController.streamTrack,
+  tracksController.getTrackFilePath,
+  streamChunked,
 );
 
 // Lib

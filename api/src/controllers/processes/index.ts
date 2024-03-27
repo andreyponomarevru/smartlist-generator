@@ -1,2 +1,2 @@
-export * from "./seeding";
-export * from "./validation";
+export * as seeding from "./seeding";
+export * as validation from "./validation";

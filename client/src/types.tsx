@@ -11,7 +11,9 @@ export type TrackMeta = {
   filePath: string;
 };
 
+//
 // Forms
+//
 
 export type OptionsList<Value> = { label: string; value: Value };
 export interface FilterFormValues {
@@ -28,7 +30,9 @@ export interface SavedFilterFormValues {
 }
 export type LibPathInput = { libPath: string };
 
+//
 // API
+//
 
 export type APIError = { status: number; moreInfo: string; message: string };
 export type Stats = { id?: number; name: string; count: number };
@@ -56,3 +60,33 @@ export type SearchQuery = {
   }[];
   excludeTracks: number[];
 };
+
+// SSE
+
+type ValidationStats = {
+  names: (string | number)[];
+  count: number;
+};
+export type TrackValidatorError = {
+  filePath: string;
+  tag: string | number;
+  value?: string | string[] | number;
+  msg: string;
+};
+export type ValidationResult = {
+  errors: TrackValidatorError[];
+  artists: ValidationStats;
+  years: ValidationStats;
+  genres: ValidationStats;
+};
+export type ProcessStatus = "pending" | "success" | "failure" | null;
+export type ProcessResult = ValidationResult | null;
+export type ProcessName = "validation" | "seeding";
+export type Process = {
+  name: ProcessName;
+  createdAt?: number;
+  updatedAt?: number;
+  status: ProcessStatus;
+  result: ProcessResult;
+};
+export type ValidationQuery = { libPath: string };

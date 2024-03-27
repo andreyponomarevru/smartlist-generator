@@ -1,7 +1,26 @@
-import { FilterFormValues, TrackMeta, SearchQuery } from "../types";
+import {
+  FilterFormValues,
+  TrackMeta,
+  SearchQuery,
+  Stats,
+  ProcessResult,
+} from "../types";
 import { MUSIC_LIB_DIR } from "../config/env";
 import { LOCAL_MUSIC_LIB_DIR } from "../config/env";
 import { State as SavedFiltersState } from "../hooks/use-saved-filters";
+
+export function calculateExcludedStats(excludedCount = 0, stats: Stats[] = []) {
+  const totalCount =
+    stats.reduce(
+      (accumulator, currentValue) => accumulator + currentValue.count,
+      0,
+    ) || 0;
+
+  const excludedPercentage = ((100 * excludedCount) / totalCount).toFixed(1);
+  const tracksLeft = totalCount - excludedCount;
+
+  return { totalCount, excludedPercentage, tracksLeft };
+}
 
 export function extractFilename(path: string) {
   const pathArray = path.split("/");
@@ -71,6 +90,15 @@ export function exportPlaylistAsJSON(
     ),
   )}`;
   link.download = `${playlistName}.json`;
+  link.click();
+}
+
+export function exportValidationReport(report: ProcessResult) {
+  const link = document.createElement("a");
+  link.href = `data:text/json;chatset=utf-8,${encodeURIComponent(
+    JSON.stringify(report, null, 2),
+  )}`;
+  link.download = "validation-report.json";
   link.click();
 }
 
