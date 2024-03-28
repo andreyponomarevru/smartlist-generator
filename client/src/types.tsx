@@ -34,9 +34,13 @@ export type LibPathInput = { libPath: string };
 // API
 //
 
-export type APIError = { status: number; moreInfo: string; message: string };
+export type APIResponseSuccess<T> = { results: T };
+export type APIResponseError = {
+  status: number;
+  moreInfo: string;
+  message: string;
+};
 export type Stats = { id?: number; name: string; count: number };
-export type GetStatsRes = { results: Stats[] };
 export type GetTrackRes = { results: TrackMeta[] };
 export type GetTrackIdsByFilePaths = {
   results: { trackId: number; filePath: string }[];
@@ -69,9 +73,9 @@ type ValidationStats = {
 };
 export type TrackValidatorError = {
   filePath: string;
-  tag: string | number;
-  value?: string | string[] | number;
-  msg: string;
+  id3TagName: string | number;
+  id3TagValue?: string | string[] | number;
+  err: string;
 };
 export type ValidationResult = {
   errors: TrackValidatorError[];
