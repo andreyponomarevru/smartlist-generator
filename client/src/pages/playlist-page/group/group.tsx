@@ -21,6 +21,7 @@ import { Modal } from "../../../lib/modal/modal";
 import { SavedFilterBody } from "../../../lib/saved-filter-body/saved-filter-body";
 import { Loader } from "../../../lib/loader/loader";
 import { APIErrorMessage } from "../../../lib/api-error-msg/api-error-msg";
+import { useModal } from "../../../hooks/use-modal";
 
 import "./group.scss";
 
@@ -31,9 +32,9 @@ interface GroupProps extends React.HTMLAttributes<HTMLDivElement> {
 
 type SavedFilter = { filterId: { label: string; value: string } };
 
-// const renderCount = 0;
-
 export function Group(props: GroupProps) {
+  const { setState: setModalState } = useModal();
+
   const { playlist } = useGlobalState();
 
   const savedFilters = useSavedFilters();
@@ -94,6 +95,7 @@ export function Group(props: GroupProps) {
               className={`group__saved-filters-form ${props.className || ""}`}
               onSubmit={form.handleSubmit(handleSubmit)}
               onClick={(e) => e.stopPropagation()}
+              role="presentation"
               id={`${CHOOSE_FILTER_FORM_ID}-${props.groupId}`}
             >
               <Controller
@@ -125,27 +127,19 @@ export function Group(props: GroupProps) {
             onClick={(e) => e.stopPropagation()}
             role="presentation"
           >
-            <Modal
-              title={savedFilters.state[watchedInput].name}
-              activator={({ setIsVisible }) => (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsVisible(true);
-                  }}
-                  className="btn btn_type_icon btn_hover_grey-20"
-                >
-                  <GrCircleInformation className="icon" />
-                </button>
-              )}
+            <button
+              type="button"
+              onClick={() => setModalState({ isVisible: true })}
+              className="btn btn_type_icon btn_hover_grey-20"
             >
+              <GrCircleInformation className="icon" />
+            </button>
+            <Modal title={savedFilters.state[watchedInput].name}>
               <SavedFilterBody filter={savedFilters.state[watchedInput]} />
             </Modal>
             <button
               type="button"
-              onClick={() => {
-                playlist.handleGroupRemove(props.groupId);
-              }}
+              onClick={() => playlist.handleGroupRemove(props.groupId)}
               className="btn btn_type_icon btn_hover_grey-20"
             >
               <span>
