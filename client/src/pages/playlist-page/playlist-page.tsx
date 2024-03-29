@@ -7,6 +7,7 @@ import { exportPlaylistToM3U } from "../../utils/misc";
 import { toHourMinSec } from "../../utils/misc";
 import { useGlobalState } from "../../hooks/use-global-state";
 import { SavedFiltersProvider } from "../../hooks/use-saved-filters";
+import { ModalProvider } from "../../hooks/use-modal";
 
 import "./playlist-page.scss";
 
@@ -53,11 +54,13 @@ export function PlaylistPage() {
           </button>
         </div>
 
-        <SavedFiltersProvider>
-          {groups.map((groupId, index) => (
-            <Group groupId={groupId} key={groupId} index={index} />
-          ))}
-        </SavedFiltersProvider>
+        <ModalProvider>
+          <SavedFiltersProvider>
+            {groups.map((groupId, index) => (
+              <Group groupId={groupId} key={groupId} index={index} />
+            ))}
+          </SavedFiltersProvider>
+        </ModalProvider>
       </section>
 
       <div className="playlist-page__btns-group">
