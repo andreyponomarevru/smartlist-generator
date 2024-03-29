@@ -19,6 +19,8 @@ import { Playlist } from "../../../lib/playlist/playlist";
 import { CHOOSE_FILTER_FORM_ID } from "../../../config/constants";
 import { Modal } from "../../../lib/modal/modal";
 import { SavedFilterBody } from "../../../lib/saved-filter-body/saved-filter-body";
+import { Loader } from "../../../lib/loader/loader";
+import { APIErrorMessage } from "../../../lib/api-error-msg/api-error-msg";
 
 import "./group.scss";
 
@@ -170,7 +172,12 @@ export function Group(props: GroupProps) {
             </button>
           </div>
         </header>
-
+        {playlist.getTrackQuery.error instanceof Error && (
+          <APIErrorMessage
+            className="group__api-error-msg"
+            error={playlist.getTrackQuery.error}
+          />
+        )}
         <div
           className={`group__body ${
             playlist.isGroupOpen[`${props.groupId}`] ? "" : "group__body_hidden"
@@ -194,6 +201,9 @@ export function Group(props: GroupProps) {
             form={`${CHOOSE_FILTER_FORM_ID}-${props.groupId}`}
             className="btn btn_type_primary group__find-track-btn"
           >
+            {playlist.getTrackQuery.isLoading && (
+              <Loader className="btn_loader-color_white" />
+            )}
             Add Track
           </button>
         </div>
