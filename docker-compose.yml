@@ -40,7 +40,6 @@ services:
     build:
       context: ./client
       dockerfile: Dockerfile
-
     restart: "always"
     env_file:
       - ./.common.env
