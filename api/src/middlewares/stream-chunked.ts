@@ -3,14 +3,14 @@ import { Request, Response } from "express";
 
 // Function implements streaming the file starting from any time point the
 // client requests.
-export async function streamChunked<T>(
-  req: Request<T>,
-  res: Response,
-  file: string,
-) {
+export async function streamChunked<T>(req: Request<T>, res: Response) {
+  if (!res.locals.trackFilePath) {
+    throw new Error("res.locals.trackFilePath is required");
+  }
+
   // TODO: cache `stat` variable to avoid I/O operation on each rewiding the
   // client does in player (write `getFileStat()` function)
-  const stat = await fs.stat(file);
+  const stat = await fs.stat(res.locals.trackFilePath);
   // fs.stats returns an object providing information about the file.
 
   // Set chunk size to 1 MB
@@ -36,7 +36,7 @@ export async function streamChunked<T>(
 
   const newRange = { start: rrange[0], end: rrange[1] };
 
-  const readStream = fs.createReadStream(file, newRange);
+  const readStream = fs.createReadStream(res.locals.trackFilePath, newRange);
   res.writeHead(206, {
     "cache-control": "no-cache, no-store, must-revalidate",
     pragma: "no-cache",

@@ -11,5 +11,5 @@ const libPath = process.argv[2];
   await trackModel.queries.createGenres(GENRES);
   await traverseDirs(libPath, trackModel.queries.create);
 
-  process.send({ name: "seeding", status: "success" } as ProcessMessage);
+  process.send!({ name: "seeding", status: "success" } as ProcessMessage);
 })();

@@ -1,19 +1,18 @@
 import { traverseDirs } from "../utils/utilities";
-import * as trackModel from "../models/track/index";
-import { schemaCreateTrack } from "../models/track/validation-schemas";
+import * as trackModel from "../models/track";
 import { ProcessMessage } from "../types";
 
 const LIB_PATH = process.argv[2];
 
 const tracksValidator = new trackModel.validator.TrackValidator(
-  schemaCreateTrack,
+  trackModel.validationSchemas.schemaCreateTrack,
 );
 
 (async () => {
   await traverseDirs(LIB_PATH, await tracksValidator.validate);
 
   if (!process.send) throw new Error("process.send is undefined");
-  process.send({
+  process.send!({
     name: "validation",
     status: tracksValidator.errors.length === 0 ? "success" : "failure",
     result: {

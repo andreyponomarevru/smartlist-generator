@@ -1,5 +1,3 @@
-import { GENRES } from "./config/constants";
-
 export interface Track {
   trackId?: number;
   duration: number;
@@ -15,7 +13,7 @@ export interface ValidatedTrack {
   artists: string[];
   year: number;
   title: string;
-  genres: (typeof GENRES)[number][];
+  genres: string[];
 }
 export type FoundTrackDBResponse = {
   artists: string[];
@@ -44,9 +42,9 @@ export type Filter = {
 };
 export type TrackValidatorError = {
   filePath: string;
-  tag: string | number;
-  value?: string | string[] | number;
-  msg: string;
+  id3TagName: string | number;
+  id3TagValue?: string | string[] | number;
+  err: string;
 };
 type ValidationStats = {
   names: (string | number)[];

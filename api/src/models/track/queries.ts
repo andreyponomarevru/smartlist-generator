@@ -2,15 +2,15 @@ import format from "pg-format";
 
 import { connectDB } from "../../config/postgres";
 import { schemaCreateTrack } from "./validation-schemas";
-import { TrackMetadataParser, logDBError } from "../../utils/utilities";
+import { logDBError } from "../../utils/utilities";
 import { SearchParams, buildSQLQuery } from "../../utils/query-builder";
 import { FoundTrackDBResponse, FoundTrack } from "../../types";
 import { GENRES } from "../../config/constants";
+import { parseAudioFile } from "./validator";
 
 export async function create(filePath: string): Promise<void> {
-  const trackMetadataParser = new TrackMetadataParser(filePath);
   const newTrack = await schemaCreateTrack.validateAsync(
-    await trackMetadataParser.parseAudioFile(),
+    await parseAudioFile(filePath),
   );
 
   const pool = await connectDB();
@@ -34,7 +34,12 @@ export async function create(filePath: string): Promise<void> {
       })
     ).rows[0];
 
-    for (const genre of newTrack.genres) {
+    for (const genreName of newTrack.genres) {
+      const validGenre = GENRES.find((valid) => valid.name === genreName);
+      if (!validGenre) {
+        throw new Error(`'${genreName}' is not a valid genre name`);
+      }
+
       await client.query({
         text: `
           INSERT INTO track_genre 
@@ -42,7 +47,7 @@ export async function create(filePath: string): Promise<void> {
           VALUES 
             ($1::integer, $2::integer) 
           ON CONFLICT DO NOTHING;`,
-        values: [trackId, GENRES.findIndex((name) => name === genre)],
+        values: [trackId, validGenre.id],
       });
     }
 
@@ -188,14 +193,14 @@ export async function destroyAll() {
   }
 }
 
-export async function createGenres(genres: string[]) {
+export async function createGenres(genres: typeof GENRES) {
   const pool = await connectDB();
 
   try {
     await pool.query({
       text: format(
         `INSERT INTO genre (genre_id, name) VALUES %L;`,
-        genres.map((genre, index) => [index, genre]),
+        genres.map(({ id, name }) => [id, name]),
       ),
     });
   } catch (err) {

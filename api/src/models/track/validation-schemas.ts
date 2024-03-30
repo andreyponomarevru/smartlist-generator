@@ -24,7 +24,7 @@ const genreName = Joi.string()
   .trim()
   .min(1)
   .max(200)
-  .valid(...GENRES)
+  .valid(...GENRES.map((genre) => genre.name))
   .required()
   .messages({
     "string.base": '"genre" item should be a type of "string"',

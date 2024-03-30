@@ -19,7 +19,6 @@ export async function create(newTask: {
       text: `INSERT INTO process (name, status) VALUES ($1, $2) RETURNING *;`,
       values: [newTask.name, newTask.status],
     });
-
     return {
       name: response.rows[0].name,
       createdAt: response.rows[0].created_at,

@@ -1,46 +1,70 @@
 import Joi, { ValidationError } from "joi";
-import { TrackMetadataParser } from "../../utils/utilities";
-import { Track, ValidatedTrack, TrackValidatorError } from "../../types";
+import { ValidatedTrack, TrackValidatorError } from "../../types";
 
-type DB = { [key: string]: Set<string | number> };
+import * as mm from "music-metadata";
+
+import { Track } from "../../types";
+
+export async function parseAudioFile(filePath: string): Promise<Track> {
+  function parseArray(arr?: string[]): string[] {
+    if (Array.isArray(arr) && arr.length > 0) {
+      // Use Set to get rid of duplicate items
+      return [...new Set(arr.filter((str) => str.trim() !== ""))];
+    } else {
+      return [];
+    }
+  }
+
+  const trackMetadata = await mm.parseFile(filePath);
+
+  const duration = trackMetadata.format.duration || 0;
+  const artists = parseArray(trackMetadata.common.artists);
+  const year = trackMetadata.common.year || 0;
+  const title = trackMetadata.common.title || "";
+  const genres = parseArray(trackMetadata.common.genre);
+
+  const extendedMetadata = {
+    filePath,
+    duration,
+    artists,
+    year,
+    title,
+    genres,
+  };
+  return extendedMetadata;
+}
 
 export class TrackValidator {
   public errors: TrackValidatorError[];
-  public db: DB;
+  public db: { genre: Set<string>; artist: Set<string>; year: Set<number> };
   #schema: Joi.ObjectSchema<ValidatedTrack>;
 
   constructor(schema: Joi.ObjectSchema<ValidatedTrack>) {
     this.errors = [];
-    this.db = {
-      artist: new Set(),
-      genre: new Set(),
-      year: new Set(),
-    };
+    this.db = { artist: new Set(), genre: new Set(), year: new Set() };
     this.#schema = schema;
     this.validate = this.validate.bind(this);
   }
 
   public async validate(filePath: string) {
-    const trackMetadataParser = new TrackMetadataParser(filePath);
     try {
-      const parsedTrack: Track = await this.#schema.validateAsync(
-        await trackMetadataParser.parseAudioFile(),
+      const parsedTrack = await this.#schema.validateAsync(
+        await parseAudioFile(filePath),
       );
       this.db.year.add(parsedTrack.year);
-      parsedTrack.genres.forEach((genre) => this.db.genre.add(genre));
+      parsedTrack.genres.forEach((name) => this.db.genre.add(name));
       parsedTrack.artists.forEach((artist) => this.db.artist.add(artist));
     } catch (err) {
       if (err instanceof ValidationError) {
         err.details.forEach((err) =>
           this.errors.push({
             filePath: filePath,
-            tag: err.path[0],
-            value: err.context?.value,
-            msg: err.message,
+            id3TagName: err.path[0],
+            id3TagValue: err.context?.value,
+            err: err.message,
           }),
         );
       } else {
-        console.log("Unknown type of error");
         throw err;
       }
     }

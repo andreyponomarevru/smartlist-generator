@@ -12,6 +12,7 @@ import * as tracksController from "./tracks";
 import * as statsController from "./lib/stats";
 import * as processesController from "./processes";
 import { validationSSE } from "./processes/validation";
+import { seedingSSE } from "./processes/seeding";
 import { isLibPathExist } from "../middlewares/is-libpath-exist";
 import { streamChunked } from "../middlewares/stream-chunked";
 
@@ -44,6 +45,7 @@ router.post(
 );
 router.get(
   "/processes/seeding",
+  seedingSSE.init,
   processesController.seeding.getSeedingStatusAsSSE,
 );
 router.delete("/processes/seeding", processesController.seeding.stopSeeding);

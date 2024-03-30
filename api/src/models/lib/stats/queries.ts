@@ -1,7 +1,7 @@
 import { connectDB } from "../../../config/postgres";
 import { logDBError } from "../../../utils/utilities";
 
-export async function countTracksByGenre(excludedTracks: number[]) {
+export async function countTracksByGenre(excludedTracks: number[] = []) {
   const pool = await connectDB();
 
   try {
@@ -40,7 +40,7 @@ export async function countTracksByGenre(excludedTracks: number[]) {
   }
 }
 
-export async function countTracksByYear(excludedTracks: number[]) {
+export async function countTracksByYear(excludedTracks: number[] = []) {
   const pool = await connectDB();
 
   console.log(

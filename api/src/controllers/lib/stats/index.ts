@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import * as statsModel from "../../../model/lib/stats/queries";
+import * as statsModel from "../../../models/lib/stats";
 
 export async function gerTracksCountByGenre(
   req: Request<unknown, unknown, unknown, { excluded: number[] }>,
@@ -8,7 +8,7 @@ export async function gerTracksCountByGenre(
 ) {
   try {
     res.json({
-      results: await statsModel.countTracksByGenre(req.query.excluded || []),
+      results: await statsModel.queries.countTracksByGenre(req.query.excluded),
     });
   } catch (err) {
     next(err);
@@ -21,14 +21,14 @@ export async function getTracksCountByYear(
   next: NextFunction,
 ) {
   console.log(
-    (await statsModel.countTracksByYear(req.query.excluded || [])).reduce(
+    (await statsModel.queries.countTracksByYear(req.query.excluded)).reduce(
       (accumulator, currentValue) => accumulator + currentValue.count,
       0,
     ),
   );
   try {
     res.json({
-      results: await statsModel.countTracksByYear(req.query.excluded || []),
+      results: await statsModel.queries.countTracksByYear(req.query.excluded),
     });
   } catch (err) {
     next(err);

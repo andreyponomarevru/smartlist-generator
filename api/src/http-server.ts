@@ -2,13 +2,38 @@ import http from "http";
 import path from "path";
 import express from "express";
 import cors from "cors";
-import { onServerError, onServerListening } from "./event-handlers/http-server";
+
 import { HTTP_PORT } from "./config/env";
 import * as env from "./config/env";
 import { handle404Error } from "./middlewares/handle-404-error";
 import { handleErrors } from "./middlewares/handle-errors";
-import { router } from "./controller/routes";
+import { router } from "./controllers/routes";
 import { API_PREFIX } from "./config/constants";
+
+function onServerListening() {
+  console.log(`${__filename}: HTTP Server is listening on port ${HTTP_PORT}`);
+}
+
+function onServerError(err: NodeJS.ErrnoException) {
+  if (err.syscall !== "listen") throw err;
+
+  const bind =
+    typeof HTTP_PORT === "string" ? `Pipe ${HTTP_PORT}` : `Port ${HTTP_PORT}`;
+
+  // Messages for 'listen' event errors
+  switch (err.code) {
+    case "EACCES":
+      console.error(`${bind} requires elevated privileges`);
+      process.exit(1);
+      break;
+    case "EADDRINUSE":
+      console.error(`${bind} is already in use`);
+      process.exit(1);
+      break;
+    default:
+      throw err;
+  }
+}
 
 //
 // Express app

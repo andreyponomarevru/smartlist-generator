@@ -1,3 +1,3 @@
-export * from "./queries";
-export * from "./validation-schemas";
-export * from "./validator";
+export * as queries from "./queries";
+export * as validationSchemas from "./validation-schemas";
+export * as validator from "./validator";

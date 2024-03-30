@@ -23,17 +23,21 @@ export async function startValidation(
 ) {
   async function onMessage(message: ProcessMessage) {
     console.log("[message] Done. All files has been validated");
-    const processState = await processModel.queries.update(message);
-    validationSSE.send(processState, "validation");
+    validationSSE.send(
+      await processModel.queries.update(message),
+      "validation",
+    );
   }
 
   async function onError(err: Error) {
     console.log("[error] Error in child process 'validation'", err);
-    const processState = await processModel.queries.update({
-      name: "validation",
-      status: "failure",
-    });
-    validationSSE.send(processState, "validation");
+    validationSSE.send(
+      await processModel.queries.update({
+        name: "validation",
+        status: "failure",
+      }),
+      "validation",
+    );
   }
 
   function onClose() {
@@ -92,19 +96,17 @@ export async function stopValidation(
   next: NextFunction,
 ) {
   try {
-    if (!process || !process.pid) {
-      throw new HttpError({
-        code: 404,
-        message: `Nothing to stop — the validation process is not running`,
-      });
-    } else {
-      process.kill("SIGTERM");
+    console.log("HERE 1 ***");
 
+    if (process && process.pid) {
+      console.log("HERE 2 ***");
+      process.kill("SIGTERM");
       process = null;
-      await processModel.queries.destroy("validation");
-      validationSSE.send(null, "validation");
-      res.status(200).end();
     }
+
+    await processModel.queries.destroy("validation");
+    validationSSE.send(null, "validation");
+    res.status(204).end();
   } catch (err) {
     next(err);
   }
