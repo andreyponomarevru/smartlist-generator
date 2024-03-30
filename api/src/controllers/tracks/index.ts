@@ -28,7 +28,6 @@ export async function findTrack(
   next: NextFunction,
 ) {
   try {
-    //throw new HttpError({ code: 400, message: "Something went wrong" });
     const searchParams = req.body;
     res.json({ results: await trackModel.queries.find(searchParams) });
   } catch (err) {

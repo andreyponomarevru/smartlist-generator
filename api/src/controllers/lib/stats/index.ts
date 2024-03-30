@@ -20,12 +20,6 @@ export async function getTracksCountByYear(
   res: Response<{ results: { name: string; count: number }[] }>,
   next: NextFunction,
 ) {
-  console.log(
-    (await statsModel.queries.countTracksByYear(req.query.excluded)).reduce(
-      (accumulator, currentValue) => accumulator + currentValue.count,
-      0,
-    ),
-  );
   try {
     res.json({
       results: await statsModel.queries.countTracksByYear(req.query.excluded),
