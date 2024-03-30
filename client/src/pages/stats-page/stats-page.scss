@@ -9,4 +9,8 @@
     font-size: $font-size_h2;
     padding: 1rem 0 1rem 0;
   }
+
+  &__loader {
+    background-color: $color_black;
+  }
 }

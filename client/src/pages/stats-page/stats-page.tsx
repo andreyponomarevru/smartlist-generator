@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Stats } from "./stats";
+import { Stats } from "./stats/stats";
 import { Loader } from "../../lib/loader/loader";
 import { useGlobalState } from "../../hooks/use-global-state";
 import { Message } from "../../lib/message/message";
@@ -10,18 +10,8 @@ import "./stats-page.scss";
 export function StatsPage() {
   const { statsQuery } = useGlobalState();
 
-  if (statsQuery.isLoading) return <Loader for="page" color="black" />;
-
-  if (statsQuery.error || !statsQuery.data) {
-    return (
-      <Message type="danger">
-        Something went wrong while loading stats :(
-      </Message>
-    );
-  }
-
   const totalCount =
-    statsQuery.data?.years.results?.reduce(
+    statsQuery.data?.years.reduce(
       (accumulator, currentValue) => accumulator + currentValue.count,
       0,
     ) || 0;
@@ -30,11 +20,18 @@ export function StatsPage() {
     <div className="stats-page">
       <header className="header1">Statistics</header>
 
+      {statsQuery.isLoading && <Loader className="stats-page__loader" />}
+      {statsQuery.error instanceof Error && (
+        <Message type="danger">Request Failed</Message>
+      )}
+
       <section>
         <h2 className="stats-page__header2">Tracks ({totalCount})</h2>
       </section>
-      <Stats stats={statsQuery.data.years.results} name="Years" />
-      <Stats stats={statsQuery.data.genres.results} name="Genres" />
+      {statsQuery.data && <Stats stats={statsQuery.data.years} name="Years" />}
+      {statsQuery.data && (
+        <Stats stats={statsQuery.data.genres} name="Genres" />
+      )}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-@import "../../global";
+@import "../../../global";
 
 .stats {
   &__header {
@@ -20,9 +20,8 @@
 
   &__list {
     margin: 1rem 0 0 0;
-    padding: 0 0 1rem 0;
     list-style-type: none;
-    line-height: 2;
+    line-height: 1.5;
     font-size: $font-size_regular-text;
   }
 
@@ -32,6 +31,7 @@
   }
 
   &__list-item-text {
+    font-size: $font-size_tiny;
     display: flex;
     flex-flow: row nowrap;
     justify-content: space-between;
