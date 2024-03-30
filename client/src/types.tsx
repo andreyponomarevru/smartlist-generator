@@ -29,23 +29,6 @@ export interface SavedFilterFormValues {
   filterId: OptionsList<string>;
 }
 export type LibPathInput = { libPath: string };
-
-//
-// API
-//
-
-export type APIResponseSuccess<T> = { results: T };
-export type APIResponseError = {
-  status: number;
-  moreInfo: string;
-  message: string;
-};
-export type Stats = { id?: number; name: string; count: number };
-export type GetTrackRes = { results: TrackMeta[] };
-export type GetTrackIdsByFilePaths = {
-  results: { trackId: number; filePath: string }[];
-};
-export type FindTrackIdsRes = { results: number[] };
 export type SelectProps<OptionsValue> = {
   name: string;
   control: Control<FilterFormValues>;
@@ -55,6 +38,13 @@ export type SelectProps<OptionsValue> = {
   resetField?: UseFormResetField<FilterFormValues>;
   isDirty?: boolean;
 };
+
+//
+// API
+//
+
+export type APIResponseSuccess<T> = { results: T };
+export type Stats = { id?: number; name: string; count: number };
 export type SearchQuery = {
   operator: string;
   filters: {
