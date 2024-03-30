@@ -3,7 +3,7 @@ import { useFormContext } from "react-hook-form";
 import { FaMinus, FaRedo, FaArrowDown, FaArrowUp } from "react-icons/fa";
 import { LuCopy } from "react-icons/lu";
 
-import { toHourMinSec } from "../../utils/misc";
+import { toHourMinSec } from "../../utils";
 import {
   FilterFormValues,
   TrackMeta,
@@ -11,7 +11,7 @@ import {
 } from "../../types";
 import { useGlobalState } from "../../hooks/use-global-state";
 import { Direction } from "../../hooks/use-global-state/use-playlist-extended";
-import { extractFilename } from "../../utils/misc";
+import { extractFilename } from "../../utils";
 
 import "./playlist.scss";
 

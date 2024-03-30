@@ -21,6 +21,8 @@ import { useGlobalState } from "../../hooks/use-global-state";
 import { useUUID } from "../../hooks/use-uuid";
 import { Playlist } from "../playlist/playlist";
 import { usePlaylist } from "../../hooks/use-playlist";
+import { Loader } from "../../lib/loader/loader";
+import { APIErrorMessage } from "../../lib/api-error-msg/api-error-msg";
 
 import "./create-filter-form.scss";
 
@@ -48,7 +50,6 @@ type Stats = Record<string, OptionsList<number>[]>;
 function createSingleSelectStyles(
   hasError?: boolean,
 ): StylesConfig<OptionsList<string | number>, false> {
-  console.log(hasError ? "ERROR" : "");
   return {
     control: (baseStyles, state) => ({
       ...baseStyles,
@@ -75,7 +76,6 @@ function createSingleSelectStyles(
 function createMultiSelectStyles(
   hasError?: boolean,
 ): StylesConfig<OptionsList<string | number>, true> {
-  console.log(hasError ? "ERROR" : "");
   return {
     control: (baseStyles, state) => ({
       ...baseStyles,
@@ -109,11 +109,11 @@ export function CreateFilterForm(props: CreateFilterFormProps) {
   React.useEffect(() => {
     if (!statsQuery.data?.genres || !statsQuery.data?.years) return;
 
-    const genre: OptionsList<number>[] = [...statsQuery.data.genres.results]
+    const genre: OptionsList<number>[] = [...statsQuery.data.genres]
       .sort((a, b) => a.name.localeCompare(b.name))
       .map((g) => ({ value: g.id as number, label: g.name }));
 
-    const year: OptionsList<number>[] = [...statsQuery.data.years.results]
+    const year: OptionsList<number>[] = [...statsQuery.data.years]
       .sort((a, b) => parseInt(b.name) - parseInt(a.name))
       .map((y) => ({ value: parseInt(y.name), label: String(y.name) }));
 
@@ -316,11 +316,18 @@ export function CreateFilterForm(props: CreateFilterFormProps) {
                 form={props.formId}
                 className="btn btn_type_primary"
               >
+                {playlist.getTrackQuery.isLoading && (
+                  <Loader className="btn_loader-color_white" />
+                )}
                 Add Track
               </button>
             </div>
           </div>
+          {playlist.getTrackQuery.error instanceof Error && (
+            <APIErrorMessage error={playlist.getTrackQuery.error} />
+          )}
         </form>
+
         <Playlist
           formId={props.formId}
           onReorderTracks={playlist.handleTrackReorder}

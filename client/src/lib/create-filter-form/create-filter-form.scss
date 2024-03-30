@@ -1,6 +1,8 @@
 @import "../../global.scss";
 
 .create-filter-form {
+  padding-bottom: 1rem;
+
   &__form {
     display: flex;
     flex-flow: column nowrap;

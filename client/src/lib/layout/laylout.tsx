@@ -1,5 +1,5 @@
 import React from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet as CurrentPageContent } from "react-router-dom";
 
 import { Player } from "../player/player";
 import { Sidebar } from "./sidebar/sidebar";
@@ -11,7 +11,7 @@ export function Layout() {
     <>
       <main className="main">
         <Sidebar />
-        <Outlet />
+        <CurrentPageContent />
       </main>
       <Player />
     </>

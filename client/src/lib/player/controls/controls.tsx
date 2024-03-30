@@ -38,7 +38,10 @@ export function Controls(props: ControlsProps) {
   }, [duration, audioRef, progressBarRef, setTimeProgress]);
 
   React.useEffect(() => {
-    if (isPlaying) audioRef.current?.play();
+    if (isPlaying)
+      audioRef.current
+        ?.play()
+        .catch(() => console.error("Audio src is unavailable"));
     else audioRef.current?.pause();
     playAnimationRef.current = requestAnimationFrame(repeat);
   }, [isPlaying, audioRef, repeat]);

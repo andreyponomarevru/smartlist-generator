@@ -2,7 +2,7 @@ import React from "react";
 import { IoMdVolumeHigh, IoMdVolumeOff, IoMdVolumeLow } from "react-icons/io";
 
 import { Controls } from "./controls/controls";
-import { toHourMinSec } from "../../utils/misc";
+import { toHourMinSec } from "../../utils";
 import { useGlobalState } from "../../hooks/use-global-state";
 
 import "./player.scss";
