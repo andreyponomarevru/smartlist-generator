@@ -4,8 +4,8 @@ import { APIResponseSuccess, Process, ValidationQuery } from "../../../types";
 import { API_ROOT_URL } from "../../../config/env";
 import { APIError } from "../../../utils";
 
-async function startValidation(reqBody: ValidationQuery) {
-  const response = await fetch(`${API_ROOT_URL}/processes/validation`, {
+async function startValidation(reqBody: ValidationQuery): Promise<Process> {
+  const response = await fetch(`${API_ROOT_URL}/processes/seeding`, {
     method: "POST",
     headers: { "content-type": "application/json", accept: "application/json" },
     body: JSON.stringify(reqBody),
@@ -17,7 +17,7 @@ async function startValidation(reqBody: ValidationQuery) {
   return results;
 }
 
-export function useStartValidationProcess() {
+export function useStartSeedingProcess() {
   const mutation = useMutation({
     mutationFn: (reqBody: ValidationQuery) => startValidation(reqBody),
   });

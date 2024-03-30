@@ -9,12 +9,12 @@ import { API_ROOT_URL } from "../../config/env";
 import { useSSE } from "../../hooks/api/use-sse";
 import { useStartValidationProcess } from "../../hooks/api/processes/use-start-validation";
 import { useLocalStorage } from "../../hooks/use-local-storage";
-import {
-  calculateExcludedStats,
-  exportValidationReport,
-} from "../../utils/misc";
+import { calculateExcludedStats, exportValidationReport } from "../../utils";
 import { Loader } from "../../lib/loader/loader";
 import { useStopValidationProcess } from "../../hooks/api/processes/use-stop-validation";
+import { useStartSeedingProcess } from "../../hooks/api/processes/use-start-seeding";
+import { useStopSeedingProcess } from "../../hooks/api/processes/use-stop-seeding";
+import { APIErrorMessage } from "../../lib/api-error-msg/api-error-msg";
 
 import "./settings-page.scss";
 
@@ -50,18 +50,8 @@ function ValidationSettings(props: ValidationSettingsProps) {
     `${API_ROOT_URL}/processes/validation`,
     "validation",
   );
-
   const startProcessQuery = useStartValidationProcess();
-  async function startProcess() {
-    await startProcessQuery.mutateAsync(props.currentSettings);
-  }
-
   const stopProcessQuery = useStopValidationProcess();
-  async function stopProcess() {
-    await stopProcessQuery.mutateAsync();
-  }
-
-  //
 
   const status = sseData?.status || "initial";
 
@@ -90,13 +80,20 @@ function ValidationSettings(props: ValidationSettingsProps) {
           <button
             type="button"
             className="btn btn_type_secondary"
-            onClick={status === "pending" ? stopProcess : startProcess}
+            onClick={
+              status === "pending"
+                ? () => stopProcessQuery.mutate()
+                : () => startProcessQuery.mutate(props.currentSettings)
+            }
           >
             {status === "pending" && (
               <Loader className="settings-page__btn-loader" />
             )}
             {status === "pending" ? "Stop" : "Validate"}
           </button>
+          {startProcessQuery.error instanceof Error && (
+            <APIErrorMessage error={startProcessQuery.error} />
+          )}
         </div>
       </div>
     </section>
@@ -108,6 +105,8 @@ function SeedingSettings(props: SeedingSettingsProps) {
     `${API_ROOT_URL}/processes/seeding`,
     "seeding",
   );
+  const startProcessQuery = useStartSeedingProcess();
+  const stopProcessQuery = useStopSeedingProcess();
 
   const status = sseData?.status || "initial";
 
@@ -116,9 +115,39 @@ function SeedingSettings(props: SeedingSettingsProps) {
       <div className="settings-page__row">
         <header className="settings-page__header">Database Seeding</header>
         {sseData && (
-          <Process status={sseData.status || "initial"} details={sseData} />
+          <Process
+            status={status}
+            details={sseData}
+            className={`status-loader status-loader_${status}`}
+          >
+            {sseData.result && (
+              <button
+                type="button"
+                onClick={() => exportValidationReport(sseData.result)}
+                className="btn btn_type_secondary"
+              >
+                <FaDownload className="icon" /> Download report
+              </button>
+            )}
+          </Process>
         )}
-        <span className="btn btn_type_secondary">Populate</span>
+        <button
+          type="button"
+          className="btn btn_type_secondary"
+          onClick={
+            status === "pending"
+              ? () => stopProcessQuery.mutate()
+              : () => startProcessQuery.mutate(props.currentSettings)
+          }
+        >
+          {status === "pending" && (
+            <Loader className="settings-page__btn-loader" />
+          )}
+          {status === "pending" ? "Stop" : "Seed"}
+        </button>
+        {startProcessQuery.error instanceof Error && (
+          <APIErrorMessage error={startProcessQuery.error} />
+        )}
       </div>
     </section>
   );
@@ -130,7 +159,7 @@ function ExcludedTracksSettings() {
   const excludedCount = playlist.excludedTracks.state.tracks.size;
   const { totalCount, excludedPercentage, tracksLeft } = calculateExcludedStats(
     excludedCount,
-    statsQuery.data?.years.results,
+    statsQuery.data?.years,
   );
 
   return (
@@ -157,6 +186,10 @@ function ExcludedTracksSettings() {
               <input
                 id="importblacklisted"
                 type="file"
+                onClick={() => {
+                  playlist.excludedTracks.handleClear();
+                  playlist.excludedTracks.getTracksQuery.reset();
+                }}
                 onChange={playlist.excludedTracks.handleImport}
                 multiple
                 hidden
@@ -175,13 +208,16 @@ function ExcludedTracksSettings() {
             </button>
           </span>
         </div>
-        <div className="settings-page__messages">
-          {playlist.excludedTracks.state.errors.map((err) => (
-            <Message key={err.message} type="danger">
-              {err.message}
-            </Message>
-          ))}
-        </div>
+        {playlist.excludedTracks.state.errors.map((err) => (
+          <Message key={err.message} type="danger">
+            {err.message}
+          </Message>
+        ))}
+        {playlist.excludedTracks.getTracksQuery.error instanceof Error && (
+          <APIErrorMessage
+            error={playlist.excludedTracks.getTracksQuery.error}
+          />
+        )}
       </div>
     </section>
   );

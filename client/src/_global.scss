@@ -226,6 +226,10 @@ $controls_btn-height: 2.75rem;
       background-color: $color_grey-20;
     }
   }
+
+  &_loader-color_white {
+    background-color: white;
+  }
 }
 
 .icon {

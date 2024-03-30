@@ -1,22 +1,17 @@
 import { useMutation } from "react-query";
 
-import { APIError } from "../../../types";
 import { API_ROOT_URL } from "../../../config/env";
+import { APIError } from "../../../utils";
 
-async function stopValidation(): Promise<void | APIError> {
+async function stopValidation() {
   const response = await fetch(`${API_ROOT_URL}/processes/validation`, {
     method: "DELETE",
   });
 
-  if (!response.ok) {
-    return (await response.json()) as APIError;
-  }
+  if (!response.ok) throw new APIError(await response.json());
 }
 
 export function useStopValidationProcess() {
-  const mutation = useMutation({
-    mutationFn: () => stopValidation(),
-    onError: (err) => console.log("[react-query error handler]", err),
-  });
+  const mutation = useMutation({ mutationFn: () => stopValidation() });
   return mutation;
 }
