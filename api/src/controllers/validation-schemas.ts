@@ -84,6 +84,7 @@ export const schemaGetStats = Joi.object<{ excluded: number[] }>({
   excluded: Joi.array().items(Joi.number().positive().min(1)).single(),
 }).optional();
 
-export const schemaLibPath = Joi.object<{ libPath: string }>({
+export type StartSeedingReqBody = { libPath: string };
+export const schemaLibPath = Joi.object<StartSeedingReqBody>({
   libPath: Joi.string().max(255).required(),
 });

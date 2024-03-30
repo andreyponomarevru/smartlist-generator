@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from "express";
 import * as trackModel from "../../models/track";
 import { HttpError } from "../../utils/error";
 import { SearchParams } from "../../utils/query-builder";
+import { FoundTrack } from "../../types";
 
 export async function getTrackFilePath(
   req: Request<{ id: number }>,
@@ -23,7 +24,7 @@ export async function getTrackFilePath(
 
 export async function findTrack(
   req: Request<unknown, unknown, SearchParams>,
-  res: Response,
+  res: Response<{ results: FoundTrack[] }>,
   next: NextFunction,
 ) {
   try {

@@ -7,6 +7,7 @@ import * as processModel from "../../../models/processes";
 import { ProcessMessage } from "../../../types";
 import { HttpError } from "../../../utils/error";
 import { NODE_PROCESS, PROCESSES } from "../../../config/processes";
+import { Process } from "../../../types";
 
 export const validationSSE = new SSE({
   status:
@@ -18,7 +19,7 @@ let process: ChildProcess | null = null;
 
 export async function startValidation(
   req: Request<unknown, unknown, { libPath: string }>,
-  res: Response,
+  res: Response<{ results: Process } | HttpError>,
   next: NextFunction,
 ) {
   async function onMessage(message: ProcessMessage) {
