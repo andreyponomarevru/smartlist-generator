@@ -4,7 +4,7 @@ import { IoMdAddCircle } from "react-icons/io";
 
 import { useSavedFilters } from "../../hooks/use-saved-filters";
 import { SavedFilter } from "../../lib/saved-filter/saved-filter";
-import { exportSavedFiltersToJSON } from "../../utils/misc";
+import { exportSavedFiltersToJSON } from "../../utils";
 import { CreateFilterForm } from "../../lib/create-filter-form/create-filter-form";
 import {
   CREATE_FILTER_FORM_ID,
@@ -94,9 +94,7 @@ export function FiltersPage() {
         <span></span>
         <button
           type="button"
-          onClick={() =>
-            exportSavedFiltersToJSON("Playlist name", savedFilters.state)
-          }
+          onClick={() => exportSavedFiltersToJSON(savedFilters.state)}
           className="btn btn_type_secondary"
           disabled={Object.keys(savedFilters).length === 0}
         >

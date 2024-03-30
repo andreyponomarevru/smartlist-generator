@@ -1,7 +1,7 @@
 import React from "react";
 
 import { TrackMeta, FilterFormValues } from "../../types";
-import { buildSearchQuery } from "../../utils/misc";
+import { buildSearchQuery } from "../../utils";
 import { useEditableText } from "../use-editable-text";
 import { useTrack } from "../api/use-track";
 import { useExcludedTracks } from "./use-excluded-tracks";
@@ -229,38 +229,41 @@ export function usePlaylist() {
     trackId,
     formValues,
   }: TrackToReplace) {
+    const newExcludedTracks = [
+      ...Object.values(state.tracks)
+        .flat()
+        .map((t) => t.trackId),
+      ...[...excludedTracks.state.tracks].map(({ trackId }) => trackId),
+    ];
+
     try {
       const track = await getTrackQuery.mutateAsync(
-        buildSearchQuery(formValues, [
-          ...Object.values(state.tracks)
-            .flat()
-            .map((t) => t.trackId),
-          ...[...excludedTracks.state.tracks].map(({ trackId }) => trackId),
-        ]),
+        buildSearchQuery(formValues, newExcludedTracks),
       );
       dispatch({
         type: "REPLACE_TRACK",
         payload: { groupId, trackId, newTrack: track },
       });
     } catch (err) {
-      console.error(getTrackQuery.error);
+      // Already handled (displayed via getTrackQuery.errors)
     }
   }
 
   async function handleTrackAdd(groupId: number, formValues: FilterFormValues) {
-    console.log(groupId, formValues);
+    const newExcludedTracks = [
+      ...Object.values(state.tracks)
+        .flat()
+        .map((t) => t.trackId),
+      ...[...excludedTracks.state.tracks].map(({ trackId }) => trackId),
+    ];
+
     try {
       const track = await getTrackQuery.mutateAsync(
-        buildSearchQuery(formValues, [
-          ...Object.values(state.tracks)
-            .flat()
-            .map((t) => t.trackId),
-          ...[...excludedTracks.state.tracks].map(({ trackId }) => trackId),
-        ]),
+        buildSearchQuery(formValues, newExcludedTracks),
       );
       dispatch({ type: "ADD_TRACK", payload: { groupId, tracks: track } });
     } catch (err) {
-      console.error(err);
+      // Already handled (displayed via getTrackQuery.errors)
     }
   }
 
@@ -292,5 +295,6 @@ export function usePlaylist() {
     handleTrackReorder,
     handleTracksReset,
     excludedTracks,
+    getTrackQuery,
   };
 }

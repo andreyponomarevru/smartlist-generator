@@ -1,6 +1,6 @@
 import React from "react";
 import { TrackMeta, FilterFormValues } from "../types";
-import { buildSearchQuery } from "../utils/misc";
+import { buildSearchQuery } from "../utils";
 import { useTrack } from "./api/use-track";
 
 export type Direction = "UP" | "DOWN";
@@ -115,39 +115,35 @@ export function usePlaylist() {
   }
 
   async function replace({ trackId, formValues }: TrackToReplace) {
+    const excludedTrackIds = [
+      ...Object.values(state.tracks)
+        .flat()
+        .map((t) => t.trackId),
+    ];
+    const searchQuery = buildSearchQuery(formValues, excludedTrackIds);
+
     try {
-      const track = await getTrackQuery.mutateAsync(
-        buildSearchQuery(formValues, [
-          ...Object.values(state.tracks)
-            .flat()
-            .map((t) => t.trackId),
-        ]),
-      );
+      const track = await getTrackQuery.mutateAsync(searchQuery);
       dispatch({
         type: "REPLACE_TRACK",
         payload: { trackId, newTrack: track },
       });
     } catch (err) {
-      console.error(getTrackQuery.error);
+      // Already handled (displayed via getTrackQuery.errors)
     }
   }
 
   async function add(formValues: FilterFormValues) {
-    try {
-      const excludedTracks = Object.values(state.tracks)
-        .flat()
-        .map((t) => t.trackId);
+    const excludedTracks = Object.values(state.tracks)
+      .flat()
+      .map((t) => t.trackId);
+    const searchQuery = buildSearchQuery(formValues, excludedTracks);
 
-      dispatch({
-        type: "ADD_TRACK",
-        payload: {
-          track: await getTrackQuery.mutateAsync(
-            buildSearchQuery(formValues, excludedTracks),
-          ),
-        },
-      });
+    try {
+      const track = await getTrackQuery.mutateAsync(searchQuery);
+      dispatch({ type: "ADD_TRACK", payload: { track } });
     } catch (err) {
-      console.error(err);
+      // Already handled (displayed via getTrackQuery.errors)
     }
   }
 
@@ -162,5 +158,6 @@ export function usePlaylist() {
     handleTrackReplace: replace,
     handleTrackReorder: reorder,
     handleReset: reset,
+    getTrackQuery,
   };
 }

@@ -1,7 +1,7 @@
 import React from "react";
 
 import { FilterFormValues } from "../types";
-import { readFileAsString } from "../utils/misc";
+import { readFileAsString } from "../utils";
 
 export type State = Record<string, FilterFormValues>;
 

@@ -1,7 +1,7 @@
 import React from "react";
 
-import { m3uToFilePaths, readFileAsString } from "../../utils/misc";
-import { useTracksSearch } from "../api/use-tracks-search";
+import { m3uToFilePaths, readFileAsString } from "../../utils";
+import { useTrackIdsFromPaths } from "../api/use-track-ids-from-paths";
 import { useLocalStorage } from "../use-local-storage";
 
 type ImportedTrack = { trackId: number; filePath: string };
@@ -56,14 +56,10 @@ export function useExcludedTracks() {
     setSaved([...state.tracks]);
   }, [state.tracks, setSaved]);
 
-  const getTracksQuery = useTracksSearch();
+  const getTracksQuery = useTrackIdsFromPaths();
 
   function clear() {
     dispatch({ type: "CLEAR" });
-  }
-
-  function addError(err: Error) {
-    dispatch({ type: "ADD_ERROR", payload: { error: err } });
   }
 
   async function importFromM3U(e: React.ChangeEvent<HTMLInputElement>) {
@@ -76,22 +72,28 @@ export function useExcludedTracks() {
       return file.name.split(".").pop()?.toLowerCase() === "m3u";
     });
     if (!isValidExtension) {
-      addError(new Error("Only M3U files are allowed"));
+      dispatch({
+        type: "ADD_ERROR",
+        payload: { error: new Error("Only M3U files are allowed") },
+      });
       return;
     }
 
     const stringifiedFiles = await Promise.all(files.map(readFileAsString));
     const excludedPaths = stringifiedFiles.map(m3uToFilePaths).flat();
-    await getTracksQuery.mutateAsync(excludedPaths, {
-      onSuccess: (data) => {
-        dispatch({ type: "IMPORT", payload: { tracks: data } });
-      },
-    });
+
+    try {
+      const track = await getTracksQuery.mutateAsync(excludedPaths);
+      dispatch({ type: "IMPORT", payload: { tracks: track } });
+    } catch (err) {
+      // Already handled (displayed via getTrackQuery.errors)
+    }
   }
 
   return {
     state,
     handleClear: clear,
     handleImport: importFromM3U,
+    getTracksQuery,
   } as const;
 }

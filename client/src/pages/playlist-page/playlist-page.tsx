@@ -3,8 +3,8 @@ import { FaDownload } from "react-icons/fa";
 import { IoMdAddCircle } from "react-icons/io";
 
 import { Group } from "./group/group";
-import { exportPlaylistToM3U } from "../../utils/misc";
-import { toHourMinSec } from "../../utils/misc";
+import { exportPlaylistToM3U } from "../../utils";
+import { toHourMinSec } from "../../utils";
 import { useGlobalState } from "../../hooks/use-global-state";
 import { SavedFiltersProvider } from "../../hooks/use-saved-filters";
 import { ModalProvider } from "../../hooks/use-modal";

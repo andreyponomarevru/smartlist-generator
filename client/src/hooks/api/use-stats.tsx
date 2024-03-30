@@ -1,40 +1,34 @@
 import { useQuery } from "react-query";
 
-import { GetStatsRes } from "../../types";
+import { APIResponseSuccess, Stats } from "../../types";
 import { API_ROOT_URL } from "../../config/env";
+import { APIError } from "../../utils";
 
-async function getStats(
-  excludedTracks: number[],
-): Promise<{ genres: GetStatsRes; years: GetStatsRes }> {
+async function getStats(excludedTracks: number[]) {
   const excluded =
     excludedTracks.length > 0
       ? `?excluded=${excludedTracks.join("&excluded=")}`
       : "";
-  const [yearsResponse, genresResponse] = await Promise.all([
+  const [yearsRes, genresRes] = await Promise.all([
     fetch(`${API_ROOT_URL}/lib/stats/years${excluded}`),
     fetch(`${API_ROOT_URL}/lib/stats/genres${excluded}`),
   ]);
 
-  if (!yearsResponse.ok || !genresResponse.ok) {
-    throw new Error(
-      `Failed to fetch stats. Years response: ${yearsResponse}, Genres res: ${genresResponse}`,
-    );
-  }
+  if (!yearsRes.ok) throw new APIError(await yearsRes.json());
+  if (!genresRes.ok) throw new APIError(await genresRes.json());
 
-  const [genres, years] = await Promise.all([
-    genresResponse.json(),
-    yearsResponse.json(),
-  ]);
+  const [genres, years] = (await Promise.all([
+    genresRes.json(),
+    yearsRes.json(),
+  ])) as [APIResponseSuccess<Stats[]>, APIResponseSuccess<Stats[]>];
 
-  return { genres, years };
+  return { genres: genres.results, years: years.results };
 }
 
 export function useStats(excludedTracks: number[]) {
-  console.log(excludedTracks);
   const statsQuery = useQuery({
     queryKey: ["stats", excludedTracks],
     queryFn: () => getStats(excludedTracks),
-    onError: (err) => console.log("[react-query error handler]", err),
   });
 
   return statsQuery;
