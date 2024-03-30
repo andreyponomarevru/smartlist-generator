@@ -15,6 +15,7 @@ import { validationSSE } from "./processes/validation";
 import { seedingSSE } from "./processes/seeding";
 import { isLibPathExist } from "../middlewares/is-libpath-exist";
 import { streamChunked } from "../middlewares/stream-chunked";
+import { getTrackFilePath } from "../middlewares/get-track-file-path";
 
 const router = express.Router();
 
@@ -67,7 +68,7 @@ router.post(
 router.get(
   "/tracks/:id/stream",
   validate(schemaIdParam, "params"),
-  tracksController.getTrackFilePath,
+  getTrackFilePath,
   streamChunked,
 );
 

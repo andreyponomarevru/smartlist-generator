@@ -1,26 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 
 import * as trackModel from "../../models/track";
-import { HttpError } from "../../utils/error";
 import { SearchParams } from "../../utils/query-builder";
 import { FoundTrack } from "../../types";
-
-export async function getTrackFilePath(
-  req: Request<{ id: number }>,
-  res: Response,
-  next: NextFunction,
-) {
-  try {
-    const trackFilePath = await trackModel.queries.findFilePathById(
-      req.params.id,
-    );
-    if (!trackFilePath) throw new HttpError({ code: 404 });
-    res.locals.trackFilePath = trackFilePath;
-    next();
-  } catch (err) {
-    next(err);
-  }
-}
 
 export async function findTrack(
   req: Request<unknown, unknown, SearchParams>,
