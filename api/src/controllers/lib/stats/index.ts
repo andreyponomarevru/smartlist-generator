@@ -3,7 +3,7 @@ import * as statsModel from "../../../models/lib/stats";
 
 export async function gerTracksCountByGenre(
   req: Request<unknown, unknown, unknown, { excluded: number[] }>,
-  res: Response,
+  res: Response<{ results: { id: number; name: string; count: number }[] }>,
   next: NextFunction,
 ) {
   try {
@@ -17,7 +17,7 @@ export async function gerTracksCountByGenre(
 
 export async function getTracksCountByYear(
   req: Request<unknown, unknown, unknown, { excluded: number[] }>,
-  res: Response,
+  res: Response<{ results: { name: string; count: number }[] }>,
   next: NextFunction,
 ) {
   console.log(

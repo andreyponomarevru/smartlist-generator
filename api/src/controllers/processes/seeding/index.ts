@@ -5,8 +5,10 @@ import { Request, Response, NextFunction } from "express";
 import { NODE_PROCESS, PROCESSES } from "../../../config/processes";
 import * as processModel from "../../../models/processes";
 import * as trackModel from "../../../models/track";
-import { ProcessMessage } from "../../../types";
+import { ProcessMessage, Process } from "../../../types";
 import { SSE } from "../../../middlewares/sse";
+import { StartSeedingReqBody } from "../../validation-schemas";
+import { HttpError } from "../../../utils/error";
 
 export const seedingSSE = new SSE({
   status:
@@ -17,8 +19,8 @@ export const seedingSSE = new SSE({
 let process: ChildProcess | null = null;
 
 export async function startSeeding(
-  req: Request,
-  res: Response,
+  req: Request<unknown, unknown, StartSeedingReqBody>,
+  res: Response<{ results: Process } | HttpError>,
   next: NextFunction,
 ) {
   async function onMessage(message: ProcessMessage) {
@@ -38,9 +40,12 @@ export async function startSeeding(
 
   try {
     if (process && process.pid) {
-      res
-        .status(400)
-        .json({ code: 400, message: "Db seeding is already running ..." });
+      res.status(400).json(
+        new HttpError({
+          code: 400,
+          message: "Db seeding is already running ...",
+        }),
+      );
     } else {
       await processModel.queries.destroy("seeding");
       const processState = await processModel.queries.create({
