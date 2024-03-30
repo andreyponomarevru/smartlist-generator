@@ -97,10 +97,7 @@ export async function stopValidation(
   next: NextFunction,
 ) {
   try {
-    console.log("HERE 1 ***");
-
     if (process && process.pid) {
-      console.log("HERE 2 ***");
       process.kill("SIGTERM");
       process = null;
     }
