@@ -2,12 +2,27 @@ import {
   FilterFormValues,
   TrackMeta,
   SearchQuery,
-  Stats,
   ProcessResult,
-} from "../types";
-import { MUSIC_LIB_DIR } from "../config/env";
-import { LOCAL_MUSIC_LIB_DIR } from "../config/env";
-import { State as SavedFiltersState } from "../hooks/use-saved-filters";
+  Stats,
+} from "./types";
+import { MUSIC_LIB_DIR } from "./config/env";
+import { LOCAL_MUSIC_LIB_DIR } from "./config/env";
+import { State as SavedFiltersState } from "./hooks/use-saved-filters";
+
+type APIResponseError = {
+  status: number;
+  moreInfo: string;
+  message: string;
+};
+
+export class APIError extends Error {
+  constructor(err: APIResponseError) {
+    super();
+
+    this.name = err.status.toString();
+    this.message = err.message;
+  }
+}
 
 export function calculateExcludedStats(excludedCount = 0, stats: Stats[] = []) {
   const totalCount =
@@ -15,11 +30,16 @@ export function calculateExcludedStats(excludedCount = 0, stats: Stats[] = []) {
       (accumulator, currentValue) => accumulator + currentValue.count,
       0,
     ) || 0;
-
-  const excludedPercentage = ((100 * excludedCount) / totalCount).toFixed(1);
   const tracksLeft = totalCount - excludedCount;
 
-  return { totalCount, excludedPercentage, tracksLeft };
+  return {
+    totalCount,
+    excludedPercentage:
+      totalCount === 0 && excludedCount === 0
+        ? 0
+        : Number(((100 * excludedCount) / totalCount).toFixed(1)),
+    tracksLeft,
+  };
 }
 
 export function extractFilename(path: string) {
@@ -29,7 +49,7 @@ export function extractFilename(path: string) {
 }
 
 export function toHourMinSec(sec: number) {
-  const hms = new Date(sec * 1000).toISOString().substr(11, 8).split(":");
+  const hms = new Date(sec * 1000).toISOString().substring(11, 8).split(":");
   if (hms[0] !== "00") return hms.join(":");
   else return hms.slice(1).join(":");
 }
@@ -119,15 +139,12 @@ export function exportPlaylistToM3U(
   link.click();
 }
 
-export function exportSavedFiltersToJSON(
-  playlistName: string,
-  filters: SavedFiltersState,
-) {
+export function exportSavedFiltersToJSON(filters: SavedFiltersState) {
   const link = document.createElement("a");
   link.href = `data:text/json;chatset=utf-8,${encodeURIComponent(
     JSON.stringify(filters, null, 2),
   )}`;
-  link.download = `${playlistName}.json`;
+  link.download = "filters-backup.json";
   link.click();
 }
 
