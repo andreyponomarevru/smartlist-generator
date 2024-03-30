@@ -6,9 +6,9 @@ module.exports = {
       preset: [
         "default",
         {
-          normalizeWhitespace: true // uglify bundled css code
-        }
-      ]
-    })
-  ]
+          normalizeWhitespace: true, // uglify bundled css code
+        },
+      ],
+    }),
+  ],
 };
