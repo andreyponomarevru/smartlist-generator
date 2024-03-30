@@ -2,9 +2,12 @@
 *.md
 node_modules/
 npm-debug.log
+*.code-workspace
 .git
 .gitignore
 Dockerfile*
+.vscode/
+_source
 .prettierrc.js
 .eslintrc.js
 .eslintignore
