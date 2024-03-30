@@ -187,6 +187,13 @@ export async function destroyAll() {
       text: `
         TRUNCATE track, artist, track_artist, genre, track_genre;`,
     });
+    // Reset Postgres auto-increment id value to 0
+    await pool.query({
+      text: `ALTER SEQUENCE track_track_id_seq RESTART;`,
+    });
+    await pool.query({
+      text: `ALTER SEQUENCE artist_artist_id_seq RESTART;`,
+    });
   } catch (err) {
     logDBError("An error occured while clearing all db tables.", err);
     throw err;
