@@ -4,6 +4,18 @@ export const API_PREFIX = "/api";
 
 //
 
+export const FILTER_OPERATOR = ["and", "or"];
+export const FILTER_CONDITIONS = [
+  "is",
+  "is not",
+  "greater than or equal",
+  "less than or equal",
+  "contains any",
+  "contains all",
+  "does not contain all",
+  "does not contain any",
+];
+
 export const GENRES: ReadonlyArray<{ id: number; name: string }> = [
   { id: 0, name: "[Soundtrack]" },
   { id: 1, name: "2-Step" },
@@ -40,17 +52,8 @@ export const GENRES: ReadonlyArray<{ id: number; name: string }> = [
 
 //
 
-// 'as const' allows us to use this array as type
 export const HTTP_ERROR_MESSAGES: ReadonlyArray<string> = [
-  "Specify either email OR username",
-  "Invalid email, username or password",
-  "Pending Account. Look for the verification email in your inbox and click the link in that email",
   "The requested page does not exist",
-  "You must authenticate to access this resource",
-  "You don't have permission to access this resource",
-  "Username or email already exists",
-  "Confirmation token is invalid",
-  "Sorry, this username is already taken",
   "Something went wrong",
 ];
 export const HTTP_ERRORS = {
