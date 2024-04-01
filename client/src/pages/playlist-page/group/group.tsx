@@ -106,9 +106,14 @@ export function Group(props: GroupProps) {
                     {...field}
                     className="group__select"
                     options={options}
-                    onInputChange={() =>
-                      playlist.handleTracksReset(props.groupId)
-                    }
+                    closeMenuOnSelect={true}
+                    onChange={(currentValue) => {
+                      const prevValue = field.value;
+                      field.onChange(currentValue);
+                      if (currentValue?.value !== prevValue.value) {
+                        playlist.handleTracksReset(props.groupId);
+                      }
+                    }}
                   />
                 )}
               />
