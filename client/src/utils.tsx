@@ -49,7 +49,7 @@ export function extractFilename(path: string) {
 }
 
 export function toHourMinSec(sec: number) {
-  const hms = new Date(sec * 1000).toISOString().substring(11, 8).split(":");
+  const hms = new Date(sec * 1000).toISOString().substring(11, 19).split(":");
   if (hms[0] !== "00") return hms.join(":");
   else return hms.slice(1).join(":");
 }
