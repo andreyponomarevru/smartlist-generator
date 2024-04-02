@@ -1,7 +1,7 @@
+import util from "util";
+import { dbConnection } from "./config/postgres";
 import { HTTP_PORT } from "./config/env";
 import { httpServer } from "./http-server";
-import util from "util";
-import * as postgresConnection from "./config/postgres";
 
 function onWarning(err: Error) {
   console.warn(err.stack);
@@ -9,7 +9,7 @@ function onWarning(err: Error) {
 
 function onUncaughtException(err: Error) {
   console.error(`uncaughtException: ${err.message} \n${err.stack}`);
-  postgresConnection.close();
+  dbConnection.close();
   process.exit(1);
 }
 

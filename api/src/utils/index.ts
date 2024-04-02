@@ -1,7 +1,13 @@
+export * from "./query-builder";
+
 import path from "path";
 import fs from "fs-extra";
 
 import { SUPPORTED_CODEC } from "../config/env";
+
+export function wrapResponse<T>(data: T) {
+  return { results: data };
+}
 
 export function logDBError(msg: string, err: unknown) {
   if (err instanceof Error) {
@@ -59,4 +65,32 @@ export function filterByExtension(filepath: string) {
   return new RegExp(`\\.(${SUPPORTED_CODEC.join("|")})$`).test(
     filepath.toLowerCase(),
   );
+}
+
+export class HttpError extends Error {
+  status: number;
+  message: string;
+  moreInfo: string;
+
+  constructor({
+    code,
+    message,
+    moreInfo = "https://github.com/ponomarevandrey/",
+  }: {
+    code: number;
+    message: string;
+    moreInfo?: string;
+  }) {
+    super();
+
+    this.status = code;
+    this.message = message;
+    this.moreInfo = moreInfo;
+  }
+}
+
+export class CustomDatabaseError extends Error {
+  constructor(message: string) {
+    super(message);
+  }
 }

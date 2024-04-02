@@ -11,29 +11,31 @@ import {
 // Pg connection
 //
 
+const CONFIG: PoolConfig = {
+  user: POSTGRES_USER,
+  host: POSTGRES_HOST,
+  database: POSTGRES_DATABASE,
+  password: POSTGRES_PASSWORD,
+  port: POSTGRES_PORT,
+};
+
 let pool: Pool | undefined;
 
-export async function connectDB() {
-  const config: PoolConfig = {
-    user: POSTGRES_USER,
-    host: POSTGRES_HOST,
-    database: POSTGRES_DATABASE,
-    password: POSTGRES_PASSWORD,
-    port: POSTGRES_PORT,
-  };
+export const dbConnection = {
+  open: async function (config: PoolConfig = CONFIG) {
+    if (pool) {
+      return pool;
+    } else {
+      pool = new Pool(config);
+      console.debug("New Postgres connection established");
+      return pool;
+    }
+  },
 
-  if (pool) {
-    return pool;
-  } else {
-    pool = new Pool(config);
-    console.debug("New Postgres connection established");
-    return pool;
-  }
-}
-
-// Shutdown cleanly. Doc: https://node-postgres.com/api/pool#poolend
-export async function close() {
-  if (pool) await pool.end();
-  pool = undefined;
-  console.debug("Pool has ended.");
-}
+  // Shutdown cleanly. Doc: https://node-postgres.com/api/pool#poolend
+  close: async function () {
+    if (pool) await pool.end();
+    pool = undefined;
+    console.debug("Pool has ended.");
+  },
+};

@@ -1,3 +1,5 @@
+import express from "express";
+
 export interface Track {
   trackId?: number;
   duration: number;
@@ -79,3 +81,7 @@ export type ProcessMessage = {
   result?: ProcessResult;
 };
 export type SSEname = ProcessName | "test";
+export type AppLoader = {
+  app: express.Express;
+  express: typeof import("express");
+};
