@@ -1,0 +1,380 @@
+openapi: 3.0.1
+info:
+  version: 1.0.0
+  title: Smartlist Generator API
+servers:
+  - url: http://localhost:8080/api
+    description: Local dev server
+
+components:
+  schemas:
+
+    APIError:
+      type: object
+      properties:
+        status: 
+          type: integer
+        message:
+          type: string
+        moreInfo:
+          type: string
+
+    SSEEventName:
+      type: string
+      enum:
+        - validation
+        - seeding
+
+    ProcessStatus:
+      type: string
+      enum:
+        - pending
+        - success
+        - failure
+        - null
+
+    Stats:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              count:
+                type: integer
+
+    FoundTrack:
+        type: object 
+        properties:
+          artists: 
+            type: array
+            items:
+              type: string
+          duration:
+            type: number
+          genres: 
+            type: array
+            items:
+              type: string
+          genreIds:
+            type: array
+            items:
+              type: integer                          
+          title:
+            type: string
+          trackId: 
+            type: integer
+          year:
+            type: integer
+          filePath:
+            type: string
+
+    ValidationResult:
+      type: object
+      properties:
+        errors: 
+          type: array
+          items:
+            type: object
+            properties:
+              filePath:
+                type: string
+              id3TagName: 
+                oneOf:
+                  - type: string
+                  - type: integer
+              id3TagValue:
+                oneOf:
+                  - type: string
+                  - type: array
+                    items:
+                      type: string
+                  - type: integer
+              err: 
+                type: string
+        artists: 
+          type: object
+          properties:
+            names:
+              type: array
+              items:
+                oneOf:
+                  - type: string
+                  - type: integer
+            count: 
+              type: integer
+        years:
+          type: object
+          properties:
+            names:
+              type: array
+              items:
+                oneOf:
+                  - type: string
+                  - type: integer
+            count: 
+              type: integer
+        genres:
+          type: object
+          properties:
+            names:
+              type: array
+              items:
+                oneOf:
+                  - type: string
+                  - type: integer
+            count: 
+              type: integer
+
+    Process: 
+      type: object
+      properties:
+        name: 
+          $ref: '#/components/schemas/SSEEventName'
+        createdAt:
+          type: number
+        updatedAt:
+          type: number
+        status: 
+          $ref: '#/components/schemas/ProcessStatus'
+        result:
+          $ref: '#/components/schemas/ValidationResult'
+          nullable: true 
+
+##########################################################################
+
+paths:
+
+  /stats/genres:
+    get:
+      summary: Returns genres stats
+      description: >-
+        ```
+        curl "localhost:8080/api/stats/genres"
+        ```
+      responses:
+        '200':
+          description: Array of genres and track counts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stats'
+
+##########################################################################
+
+  /stats/years:
+    get:
+      summary: Returns years stats
+      description: >-
+        ```
+        curl "localhost:8080/api/stats/years"
+        ```
+      responses:
+        '200':
+          description: Array of years and track counts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stats'
+
+##########################################################################
+
+  /tracks/ids:
+    post:
+      summary: >-
+        Given an array of track file paths returns an array of corresponding track ids
+      description: >- 
+        ```
+        curl
+          --request POST \
+          --header "content-type: application/json" \
+          --data '["path/to/file.flac", "path/to/file.mp3", "path/to/file.flac"]' \
+          "localhost:8080/api/tracks/ids"
+        ```
+      responses:
+        200:
+          description: Array of track ids
+          content:
+            application/json:
+              schema:
+                type: object 
+                properties:
+                  results:
+                    type: array
+                    items: 
+                      type: object 
+                      properties:
+                        trackId: 
+                          type: integer
+                        filePath:
+                          type: string
+
+##########################################################################
+
+  /tracks/{id}/stream:
+    get:
+      summary: Get track audio as stream
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type:
+              integer
+          required: true
+          description: Numeric ID of the track to get
+      description: >-
+        ```
+        curl \
+          "localhost:8080/api/tracks/103/stream" \
+          --output -
+        ```
+      responses:
+        206:
+          description: Binary data stream (regular HTTP streaming)
+          content: 
+            audio/mpeg: {}
+        404:
+          description: The track with the provided id either doesn't exist in database or it exists in database but its audio file has been deleted from disk
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+
+##########################################################################
+
+  /tracks/search:
+    post:
+      summary: Find a track using the provided parameters
+      description: >-
+        ```
+        curl \
+          --request POST \
+          --header "content-type: application/json" \
+          --data '{"operator":"AND","filters":[{"name":"year","rule":"greater than or equal","value":2019},{"name":"genre","rule":"contains all","value":[50]}],"excludeTracks":[117, 34, 119, 219, 220, 550]}' \
+          "localhost:8080/api/tracks/search"
+        ```
+      responses:
+        200:
+          description: A track matching the search query
+          content:
+            application/json:
+              schema:
+                type: object 
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FoundTrack'
+
+  ##########################################################################
+
+  /processes/validation:
+    get:
+      summary: Opens SSE connection to keep the client informed about the validation process status 
+      description: >-
+        Returns the current status of the validation process
+        
+        If the validation process is already executed, also includes the results (report) of validation in `result` field
+
+        ```
+        curl "localhost:8080/api/processes/validation"
+        ```
+      responses:
+        200:
+          description: Returns process status
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  event:
+                    type:
+                      string
+                  data:
+                    $ref: '#/components/schemas/Process'
+                        
+    post: 
+      summary: Start the process (validate all tracks)
+      responses:
+        202:
+          description: Starts a new validation process and immediately returns its pending status as SSE. It also returns this same data as regular REST API response, just in case
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  result:
+                    $ref: '#/components/schemas/Process'
+        400:
+          description: Returned when the process is already started (running) and you attempt to start it again
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+
+    delete:
+      summary: Stops the process
+      responses:
+        204:
+          description: Kills the process and deletes all info about it from database
+
+##########################################################################
+
+  /processes/seeding:
+    get:
+      summary: Opens SSE connection to keep the client informed about the seeding process status 
+      description: >-
+        Returns the current status of the seeding process
+
+        ```
+        curl --verbose "localhost:8080/api/processes/seeding"
+        ```
+      responses:
+        200:
+          description: Process status
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  event:
+                    type:
+                      string
+                  data:
+                    $ref: '#/components/schemas/Process'
+
+    post:
+      summary: Starts the process (populate database with tracks)
+      responses:
+        202:
+          description: Starts a new seeding process and immediately returns its pending status as SSE. It also returns this same data as regular REST API response, just in case
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  result:
+                    $ref: '#/components/schemas/Process'
+
+        400:
+          description: Returned when the process is already started (running) and you attempt to start it again
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+
+    delete:
+      summary: Stops the process
+      responses:
+        204:
+          description: >-
+            Kills the process and deletes all info about it from database. 
+            
+            It also deletes everything that it has created: drops all tracks, genres and other stuff, so the database falls back to its initial clean state.
+  
+
