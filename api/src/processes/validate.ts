@@ -1,12 +1,10 @@
-import { traverseDirs } from "../utils/utilities";
-import * as trackModel from "../models/track";
+import { traverseDirs } from "../utils";
+import { TrackValidator, schemaCreateTrack } from "../services/tracks";
 import { ProcessMessage } from "../types";
 
 const LIB_PATH = process.argv[2];
 
-const tracksValidator = new trackModel.validator.TrackValidator(
-  trackModel.validationSchemas.schemaCreateTrack,
-);
+const tracksValidator = new TrackValidator(schemaCreateTrack);
 
 (async () => {
   await traverseDirs(LIB_PATH, await tracksValidator.validate);

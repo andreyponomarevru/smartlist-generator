@@ -2,7 +2,7 @@ import fs from "fs-extra";
 
 import { Request, Response, NextFunction } from "express";
 
-import { HttpError } from "../utils/error";
+import { HttpError } from "../utils";
 
 export async function isLibPathExist(
   req: Request<unknown, unknown, { libPath: string }>,
