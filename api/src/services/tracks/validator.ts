@@ -17,21 +17,14 @@ export async function parseAudioFile(filePath: string): Promise<Track> {
 
   const trackMetadata = await mm.parseFile(filePath);
 
-  const duration = trackMetadata.format.duration || 0;
-  const artists = parseArray(trackMetadata.common.artists);
-  const year = trackMetadata.common.year || 0;
-  const title = trackMetadata.common.title || "";
-  const genres = parseArray(trackMetadata.common.genre);
-
-  const extendedMetadata = {
-    filePath,
-    duration,
-    artists,
-    year,
-    title,
-    genres,
-  };
-  return extendedMetadata;
+  return {
+    filePath: filePath,
+    duration: trackMetadata.format.duration || 0,
+    artists: parseArray(trackMetadata.common.artists),
+    year: trackMetadata.common.year || 0,
+    title: trackMetadata.common.title || "",
+    genres: parseArray(trackMetadata.common.genre),
+  } as Track;
 }
 
 export class TrackValidator {
