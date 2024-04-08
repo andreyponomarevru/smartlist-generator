@@ -16,6 +16,7 @@ export interface ValidatedTrack {
   year: number;
   title: string;
   genres: string[];
+  hasCover: boolean;
 }
 export type FoundTrackDBResponse = {
   artists: string[];

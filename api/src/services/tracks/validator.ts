@@ -15,7 +15,7 @@ export async function parseAudioFile(filePath: string): Promise<Track> {
     }
   }
 
-  const trackMetadata = await mm.parseFile(filePath);
+  const trackMetadata = await mm.parseFile(filePath, { duration: true });
 
   return {
     filePath: filePath,
@@ -24,6 +24,8 @@ export async function parseAudioFile(filePath: string): Promise<Track> {
     year: trackMetadata.common.year || 0,
     title: trackMetadata.common.title || "",
     genres: parseArray(trackMetadata.common.genre),
+    hasCover:
+      !!trackMetadata.common.picture && trackMetadata.common.picture.length > 0,
   } as Track;
 }
 

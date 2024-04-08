@@ -56,4 +56,5 @@ export const schemaCreateTrack = Joi.object<ValidatedTrack>({
       "number.min": '"year" minimum value is 1900',
       "number.max": `"year" maximum values is ${new Date().getFullYear() + 1}`,
     }),
+  hasCover: Joi.boolean().valid(true),
 }).options({ presence: "required" });
