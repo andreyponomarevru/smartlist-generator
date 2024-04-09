@@ -9,9 +9,9 @@ import { parseAudioFile } from "./validator";
 
 export const trackService = {
   create: async function (filePath: string) {
-    tracksRepo.create(
-      await schemaCreateTrack.validateAsync(await parseAudioFile(filePath)),
-    );
+    const parsedTrack = await parseAudioFile(filePath);
+    const validTrack = await schemaCreateTrack.validateAsync(parsedTrack);
+    tracksRepo.create(validTrack);
   },
 
   find: async function (searchParams: SearchParams) {
