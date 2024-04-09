@@ -1,0 +1,17 @@
+@import "../global.scss";
+
+.page-404 {
+  display: flex;
+  flex-flow: column nowrap;
+  margin: 0 auto;
+  height: 100%;
+  font-size: $font-size_h1;
+  font-weight: bold;
+  align-items: center;
+  width: fit-content;
+  padding: 1rem 1rem;
+  line-height: 1;
+  border-radius: $border_radius_block;
+  background-color: $color_red-10;
+  color: $color_red-50;
+}

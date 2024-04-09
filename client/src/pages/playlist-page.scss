@@ -1,0 +1,68 @@
+@import "../global.scss";
+
+.playlist-page {
+  display: flex;
+  flex-flow: column nowrap;
+  row-gap: 1rem;
+
+  &__section {
+    display: flex;
+    row-gap: 1rem;
+    flex-flow: column nowrap;
+  }
+
+  &__main {
+    grid-area: Playlists;
+    display: flex;
+    flex-flow: column nowrap;
+    padding: 0 0 2rem 2rem;
+    margin: 2rem 1.5rem 1rem 1rem;
+    row-gap: 2rem;
+  }
+
+  //
+
+  &__saved-filters-header {
+    font-size: $font-size_h2;
+  }
+
+  &__title:hover &__edit-name-btn {
+    display: inline-block;
+  }
+
+  // Playlist
+
+  &__playlist-header {
+    display: grid;
+    grid-template-areas: "Name . . EstimeteLength";
+    grid-template-columns: 1fr 20%;
+    flex-flow: row nowrap;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__playlist-name {
+    grid-area: Name;
+    font-size: $font-size_h1;
+
+    & .editable-text__name {
+      font-size: $font-size_h2;
+    }
+  }
+
+  &__duration {
+    grid-area: EstimeteLength;
+    display: flex;
+    justify-content: flex-end;
+    font-size: $font-size_regular-text;
+    margin-bottom: 1rem;
+  }
+
+  &__btns-group {
+    display: flex;
+    flex-flow: row nowrap;
+    column-gap: 1rem;
+    align-items: center;
+    justify-content: space-between;
+  }
+}

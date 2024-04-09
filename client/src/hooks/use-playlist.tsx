@@ -1,7 +1,7 @@
 import React from "react";
 import { TrackMeta, FilterFormValues } from "../types";
 import { buildSearchQuery } from "../utils";
-import { useTrack } from "./api/use-track";
+import { useTrack } from "../features/track/use-track";
 
 export type Direction = "UP" | "DOWN";
 export type TrackToReorder = {

@@ -1,0 +1,173 @@
+@import "../../../global.scss";
+
+.player {
+  position: fixed;
+  bottom: 0;
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-template-columns: 30% 1fr 10%;
+  width: 100%;
+  align-items: center;
+  justify-content: flex-start;
+  column-gap: 2rem;
+
+  padding: 0rem 1rem;
+  background-color: white;
+  border-radius: $border_radius_btn $border_radius_btn 0 0;
+  font-size: 1.5rem;
+  box-shadow: 0px 0px 1rem $color_grey-50;
+
+  &_disabled {
+    pointer-events: none;
+  }
+
+  &_disabled * {
+    opacity: 70%;
+  }
+
+  &__time {
+    color: $color_black;
+    font-size: $font-size_tiny;
+
+    &_current {
+      color: $color_black;
+    }
+  }
+
+  &__meta {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: flex-start;
+    align-items: center;
+    color: $color_black;
+    font-size: 0.75rem;
+    column-gap: 1rem;
+
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  &__artist {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  &__title {
+    color: $color_black;
+  }
+
+  &__year {
+    color: $color_black;
+  }
+
+  &__progress-bar-wrapper {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    column-gap: 1rem;
+    align-items: center;
+    width: 100%;
+  }
+
+  &__volume button {
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    line-height: 0;
+  }
+
+  &__volume {
+    display: flex;
+    column-gap: 0.5rem;
+    align-items: center;
+  }
+
+  //
+  // Custom input range (progress bar)
+  //
+
+  // Input range - chrome and safari
+  &__progress-bar {
+    --range-progress: 0;
+
+    accent-color: black; // color of the native played part of progressbar
+    // -webkit-appearance: none; // hide chrome native progressbar
+    // appearance: none; // hide chrome native progressbar
+    position: relative;
+    width: 100%;
+    height: 1rem;
+    border-radius: 2px;
+    cursor: pointer;
+    background: $color_grey-50;
+
+    border-radius: 1rem;
+    height: 0.5rem;
+  }
+
+  // Input range - firefox
+  &__progress-bar::-moz-range-track {
+    position: relative;
+    background: $color_grey-50;
+    width: 100%;
+    height: 0.5rem;
+    border-radius: 2px;
+    cursor: pointer;
+  }
+
+  // played progress length - Chrome & safari
+  &__progress-bar::before {
+    content: "";
+    height: 0.5rem;
+    background: $color_black;
+    width: var(
+      --range-progress
+    ); // chrome doesnt see this var so it doesn't style anything
+    border-bottom-left-radius: 2px;
+    border-top-left-radius: 2px;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  // played progress length - firefox
+  &__progress-bar::-moz-range-progress {
+    background: $color_black;
+    border-bottom-left-radius: 2px;
+    border-top-left-radius: 2px;
+    height: 0.5rem;
+  }
+
+  // slider thumb - chrome and safari
+  &__progress-bar::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 8px;
+    width: 8px;
+    border-radius: 50%;
+    border: none;
+    background-color: $color_black;
+    cursor: pointer;
+    position: relative;
+  }
+
+  // dragging thumb - chrome and safari
+  &__progress-bar:active::-webkit-slider-thumb {
+    transform: scale(1.2);
+  }
+
+  // slider thumb - firefox
+  &__progress-bar::-moz-range-thumb {
+    height: 8px;
+    width: 8px;
+    border-radius: 50%;
+    background: $color_black;
+    cursor: pointer;
+    border: transparent;
+    position: relative;
+  }
+
+  // dragging thumb - firefox
+  &__progress-bar:active::-moz-range-thumb {
+    transform: scale(1.2);
+  }
+}
