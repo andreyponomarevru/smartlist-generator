@@ -3,7 +3,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ErrorBoundary } from "../features/ui/error-boundary";
 
-import { ROUTES } from "../config/routes";
+import { ROUTES } from "./routes";
 import { Layout } from "../features/layout";
 import { Page404 } from "../pages/404-page";
 import { GlobalStateProvider } from "../hooks/use-global-state";

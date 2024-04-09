@@ -2,7 +2,7 @@ import * as RTK from "@reduxjs/toolkit";
 
 import type { RootState, AppDispatch } from "./store";
 
-// TypeScript helpers
+// TypeScript helpers for typing
 
 export const listenerMiddleware = RTK.createListenerMiddleware();
 export const startAppListening = listenerMiddleware.startListening.withTypes<

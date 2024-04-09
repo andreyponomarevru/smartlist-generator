@@ -4,7 +4,7 @@ import { NODE_ENV } from "../config/env";
 import { filtersReducer } from "../features/filters";
 import { listenerMiddleware } from "../app/listener-middleware";
 
-// Typescript helpers
+// Typescript helpers for typing
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 export type AppStore = typeof store;
