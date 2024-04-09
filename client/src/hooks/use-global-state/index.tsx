@@ -1,8 +1,8 @@
 import React from "react";
 
-import { usePlayer } from "./use-player";
-import { useStats } from "../api/use-stats";
-import { usePlaylist } from "./use-playlist-extended";
+import { usePlayer } from "../../features/layout";
+import { useStats } from "../../features/stats/use-stats";
+import { usePlaylist } from "../../features/playlist/use-playlist-extended";
 
 type Context = {
   statsQuery: ReturnType<typeof useStats>;

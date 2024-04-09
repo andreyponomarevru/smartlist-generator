@@ -1,0 +1,19 @@
+@import "../../../global.scss";
+
+.loader {
+  display: inline-flex;
+  border-radius: 50%;
+
+  width: 1rem;
+  height: 1rem;
+
+  &_blink {
+    animation: blinker 0.7s ease-in-out infinite;
+  }
+
+  @keyframes blinker {
+    50% {
+      opacity: 0;
+    }
+  }
+}

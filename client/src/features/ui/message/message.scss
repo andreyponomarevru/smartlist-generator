@@ -1,0 +1,31 @@
+@import "../../../global.scss";
+
+.message {
+  border-radius: $border_radius_block;
+
+  a {
+    text-decoration: none;
+  }
+
+  &_warning {
+    color: $color_warning;
+  }
+
+  &_success {
+    color: $color_success;
+    background-color: $color_green-20;
+    padding: 0.5rem 1rem;
+    font-size: $font-size_tiny;
+  }
+
+  &_info {
+    color: $color_info;
+  }
+
+  &_danger {
+    color: $color_danger;
+    background-color: $color_red-10;
+    padding: 0.5rem 1rem;
+    font-size: $font-size_tiny;
+  }
+}

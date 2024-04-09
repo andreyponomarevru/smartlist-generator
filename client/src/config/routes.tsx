@@ -1,10 +1,9 @@
 import React from "react";
 
-import { FiltersPage } from "../pages/filters-page/filters-page";
-import { SettingsPage } from "../pages/settings-page/settings-page";
-import { PlaylistPage } from "../pages/playlist-page/playlist-page";
-import { SavedFiltersProvider } from "../hooks/use-saved-filters";
-import { StatsPage } from "../pages/stats-page/stats-page";
+import { FiltersPage } from "../pages/filters-page";
+import { SettingsPage } from "../pages/settings-page";
+import { PlaylistPage } from "../pages/playlist-page";
+import { StatsPage } from "../pages/stats-page";
 
 export const PATHS = {
   index: "/",
@@ -15,23 +14,9 @@ export const PATHS = {
 };
 
 export const ROUTES = [
-  {
-    path: PATHS.index,
-    element: (
-      <SavedFiltersProvider>
-        <FiltersPage />
-      </SavedFiltersProvider>
-    ),
-  },
+  { path: PATHS.index, element: <FiltersPage /> },
   { path: PATHS.playlist, element: <PlaylistPage /> },
-  {
-    path: PATHS.filters,
-    element: (
-      <SavedFiltersProvider>
-        <FiltersPage />
-      </SavedFiltersProvider>
-    ),
-  },
+  { path: PATHS.filters, element: <FiltersPage /> },
   { path: PATHS.settings, element: <SettingsPage /> },
   { path: PATHS.stats, element: <StatsPage /> },
 ];
