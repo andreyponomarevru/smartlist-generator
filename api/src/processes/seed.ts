@@ -8,6 +8,7 @@ const libPath = process.argv[2];
 (async () => {
   if (!process.send) throw new Error("process.send is undefined");
 
+  await trackService.destroyAll();
   await trackService.createGenres(GENRES);
   await traverseDirs(libPath, trackService.create);
 
