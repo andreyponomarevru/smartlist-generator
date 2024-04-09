@@ -32,7 +32,7 @@ export const tracksRepo = {
       for (const genreName of newTrack.genres) {
         const validGenre = GENRES.find((valid) => valid.name === genreName);
         if (!validGenre) {
-          throw new Error(`${genreName} is not a valid genre name`);
+          throw new Error(`'${genreName}' is not a valid genre name`);
         }
 
         await client.query({
