@@ -49,28 +49,23 @@ export const tracksRepo = {
       // Insert artists
 
       for (const artist of newTrack.artists) {
-        const { artist_id } = (
-          await client.query({
-            text: `
-              WITH 
-                input_rows (name) AS (VALUES ($1)), 
-                
-                ins AS ( 
-                  INSERT INTO artist (name) 
-                    SELECT name FROM input_rows 
-                  ON CONFLICT DO NOTHING 
-                  RETURNING artist_id 
-                ) 
-              
-              SELECT artist_id FROM ins 
-              
-              UNION ALL 
-              
-              SELECT a.artist_id FROM input_rows 
-              JOIN artist AS a USING (name);`,
+        let artistId: number | null = null;
+
+        const response = await client.query<{ artist_id: number }>({
+          text: `
+            INSERT INTO artist (name) VALUES ($1)
+            ON CONFLICT DO NOTHING RETURNING artist_id`,
+          values: [artist],
+        });
+        if (response.rowCount !== 0) {
+          artistId = response.rows[0].artist_id;
+        } else {
+          const response = await client.query<{ artist_id: number }>({
+            text: `SELECT artist_id FROM artist WHERE name = $1;`,
             values: [artist],
-          })
-        ).rows[0];
+          });
+          artistId = response.rows[0].artist_id;
+        }
 
         await client.query({
           text: `
@@ -79,7 +74,7 @@ export const tracksRepo = {
             VALUES 
               ($1::integer, $2::integer) 
             ON CONFLICT DO NOTHING`,
-          values: [trackId, artist_id],
+          values: [trackId, artistId],
         });
       }
 
@@ -157,9 +152,10 @@ export const tracksRepo = {
     const pool = await dbConnection.open();
 
     try {
-      const sql = `SELECT track_id, file_path FROM track WHERE file_path = ANY($1);`;
-      const response = await pool.query<FoundTrackDBResponse>(sql, [filePaths]);
-      console.log("RESPONSE ROWS: ", response);
+      const response = await pool.query<FoundTrackDBResponse>(
+        `SELECT track_id, file_path FROM track WHERE file_path = ANY($1);`,
+        [filePaths],
+      );
       return response.rows.length === 0
         ? []
         : response.rows.map(({ track_id, file_path }) => {
