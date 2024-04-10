@@ -22,30 +22,32 @@ export const filtersSlice = RTK.createSlice({
   reducers: {
     saveFilter: (
       state,
-      action: RTK.PayloadAction<{ formId: string; inputs: FilterFormValues }>,
+      action: RTK.PayloadAction<{ filterId: string; inputs: FilterFormValues }>,
     ) => {
-      return { ...state, [action.payload.formId]: action.payload.inputs };
+      return { ...state, [action.payload.filterId]: action.payload.inputs };
     },
-    destroyFilter: (state, action: RTK.PayloadAction<{ formId: string }>) => {
-      delete state[action.payload.formId];
-    },
-    updateFilter: (
-      state,
-      action: RTK.PayloadAction<{ formId: string; inputs: FilterFormValues }>,
-    ) => {
-      state[action.payload.formId] = action.payload.inputs;
+    destroyFilter: (state, action: RTK.PayloadAction<{ filterId: string }>) => {
+      delete state[action.payload.filterId];
     },
     importFilters: (state, action: RTK.PayloadAction<FiltersState>) => {
       return { ...state, ...action.payload };
     },
   },
 });
-export const { saveFilter, destroyFilter, updateFilter, importFilters } =
+export const { saveFilter, destroyFilter, importFilters } =
   filtersSlice.actions;
+
+// Selectors
 
 export function selectFilters(state: RootState) {
   return state.filters;
 }
+
+export function selectFilterById(state: RootState, filterId: string) {
+  return state.filters[filterId];
+}
+
+// Thunks
 
 export function thunkImportFilters(
   e: React.ChangeEvent<HTMLInputElement>,
@@ -78,11 +80,12 @@ export function thunkImportFilters(
   };
 }
 
-//,  importFilters
+// Middlewares
 
 startAppListening({
-  matcher: RTK.isAnyOf(saveFilter, updateFilter, destroyFilter, importFilters),
+  matcher: RTK.isAnyOf(saveFilter, destroyFilter, importFilters),
   effect: (action, listenerApi) => {
+    console.log("LOCAL STORAGE THUNK", listenerApi.getState());
     localStorage.setItem(
       LOCAL_STORAGE_KEY,
       JSON.stringify(listenerApi.getState().filters),
