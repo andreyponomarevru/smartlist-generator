@@ -24,8 +24,10 @@ export function Stats(props: StatsProps) {
       return sortDir === "asc"
         ? a.name.toString().localeCompare(b.name.toString())
         : b.name.toString().localeCompare(a.name.toString());
-    } else {
+    } else if (sortType === "num") {
       return sortDir === "asc" ? a.count - b.count : b.count - a.count;
+    } else {
+      return 0;
     }
   }
 
