@@ -8,48 +8,38 @@ import { Stats } from "../../types";
 
 import "./stats.scss";
 
+type StatsItem = { name: string; count: number };
+
 interface StatsProps extends React.HTMLAttributes<HTMLElement> {
   name: string;
-  stats: Stats[];
+  stats: StatsItem[];
 }
 
 export function Stats(props: StatsProps) {
-  const [sortedByNum, setSortByNum] = React.useState(false);
-  const [sortedByAlpha, setSortByAlpha] = React.useState(true);
+  const [sortType, setSortType] = React.useState<"alpha" | "num">("alpha");
+  const [sortDir, setSortDir] = React.useState<"asc" | "desc">("asc");
 
-  const [stats, setStats] = React.useState(props.stats);
+  function sortBy(a: StatsItem, b: StatsItem) {
+    if (sortType === "alpha") {
+      return sortDir === "asc"
+        ? a.name.toString().localeCompare(b.name.toString())
+        : b.name.toString().localeCompare(a.name.toString());
+    } else {
+      return sortDir === "asc" ? a.count - b.count : b.count - a.count;
+    }
+  }
 
-  React.useEffect(() => {
-    sortedByNum
-      ? setStats([...stats].sort((a, b) => a.count - b.count))
-      : setStats([...stats].sort((a, b) => b.count - a.count));
-  }, [sortedByNum]);
-
-  React.useEffect(() => {
-    sortedByAlpha
-      ? setStats([
-          ...stats.sort((a, b) =>
-            a.name.toString().localeCompare(b.name.toString()),
-          ),
-        ])
-      : setStats([
-          ...stats.sort((a, b) =>
-            b.name.toString().localeCompare(a.name.toString()),
-          ),
-        ]);
-  }, [sortedByAlpha]);
-
-  const statsList = stats.map((year) => {
+  const statsList = [...props.stats].sort(sortBy).map((item) => {
     return (
-      <li key={year.name} className="stats__list-item">
+      <li key={item.name} className="stats__list-item">
         <span className="stats__list-item-text">
-          <span>{year.name}</span>
-          <span>{year.count}</span>
+          <span>{item.name}</span>
+          <span>{item.count}</span>
         </span>
         <span className="stats__graph">
           <span
             className="stats__graph-bar"
-            style={{ width: year.count / 4 }}
+            style={{ width: item.count / 4 }}
           ></span>
         </span>
       </li>
@@ -59,29 +49,47 @@ export function Stats(props: StatsProps) {
   return (
     <section>
       <h2 className="stats__header">
-        {props.name} ({stats.length})
+        {props.name} ({props.stats.length})
         <span className="stats__icons">
           <button
             type="button"
             className="btn btn_hover_grey-20 btn_type_icon"
-            onClick={() => setSortByAlpha((prev) => !prev)}
+            onClick={() => {
+              setSortDir("desc");
+              setSortType("num");
+            }}
           >
-            {sortedByAlpha ? (
-              <FaSortAlphaDown className="icon" />
-            ) : (
-              <FaSortAlphaDownAlt className="icon" />
-            )}
+            <FaSortAmountDown className="icon" />
           </button>
           <button
             type="button"
             className="btn btn_hover_grey-20 btn_type_icon"
-            onClick={() => setSortByNum((prev) => !prev)}
+            onClick={() => {
+              setSortDir("asc");
+              setSortType("num");
+            }}
           >
-            {sortedByNum ? (
-              <FaSortAmountDownAlt className="icon" />
-            ) : (
-              <FaSortAmountDown className="icon" />
-            )}
+            <FaSortAmountDownAlt className="icon" />
+          </button>
+          <button
+            type="button"
+            className="btn btn_hover_grey-20 btn_type_icon"
+            onClick={() => {
+              setSortDir("desc");
+              setSortType("alpha");
+            }}
+          >
+            <FaSortAlphaDownAlt className="icon" />
+          </button>
+          <button
+            type="button"
+            className="btn btn_hover_grey-20 btn_type_icon"
+            onClick={() => {
+              setSortDir("asc");
+              setSortType("alpha");
+            }}
+          >
+            <FaSortAlphaDown className="icon" />
           </button>
         </span>
       </h2>
