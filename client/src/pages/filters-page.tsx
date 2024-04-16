@@ -2,60 +2,41 @@ import React from "react";
 import { FaDownload, FaFileImport } from "react-icons/fa";
 import { IoMdAddCircle } from "react-icons/io";
 
-import { useAppSelector } from "../hooks/redux-ts-helpers";
-import {
-  selectFilters,
-  destroyFilter,
-  updateFilter,
-  thunkImportFilters,
-} from "../features/filters/";
-import { SavedFilter } from "../features/filters/saved-filter/saved-filter-component";
-import { exportSavedFiltersToJSON } from "../utils";
-import { CreateFilterForm } from "../features/create-filter-form";
-
-import {
-  CREATE_FILTER_FORM_ID,
-  EDIT_FILTER_FORM_ID,
-} from "../config/constants";
+import { useAppSelector, useAppDispatch } from "../hooks/redux-ts-helpers";
+import { selectFilters, thunkImportFilters } from "../features/filters/";
+import { Filter } from "../features/filters/filter/filter-component";
+import { EditFilterForm } from "../features/edit-filter-form";
+import { EDIT_FILTER_FORM_ID } from "../features/edit-filter-form";
 import { FilterFormValues } from "../types";
+import { FiltersState } from "../features/filters";
+import { Message } from "../features/ui/message";
 
 import "./filters-page.scss";
 
+function exportSavedFiltersToJSON(filters: FiltersState) {
+  const link = document.createElement("a");
+  link.href = `data:text/json;chatset=utf-8,${encodeURIComponent(
+    JSON.stringify(filters, null, 2),
+  )}`;
+  link.download = "filters-backup.json";
+  link.click();
+}
+
 export function FiltersPage() {
+  const dispatch = useAppDispatch();
   const savedFilters = useAppSelector(selectFilters);
+  const [showCreateFilterForm, setShowCreateFilterForm] = React.useState(false);
+  const [importError, setImportError] = React.useState<string>("");
 
-  const [showCreateFilter, setShowCreateFilter] = React.useState(false);
-  const [editableFilter, setEditableFilter] = React.useState<null | {
-    filterId: string;
-    isEditable: boolean;
-  }>(null);
-
-  const savedFiltersList = Object.entries(savedFilters).map(
-    ([id, inputs]: [string, FilterFormValues]) => {
-      if (editableFilter && editableFilter.filterId === id) {
-        return (
-          <CreateFilterForm
-            key={id}
-            formId={EDIT_FILTER_FORM_ID}
-            savedFormId={id}
-            className="filters-page__create-filter-form"
-            defaultValues={inputs}
-            onEditingCancel={() => setEditableFilter(null)}
-          />
-        );
-      }
-
-      return (
-        <SavedFilter
-          key={id}
-          filter={savedFilters[`${id}`]}
-          onEdit={() => setEditableFilter({ filterId: id, isEditable: true })}
-          onDestroy={() => destroyFilter({ formId: id })}
-          onRename={() => updateFilter({ formId: id, inputs })}
-        />
-      );
-    },
-  );
+  async function handleImportFilters(e: React.ChangeEvent<HTMLInputElement>) {
+    if (importError) setImportError("");
+    try {
+      await dispatch(thunkImportFilters(e));
+    } catch (err) {
+      if (err instanceof Error) setImportError(err.message);
+      setTimeout(() => setImportError(""), 1000);
+    }
+  }
 
   return (
     <div className="filters-page">
@@ -66,7 +47,8 @@ export function FiltersPage() {
           <input
             id="importsavedfilters"
             type="file"
-            onChange={(e) => thunkImportFilters(e)}
+            onChange={handleImportFilters}
+            onClick={() => setImportError("")}
             multiple
             hidden
           />
@@ -78,8 +60,8 @@ export function FiltersPage() {
         <button
           type="button"
           className="btn btn_type_primary"
-          onClick={() => setShowCreateFilter(true)}
-          disabled={showCreateFilter}
+          onClick={() => setShowCreateFilterForm(true)}
+          disabled={showCreateFilterForm}
         >
           <IoMdAddCircle className="icon" />
           Create a New Filter
@@ -88,14 +70,22 @@ export function FiltersPage() {
 
       <div></div>
 
-      {showCreateFilter && (
-        <CreateFilterForm
-          formId={CREATE_FILTER_FORM_ID}
-          onEditingCancel={() => setShowCreateFilter(false)}
+      {importError && <Message type="danger">{importError}</Message>}
+
+      {showCreateFilterForm && (
+        <EditFilterForm
+          filterId={EDIT_FILTER_FORM_ID}
+          onCancelClick={() => setShowCreateFilterForm(false)}
         />
       )}
 
-      <div className="filters-page__saved-list">{savedFiltersList}</div>
+      <div className="filters-page__saved-list">
+        {Object.entries(savedFilters).map(
+          ([id]: [string, FilterFormValues]) => (
+            <Filter key={id} filterId={id} />
+          ),
+        )}
+      </div>
 
       <div className="filters-page__controls">
         <span></span>
