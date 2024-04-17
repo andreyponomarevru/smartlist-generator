@@ -8,14 +8,17 @@
   }
 
   &_warning {
-    color: $color_warning;
+    color: $color_black;
+    background-color: $color_brown-10;
+    padding: 0.5rem 1rem;
+    font-size: $font-size_root;
   }
 
   &_success {
     color: $color_success;
     background-color: $color_green-20;
     padding: 0.5rem 1rem;
-    font-size: $font-size_tiny;
+    font-size: $font-size_root;
   }
 
   &_info {
@@ -26,6 +29,6 @@
     color: $color_danger;
     background-color: $color_red-10;
     padding: 0.5rem 1rem;
-    font-size: $font-size_tiny;
+    font-size: $font-size_root;
   }
 }
