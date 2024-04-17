@@ -10,14 +10,15 @@ import Select from "react-select";
 import { Field } from "./field/field-component";
 import { upsertFilter } from "../../filters";
 import { Message } from "../../ui/message";
-import { FilterFormValues } from "../../../types";
-import { Subplaylist } from "../../subplaylist/components/subplaylist-component";
+import { FilterFormValues, TrackMeta } from "../../../types";
 import { createSingleSelectStyles } from "./react-select-styles";
 import { useAppDispatch } from "../../../hooks/redux-ts-helpers";
 import { usePlaylist } from "../hooks/use-playlist";
 import { DEFAULT_FILTER_VALUES, OPERATORS } from "../constants";
 import { Loader } from "../../ui/loader";
 import { APIErrorMessage } from "../../ui/api-error-msg";
+import { Track } from "../../track";
+import { Subplaylist } from "../../ui/subplaylist";
 
 export const EDIT_FILTER_FORM_ID = "create-filter-form";
 
@@ -190,14 +191,21 @@ export function EditFilterForm(props: EditFilterFormProps) {
         )}
       </form>
       <FormProvider {...form}>
-        <Subplaylist
-          formId={props.filterId}
-          onReorderTracks={handleTrackReorder}
-          onRemoveTrack={handleTrackRemove}
-          onResubmit={handleResubmit}
-          tracks={tracks}
-          className="subplaylist_create-form-playlist"
-        />
+        {tracks.length > 0 && (
+          <Subplaylist className="edit-filter-form__playlist">
+            {tracks.map((trackMeta: TrackMeta, index) => (
+              <Track
+                formId={props.filterId}
+                meta={trackMeta}
+                index={index}
+                onRemoveTrack={handleTrackRemove}
+                onReorderTracks={handleTrackReorder}
+                onResubmit={handleResubmit}
+                tracksTotal={tracks.length}
+              />
+            ))}
+          </Subplaylist>
+        )}
       </FormProvider>
     </div>
   );
