@@ -4,7 +4,7 @@ import { FaSortAmountDown } from "react-icons/fa";
 import { FaSortAlphaDownAlt } from "react-icons/fa";
 import { FaSortAmountDownAlt } from "react-icons/fa";
 
-import { Stats } from "../../types";
+import { Stats } from "../../../types";
 
 import "./stats.scss";
 
