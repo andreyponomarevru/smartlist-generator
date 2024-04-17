@@ -9,17 +9,17 @@ import {
 import Select from "react-select";
 import { FaMinus, FaPlus } from "react-icons/fa";
 
-import { FilterFormValues, Stats } from "../../../types";
+import { FilterFormValues, Stats } from "../../../../types";
 import { createSingleSelectStyles } from "../react-select-styles";
-import { ConditionSelect } from "./condition-select";
-import { useAppSelector } from "../../../hooks/redux-ts-helpers";
-import { useGetStatsQuery } from "../../../features/api";
+import { ConditionSelect } from "../condition-select/condition-select-component";
+import { useAppSelector } from "../../../../hooks/redux-ts-helpers";
+import { useGetStatsQuery } from "../../../stats";
 import {
   FILTER_NAMES,
   DEFAULT_FILTER_VALUES,
   FILTER_CONDITIONS,
-} from "../constants";
-import { selectExcludedTracksIds } from "../../../features/excluded-tracks";
+} from "../../constants";
+import { selectExcludedTracksIds } from "../../../excluded-tracks";
 
 function parseToOptionsList(stats: Stats) {
   return {
@@ -47,6 +47,24 @@ export function Field(props: FieldsProps) {
   const excludedTrackIds = useAppSelector(selectExcludedTracksIds);
   const stats = useGetStatsQuery(excludedTrackIds);
 
+  const isFilterNameChanged = Boolean(
+    form.formState.dirtyFields.filters &&
+      form.formState.dirtyFields.filters[props.index] &&
+      form.formState.dirtyFields.filters[props.index].name,
+  );
+
+  function handleInsertField() {
+    props.insert(props.index + 1, [DEFAULT_FILTER_VALUES.filters[0]]);
+    // Prevent reseting previous/following fields to empty inputs
+    form.reset(form.getValues());
+  }
+
+  function handleRemoveField() {
+    props.remove(props.index);
+    // Prevent reseting previous/following fields to empty inputs
+    form.reset(form.getValues());
+  }
+
   return (
     <div
       key={props.field.id}
@@ -71,13 +89,7 @@ export function Field(props: FieldsProps) {
           control={form.control}
           index={props.index}
           resetField={form.resetField}
-          isDirty={
-            !!(
-              form.formState.dirtyFields.filters &&
-              form.formState.dirtyFields.filters[props.index] &&
-              form.formState.dirtyFields.filters[props.index].name
-            )
-          }
+          isDirty={isFilterNameChanged}
           conditionOptionsList={Object.values(
             FILTER_CONDITIONS[watchedFilters.filters[props.index].name.value],
           )}
@@ -89,20 +101,14 @@ export function Field(props: FieldsProps) {
         <button
           disabled={props.fieldsCount === 1}
           type="button"
-          onClick={() => {
-            props.remove(props.index);
-            form.reset(form.getValues());
-          }}
+          onClick={handleRemoveField}
           className="btn btn_type_icon btn_hover_grey-20"
         >
           <FaMinus className="icon" />
         </button>
         <button
           type="button"
-          onClick={() => {
-            props.insert(props.index + 1, [DEFAULT_FILTER_VALUES.filters[0]]);
-            form.reset(form.getValues());
-          }}
+          onClick={handleInsertField}
           className="btn btn_type_icon btn_hover_grey-20"
         >
           <FaPlus className="icon" />

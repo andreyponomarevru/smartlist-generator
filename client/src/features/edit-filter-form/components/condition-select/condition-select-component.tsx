@@ -7,7 +7,7 @@ import {
 } from "react-hook-form";
 import Select from "react-select";
 
-import { createSingleSelectStyles } from "../../react-select-styles";
+import { createSingleSelectStyles } from "../react-select-styles";
 import { Message } from "../../../../features/ui/message";
 import { createMultiSelectStyles } from "./react-select-styles";
 import { OptionsList, FilterFormValues } from "../../../../types";
@@ -18,8 +18,8 @@ type SelectProps<OptionsValue> = {
   index: number;
   conditionOptionsList: OptionsList<OptionsValue>[];
   valueOptionsList: Record<string, OptionsList<OptionsValue>[]>;
-  resetField?: UseFormResetField<FilterFormValues>;
-  isDirty?: boolean;
+  resetField: UseFormResetField<FilterFormValues>;
+  isDirty: boolean;
 };
 
 export const ConditionSelect = React.memo(function (
@@ -30,7 +30,7 @@ export const ConditionSelect = React.memo(function (
   const selectedFilterName = filtersWatch[index]?.name.value;
 
   React.useEffect(() => {
-    if (resetField && isDirty) {
+    if (isDirty) {
       resetField(`filters.${index}.condition`, {
         keepDirty: false,
         defaultValue: null,
@@ -40,14 +40,7 @@ export const ConditionSelect = React.memo(function (
         defaultValue: null,
       });
     }
-  }, [isDirty, selectedFilterName, index, resetField]);
-
-  React.useEffect(() => {
-    if (resetField) {
-      resetField(`filters.${index}.condition`, { keepDirty: true });
-      resetField(`filters.${index}.value`, { keepDirty: true });
-    }
-  }, [isDirty, index, resetField]);
+  }, [isDirty, selectedFilterName, resetField]);
 
   return (
     <>
