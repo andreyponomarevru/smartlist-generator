@@ -1,7 +1,7 @@
 import React from "react";
 
-import { FilterDetails } from "./filter-details";
-import { FilterHeader } from "./filter-header";
+import { FilterDetails } from "./filter-details/filter-details-component";
+import { FilterHeader } from "./filter-header/filter-header-component";
 import { useAppSelector } from "../../../hooks/redux-ts-helpers";
 import { selectFilterById } from "../filters-slice";
 import { EditFilterForm } from "../../edit-filter-form";
@@ -32,25 +32,23 @@ export function Filter(props: FilterProps) {
         onCancelClick={() => setShowEditFilterForm(false)}
       />
     );
-  }
-
-  return (
-    <div className="filter">
-      <FilterHeader
-        name={filter.name}
-        isOpen={isFilterOpen}
-        onOpenClick={() => setIsFilterOpen((prev) => !prev)}
-        onEditClick={() => setShowEditFilterForm(true)}
-        onDestroyClick={() =>
-          dispatch(destroyFilter({ filterId: props.filterId }))
-        }
-      />
-      {isFilterOpen && (
-        <FilterDetails
-          className="filter__filter-details"
-          filterId={props.filterId}
+  } else {
+    return (
+      <div className="filter">
+        <FilterHeader
+          name={filter.name}
+          isOpen={isFilterOpen}
+          onOpenClick={() => setIsFilterOpen((prev) => !prev)}
+          onEditClick={() => setShowEditFilterForm(true)}
+          onDestroyClick={() => dispatch(destroyFilter({ id: props.filterId }))}
         />
-      )}
-    </div>
-  );
+        {isFilterOpen && (
+          <FilterDetails
+            className="filter__filter-details"
+            filterId={props.filterId}
+          />
+        )}
+      </div>
+    );
+  }
 }
