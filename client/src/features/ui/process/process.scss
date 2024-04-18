@@ -1,0 +1,37 @@
+@import "../../../global.scss";
+
+.process {
+  display: flex;
+  flex-flow: row nowrap;
+  row-gap: 1rem;
+  column-gap: 1rem;
+  align-items: center;
+  padding: 1rem 1rem 1rem 1rem;
+  border-radius: $border_radius_block;
+
+  &__list {
+    list-style-type: none;
+    display: flex;
+    flex-flow: column nowrap;
+  }
+
+  &__list-item {
+    display: flex;
+    flex-flow: column nowrap;
+
+    font-size: $font-size_tiny;
+  }
+
+  &_status_failure {
+    background-color: $color_red-10;
+  }
+
+  &_status_success {
+    background-color: $color_green-20;
+  }
+
+  &_status_pending,
+  &_status_initial {
+    background-color: $color_grey-20;
+  }
+}
