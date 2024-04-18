@@ -1,36 +1,40 @@
 import React from "react";
 
-import { Stats } from "../features/stats";
-import { Loader } from "../features/ui/loader/loader-component";
-import { useGlobalState } from "../hooks/use-global-state";
-import { Message } from "../features/ui/message/message-component";
+import { Stats, useGetStatsQuery } from "../features/stats";
+import { Loader } from "../features/ui/loader";
+import { Message } from "../features/ui/message";
+import { isAPIErrorType } from "../utils";
+import { useAppSelector } from "../hooks/redux-ts-helpers";
+import { selectExcludedTracksIds } from "../features/excluded-tracks";
 
 import "./stats-page.scss";
 
 export function StatsPage() {
-  const { statsQuery } = useGlobalState();
+  const excludedTrackIds = useAppSelector(selectExcludedTracksIds);
+  const stats = useGetStatsQuery(excludedTrackIds);
 
-  const totalCount =
-    statsQuery.data?.years.reduce(
+  const totalTracksCount =
+    stats.data?.years.reduce(
       (accumulator, currentValue) => accumulator + currentValue.count,
       0,
     ) || 0;
 
   return (
-    <div className="stats-page">
+    <div className={`stats-page ${stats.isFetching ? "dimmed" : ""}`}>
       <header className="header1">Statistics</header>
-
-      {statsQuery.isLoading && <Loader className="stats-page__loader" />}
-      {statsQuery.error instanceof Error && (
-        <Message type="danger">Request Failed</Message>
-      )}
-
       <section>
-        <h2 className="stats-page__header2">Tracks ({totalCount})</h2>
+        <h2 className="stats-page__header2">Tracks ({totalTracksCount})</h2>
       </section>
-      {statsQuery.data && <Stats stats={statsQuery.data.years} name="Years" />}
-      {statsQuery.data && (
-        <Stats stats={statsQuery.data.genres} name="Genres" />
+
+      {stats.isLoading && <Loader className="stats-page__loader" />}
+      {stats.isSuccess && (
+        <>
+          <Stats stats={stats.data.years} name="Years" />
+          <Stats stats={stats.data.genres} name="Genres" />
+        </>
+      )}
+      {stats.isError && isAPIErrorType(stats.error) && (
+        <Message type="danger">{stats.error.message}</Message>
       )}
     </div>
   );

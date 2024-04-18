@@ -5,7 +5,7 @@
     "types": ["node"],
 
     "outDir": "./build",
-    "rootDir": "./src",
+    "rootDir": "./src/",
     "baseUrl": "./src/",
     "paths": {
       "*": ["node_modules/*"]

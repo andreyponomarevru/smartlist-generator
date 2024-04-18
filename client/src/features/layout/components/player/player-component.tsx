@@ -1,13 +1,15 @@
 import React from "react";
 import { IoMdVolumeHigh, IoMdVolumeOff, IoMdVolumeLow } from "react-icons/io";
 
-import { Controls } from "./controls/controls-component";
-import { toHourMinSec } from "../../../utils";
-import { useGlobalState } from "../../../hooks/use-global-state";
+import { Controls } from "./controls-component";
+import { toHourMinSec } from "../../../../utils";
+// import { useGlobalState } from "../../../hooks/use-global-state";
 
 import "./player.scss";
 
 export function Player() {
+  return null;
+  /*
   const { player } = useGlobalState();
 
   if (!player.activeTrack) return null;
@@ -68,5 +70,5 @@ export function Player() {
         />
       </div>
     </div>
-  );
+  );*/
 }

@@ -1,45 +1,34 @@
+import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
+
 import {
   FilterFormValues,
   TrackMeta,
   SearchQuery,
   ProcessResult,
-  Stats,
+  APIResponseError,
 } from "../types";
-import { MUSIC_LIB_DIR } from "../config/env";
-import { LOCAL_MUSIC_LIB_DIR } from "../config/env";
-import { FiltersState } from "../features/filters/";
 
-type APIResponseError = {
-  status: number;
-  moreInfo: string;
-  message: string;
-};
-
-export class APIError extends Error {
-  constructor(err: APIResponseError) {
-    super();
-
-    this.name = err.status.toString();
-    this.message = err.message;
-  }
+export function isAPIErrorType(err: unknown): err is APIResponseError {
+  return (
+    typeof err === "object" && err !== null && "name" in err && "message" in err
+  );
 }
 
-export function calculateExcludedStats(excludedCount = 0, stats: Stats[] = []) {
-  const totalCount =
-    stats.reduce(
-      (accumulator, currentValue) => accumulator + currentValue.count,
-      0,
-    ) || 0;
-  const tracksLeft = totalCount - excludedCount;
+export function isErrorWithMessage(
+  error: unknown,
+): error is { message: string } {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof (error as any).message === "string"
+  );
+}
 
-  return {
-    totalCount,
-    excludedPercentage:
-      totalCount === 0 && excludedCount === 0
-        ? 0
-        : Number(((100 * excludedCount) / totalCount).toFixed(1)),
-    tracksLeft,
-  };
+export function isFetchBaseQueryError(
+  error: unknown,
+): error is FetchBaseQueryError {
+  return typeof error === "object" && error !== null && "status" in error;
 }
 
 export function extractFilename(path: string) {
@@ -122,32 +111,6 @@ export function exportValidationReport(report: ProcessResult) {
   link.click();
 }
 
-export function exportPlaylistToM3U(
-  playlistName: string,
-  tracks: Record<string, TrackMeta[]>,
-  groupIds: number[],
-) {
-  const link = document.createElement("a");
-  link.href = `data:text/json;chatset=utf-8,${encodeURIComponent(
-    `#EXTM3U\n#PLAYLIST:${playlistName}\n\n${groupIds
-      .map((groupId) => tracks[`${groupId}`])
-      .flat()
-      .map((t) => `file://${encodeRFC3986URIComponent(t.filePath)}`)
-      .join("\n")}`,
-  )}`;
-  link.download = `${playlistName}.m3u`;
-  link.click();
-}
-
-export function exportSavedFiltersToJSON(filters: FiltersState) {
-  const link = document.createElement("a");
-  link.href = `data:text/json;chatset=utf-8,${encodeURIComponent(
-    JSON.stringify(filters, null, 2),
-  )}`;
-  link.download = "filters-backup.json";
-  link.click();
-}
-
 export function encodeRFC3986URIComponent(str: string) {
   return encodeURI(str).replace(
     /[!'()*]/g,
@@ -155,23 +118,7 @@ export function encodeRFC3986URIComponent(str: string) {
   );
 }
 
-export function m3uToFilePaths(m3u: string) {
-  const m3uStrings = m3u.split("\n");
-  const filePaths: string[] = [];
-
-  for (let i = 3; i < m3uStrings.length; i++) {
-    const filePath =
-      MUSIC_LIB_DIR +
-      decodeURIComponent(m3uStrings[i])
-        .replace("file://", "")
-        .replace(LOCAL_MUSIC_LIB_DIR, "");
-    filePaths.push(filePath);
-  }
-
-  return filePaths;
-}
-
-export function readFileAsString(file: File): Promise<string> {
+export function parseFileToStrings(file: File): Promise<string[] | string> {
   return new Promise(function (resolve, reject) {
     const fr = new FileReader();
 

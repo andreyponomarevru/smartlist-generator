@@ -317,3 +317,8 @@ $controls_btn-height: 2.75rem;
   border-radius: $border_radius_block;
   font-size: $font-size_controls;
 }
+
+.dimmed {
+  pointer-events: none;
+  opacity: 50%;
+}

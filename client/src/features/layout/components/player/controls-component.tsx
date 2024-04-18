@@ -1,6 +1,5 @@
 import React from "react";
 import { IoPauseSharp } from "react-icons/io5";
-import { useGlobalState } from "../../../../hooks/use-global-state";
 import { FaPlay } from "react-icons/fa";
 
 import "./controls.scss";
@@ -8,7 +7,8 @@ import "./controls.scss";
 interface ControlsProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function Controls(props: ControlsProps) {
-  const {
+  return null;
+  /* const {
     player: {
       duration,
       progressBarRef,
@@ -18,8 +18,8 @@ export function Controls(props: ControlsProps) {
       activeTrack,
       togglePlay,
     },
-  } = useGlobalState();
-
+  } = useGlobalState();*/
+  /*
   // The requestAnimationFrame returns the request-id that we have assigned to playAnimationRef.current. The ref will preserve the returned ID over time. This ID lets us cancel the request once we pause the playback.
   const playAnimationRef = React.useRef<number>();
 
@@ -64,5 +64,5 @@ export function Controls(props: ControlsProps) {
         )}
       </button>
     </div>
-  );
+  );*/
 }

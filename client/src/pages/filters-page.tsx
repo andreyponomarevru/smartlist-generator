@@ -3,8 +3,11 @@ import { FaDownload, FaFileImport } from "react-icons/fa";
 import { IoMdAddCircle } from "react-icons/io";
 
 import { useAppSelector, useAppDispatch } from "../hooks/redux-ts-helpers";
-import { selectFilters, thunkImportFilters } from "../features/filters/";
-import { Filter } from "../features/filters/filter/filter-component";
+import {
+  selectFilters,
+  thunkImportFilters,
+  Filter,
+} from "../features/filters/";
 import { EditFilterForm } from "../features/edit-filter-form";
 import { EDIT_FILTER_FORM_ID } from "../features/edit-filter-form";
 import { FilterFormValues } from "../types";
@@ -30,6 +33,7 @@ export function FiltersPage() {
 
   async function handleImportFilters(e: React.ChangeEvent<HTMLInputElement>) {
     if (importError) setImportError("");
+
     try {
       await dispatch(thunkImportFilters(e));
     } catch (err) {

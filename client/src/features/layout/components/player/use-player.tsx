@@ -1,6 +1,6 @@
 import React from "react";
-import { TrackMeta } from "../../../types";
-import { API_ROOT_URL } from "../../../config/env";
+import { TrackMeta } from "../../../../types";
+import { API_ROOT_URL } from "../../../../config/env";
 
 type State = {
   activeTrack?: TrackMeta | null;

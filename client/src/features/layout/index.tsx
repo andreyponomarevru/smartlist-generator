@@ -1,2 +1,1 @@
-export * from "./laylout-component";
-export { usePlayer } from "./player";
+export * from "./components";

@@ -5,7 +5,7 @@ import { NavLink } from "react-router-dom";
 import { RiPlayList2Fill } from "react-icons/ri";
 import { IoIosStats } from "react-icons/io";
 
-import { PATHS } from "../../../app/routes";
+import { PATHS } from "../../../../app/routes";
 import { Logo } from "./logo-component";
 
 import "./sidebar.scss";

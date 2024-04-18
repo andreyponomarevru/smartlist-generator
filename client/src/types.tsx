@@ -1,5 +1,3 @@
-import { Control, UseFormResetField } from "react-hook-form";
-
 export type TrackMeta = {
   artists: string[];
   duration: number;
@@ -15,7 +13,7 @@ export type TrackMeta = {
 // Forms
 //
 
-export type OptionsList<Value> = { label: string; value: Value };
+export type OptionsList<Value = number> = { label: string; value: Value };
 export interface FilterFormValues {
   name: string;
   operator: { label: string; value: string };
@@ -29,22 +27,21 @@ export interface SavedFilterFormValues {
   filterId: OptionsList<string>;
 }
 export type LibPathInput = { libPath: string };
-export type SelectProps<OptionsValue> = {
-  name: string;
-  control: Control<FilterFormValues>;
-  index: number;
-  optionsForCondition: OptionsList<OptionsValue>[];
-  optionsForValue: Record<string, OptionsList<OptionsValue>[]>;
-  resetField?: UseFormResetField<FilterFormValues>;
-  isDirty?: boolean;
-};
 
 //
 // API
 //
 
 export type APIResponseSuccess<T> = { results: T };
-export type Stats = { id?: number; name: string; count: number };
+export type APIResponseError = {
+  status: number;
+  message: string;
+  moreInfo: string;
+};
+export type Stats = {
+  years: { name: string; count: number }[];
+  genres: { id?: number; name: string; count: number }[];
+};
 export type SearchQuery = {
   operator: string;
   filters: {
