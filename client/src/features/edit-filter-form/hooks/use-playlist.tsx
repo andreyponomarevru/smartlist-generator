@@ -110,7 +110,6 @@ export function usePlaylist() {
     const excludedTracks = Object.values(state.tracks)
       .flat()
       .map((t) => t.trackId);
-    //const searchQuery = buildSearchQuery(formValues, excludedTrackIds);
 
     try {
       const track = await findTrack({
@@ -130,7 +129,6 @@ export function usePlaylist() {
     const excludedTracks = Object.values(state.tracks)
       .flat()
       .map((t) => t.trackId);
-    //const searchQuery = buildSearchQuery(formValues, excludedTracks);
 
     try {
       const track = await findTrack({
