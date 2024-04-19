@@ -7,9 +7,14 @@ import {
   useStopProcessMutation,
   useStreamSSEsQuery,
 } from "../../api";
-import { exportValidationReport } from "../../../utils";
+import {
+  exportValidationReport,
+  getRTKQueryErr,
+  isFetchBaseQueryError,
+} from "../../../utils";
 import { Loader } from "../..//ui/loader/loader-component";
 import { Process } from "../../ui/process";
+import { Message } from "../../ui/message";
 
 interface SeedingSettingsProps extends React.HTMLAttributes<HTMLElement> {
   currentSettings: LibPathInput;
@@ -17,8 +22,8 @@ interface SeedingSettingsProps extends React.HTMLAttributes<HTMLElement> {
 
 export function SeedingSettings(props: SeedingSettingsProps) {
   const sseStream = useStreamSSEsQuery("seeding");
-  const [startProcess] = useStartProcessMutation();
-  const [stopProcess] = useStopProcessMutation();
+  const [startProc, startProcResult] = useStartProcessMutation();
+  const [stopProc, stopProcResult] = useStopProcessMutation();
 
   const latestMsg = Array.isArray(sseStream.data)
     ? sseStream.data[sseStream.data.length - 1]
@@ -49,9 +54,9 @@ export function SeedingSettings(props: SeedingSettingsProps) {
           className="btn btn_type_secondary"
           onClick={
             latestMsg?.status === "pending"
-              ? () => stopProcess({ processName: "seeding" })
+              ? () => stopProc({ processName: "seeding" })
               : () =>
-                  startProcess({
+                  startProc({
                     processName: "seeding",
                     libPath: props.currentSettings.libPath,
                   })
@@ -63,6 +68,15 @@ export function SeedingSettings(props: SeedingSettingsProps) {
           {latestMsg?.status === "pending" ? "Stop" : "Seed"}
         </button>
       </div>
+      {sseStream.error && (
+        <Message type="danger">{getRTKQueryErr(sseStream.error)}</Message>
+      )}
+      {startProcResult.error && (
+        <Message type="danger">{getRTKQueryErr(startProcResult.error)}</Message>
+      )}
+      {stopProcResult.error && (
+        <Message type="danger">{stopProcResult.error.toString()}</Message>
+      )}
     </section>
   );
 }

@@ -14,6 +14,18 @@ export function isAPIErrorType(err: unknown): err is APIResponseError {
   );
 }
 
+export function getRTKQueryErr(err: unknown) {
+  if (isFetchBaseQueryError(err)) {
+    const errMsg = "error" in err ? err.error : JSON.stringify(err.data);
+    return errMsg;
+  } else if (isErrorWithMessage(err)) {
+    return err.message;
+  } else {
+    console.log("Unknown type of error", err);
+    return "Unknown type of error";
+  }
+}
+
 export function isErrorWithMessage(
   error: unknown,
 ): error is { message: string } {

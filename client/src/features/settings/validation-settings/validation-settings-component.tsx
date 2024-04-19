@@ -2,7 +2,7 @@ import React from "react";
 import { FaDownload } from "react-icons/fa";
 
 import type { LibPathInput } from "../../../types";
-import { exportValidationReport } from "../../../utils";
+import { exportValidationReport, getRTKQueryErr } from "../../../utils";
 import { Loader } from "../../ui/loader/loader-component";
 import { Process as SSEMessage } from "../../ui/process";
 import {
@@ -10,6 +10,7 @@ import {
   useStartProcessMutation,
   useStopProcessMutation,
 } from "../../api";
+import { Message } from "../../ui/message";
 
 interface ValidationSettingsProps extends React.HTMLAttributes<HTMLElement> {
   currentSettings: LibPathInput;
@@ -17,8 +18,8 @@ interface ValidationSettingsProps extends React.HTMLAttributes<HTMLElement> {
 
 export function ValidationSettings(props: ValidationSettingsProps) {
   const sseStream = useStreamSSEsQuery("validation");
-  const [startProcess] = useStartProcessMutation();
-  const [stopProcess] = useStopProcessMutation();
+  const [startProc, startProcResult] = useStartProcessMutation();
+  const [stopProc, stopProcResult] = useStopProcessMutation();
 
   const latestMsg = Array.isArray(sseStream.data)
     ? sseStream.data[sseStream.data.length - 1]
@@ -49,9 +50,9 @@ export function ValidationSettings(props: ValidationSettingsProps) {
             className="btn btn_type_secondary"
             onClick={
               latestMsg?.status === "pending"
-                ? () => stopProcess({ processName: "validation" })
+                ? () => stopProc({ processName: "validation" })
                 : () =>
-                    startProcess({
+                    startProc({
                       processName: "validation",
                       libPath: props.currentSettings.libPath,
                     })
@@ -64,6 +65,15 @@ export function ValidationSettings(props: ValidationSettingsProps) {
           </button>
         </div>
       </div>
+      {sseStream.error && (
+        <Message type="danger">{getRTKQueryErr(sseStream.error)}</Message>
+      )}
+      {startProcResult.error && (
+        <Message type="danger">{getRTKQueryErr(startProcResult.error)}</Message>
+      )}
+      {stopProcResult.error && (
+        <Message type="danger">{getRTKQueryErr(stopProcResult.error)}</Message>
+      )}
     </section>
   );
 }
