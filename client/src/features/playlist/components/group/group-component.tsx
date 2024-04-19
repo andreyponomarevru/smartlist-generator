@@ -14,15 +14,19 @@ import { GrCircleInformation } from "react-icons/gr";
 import {
   useAppDispatch,
   useAppSelector,
-} from "../../../hooks/redux-ts-helpers";
-import { OptionsList, SavedFilterFormValues, TrackMeta } from "../../../types";
-import { Track } from "../../track";
-import { Subplaylist } from "../../ui/subplaylist";
-import { Modal, useModal } from "../../ui/modal/";
-import { FilterDetails, selectFilters } from "../../filters/";
-import { useLazyFindTrackQuery } from "../../track";
-import type { Direction } from "../playlist-slice";
-import { selectExcludedTracksIds } from "../../excluded-tracks";
+} from "../../../../hooks/redux-ts-helpers";
+import {
+  OptionsList,
+  SavedFilterFormValues,
+  TrackMeta,
+} from "../../../../types";
+import { Track } from "../../../track";
+import { Subplaylist } from "../../../ui/subplaylist";
+import { Modal, useModal } from "../../../ui/modal";
+import { FilterDetails, selectFilters } from "../../../filters";
+import { useLazyFindTrackQuery } from "../../../track";
+import type { Direction } from "../../playlist-slice";
+import { selectExcludedTracksIds } from "../../../excluded-tracks";
 import {
   addGroup,
   reorderGroup,
@@ -35,8 +39,8 @@ import {
   resetGroup,
   selectPlaylist,
   selectTracksFromGroup,
-} from "../playlist-slice";
-import { Message } from "../../ui/message";
+} from "../../playlist-slice";
+import { Message } from "../../../ui/message";
 
 import "./group.scss";
 
