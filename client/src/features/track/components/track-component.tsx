@@ -19,9 +19,7 @@ interface TrackProps {
   index: number;
   tracksTotal: number;
 
-  // groupId?: string; // remove if it works without it
   formId: string;
-
   onRemoveTrack: (trackId: number) => void;
   onReorderTracks: ({
     index,
