@@ -195,6 +195,7 @@ export function EditFilterForm(props: EditFilterFormProps) {
           <Subplaylist className="edit-filter-form__playlist">
             {tracks.map((trackMeta: TrackMeta, index) => (
               <Track
+                key={trackMeta.toString() + props.filterId}
                 formId={props.filterId}
                 meta={trackMeta}
                 index={index}
