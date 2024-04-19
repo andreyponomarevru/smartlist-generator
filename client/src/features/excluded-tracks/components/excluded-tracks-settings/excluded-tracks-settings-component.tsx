@@ -6,6 +6,7 @@ import { MUSIC_LIB_DIR } from "../../../../config/env";
 import { useLazyImportExcludedTracksFromM3UQuery } from "../..";
 import { useGetStatsQuery } from "../../../stats";
 import {
+  getRTKQueryErr,
   isErrorWithMessage,
   isFetchBaseQueryError,
   parseFileToStrings,
@@ -92,12 +93,7 @@ export function ExcludedTracksSettings() {
         invalidPaths: importResult.invalidPaths,
       });
     } catch (err) {
-      if (isFetchBaseQueryError(err)) {
-        const errMsg = "error" in err ? err.error : JSON.stringify(err.data);
-        setErrors({ importError: errMsg });
-      } else if (isErrorWithMessage(err)) {
-        setErrors({ importError: err.message });
-      }
+      setErrors({ importError: getRTKQueryErr(err) });
     }
   }
 
