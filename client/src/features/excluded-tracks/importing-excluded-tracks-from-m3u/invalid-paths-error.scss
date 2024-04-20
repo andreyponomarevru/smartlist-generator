@@ -1,0 +1,24 @@
+@import "../../../global.scss";
+
+.invalid-paths-error {
+  display: block;
+  margin-top: 1rem;
+  overflow: hidden;
+
+  &__short-text {
+    display: inline-block;
+    font-size: $font-size_regular-text;
+    padding-bottom: 1rem;
+  }
+
+  &__list {
+    display: flex;
+    flex-flow: column nowrap;
+    row-gap: 1rem;
+  }
+
+  &__list-item {
+    list-style-type: none;
+    word-break: break-all;
+  }
+}

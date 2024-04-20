@@ -1,9 +1,9 @@
 import * as RTK from "@reduxjs/toolkit";
 
 import { NODE_ENV } from "../config/env";
-import { filtersReducer } from "../features/filters";
+import { filtersReducer } from "../features/filters/filters";
 import { listenerMiddleware } from "../app/listener-middleware";
-import { playlistReducer } from "../features/playlist/playlist-slice";
+import { playlistReducer } from "../features/playlist/playlist/playlist-slice";
 import { excludedTracksReducer } from "../features/excluded-tracks/excluded-tracks-slice";
 import { apiSplitSlice } from "../features/api/api-slice";
 
@@ -13,7 +13,6 @@ export const store = RTK.configureStore({
     excludedTracks: excludedTracksReducer,
     playlist: playlistReducer,
     [apiSplitSlice.reducerPath]: apiSplitSlice.reducer,
-    // player:
   },
   middleware: (getDefaultMiddleware) => {
     return getDefaultMiddleware().prepend(

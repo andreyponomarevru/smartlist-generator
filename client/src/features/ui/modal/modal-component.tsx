@@ -5,11 +5,11 @@ import "./modal.scss";
 
 import { useModal } from "./use-modal";
 
-interface ModalProps extends React.HTMLAttributes<HTMLDivElement> {
+interface Props extends React.HTMLAttributes<HTMLDivElement> {
   title: string;
 }
 
-export function Modal(props: ModalProps) {
+export function Modal(props: Props) {
   const { state, setState } = useModal();
 
   return (

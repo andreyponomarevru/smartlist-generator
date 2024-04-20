@@ -1,2 +1,2 @@
 export * from "./api-slice";
-export * from "./sse-slice";
+export * from "../sse/sse-slice";

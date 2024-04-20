@@ -11,10 +11,11 @@ import {
 } from "../../../types";
 import type { Direction } from "../../playlist";
 import { extractFilename } from "../../../utils";
+import { usePlayer } from "../../player";
 
 import "./track.scss";
 
-interface TrackProps {
+interface Props {
   meta: TrackMeta;
   index: number;
   tracksTotal: number;
@@ -34,20 +35,13 @@ interface TrackProps {
   ) => void;
 }
 
-export function Track(props: TrackProps) {
+export function Track(props: Props) {
   const form = useFormContext<FilterFormValues & SavedFilterFormValues>();
   const { meta, index } = props;
 
-  /*const {
-    player: { activeTrack, isPlaying, play, togglePlay },
-  } = useGlobalState();*/
-  const player = {
-    activeTrack: { trackId: 0 },
-    isPlaying: false,
-    togglePlay: (arg: any) => {},
-    play: (arg: any) => {},
-  };
-  const { activeTrack, isPlaying, togglePlay, play } = player;
+  const {
+    player: { play, togglePlay, isPlaying, activeTrack },
+  } = usePlayer();
 
   return (
     <li

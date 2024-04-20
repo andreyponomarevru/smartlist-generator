@@ -1,3 +1,3 @@
-export * from "./lib-path";
-export * from "./seeding-settings";
-export * from "./validation-settings";
+export * from "./lib-path-component";
+export * from "./seeding-settings-component";
+export * from "./validation-settings-component";

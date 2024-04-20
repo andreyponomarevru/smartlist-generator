@@ -29,8 +29,8 @@ export function StatsPage() {
       {stats.isLoading && <Loader className="stats-page__loader" />}
       {stats.isSuccess && (
         <>
-          <Stats stats={stats.data.years} name="Years" />
-          <Stats stats={stats.data.genres} name="Genres" />
+          <Stats stats={stats.data.years} headerName="Years" />
+          <Stats stats={stats.data.genres} headerName="Genres" />
         </>
       )}
       {stats.isError && isAPIErrorType(stats.error) && (

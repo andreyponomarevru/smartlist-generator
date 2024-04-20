@@ -39,14 +39,14 @@ export interface ExcludedTracksState {
 
 const LOCAL_STORAGE_KEY = "excludedTracks";
 
-function getInitialState(): ExcludedTracksState {
-  const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+function getInitialState(localStorageKey: string): ExcludedTracksState {
+  const saved = localStorage.getItem(localStorageKey);
   return {
     tracks: saved !== null ? (JSON.parse(saved) as ImportedTrack[]) : [],
   };
 }
 
-const initialState = getInitialState();
+const initialState = getInitialState(LOCAL_STORAGE_KEY);
 
 const excludedTracksSlice = RTK.createSlice({
   name: "excludedTracks",
@@ -65,6 +65,7 @@ const excludedTracksSlice = RTK.createSlice({
 });
 export const { clearExcludedTracks, addExcludedTracks } =
   excludedTracksSlice.actions;
+export const excludedTracksReducer = excludedTracksSlice.reducer;
 
 //
 // Selectors
@@ -94,8 +95,6 @@ startAppListening({
     );
   },
 });
-
-export const excludedTracksReducer = excludedTracksSlice.reducer;
 
 //
 // Endpoints

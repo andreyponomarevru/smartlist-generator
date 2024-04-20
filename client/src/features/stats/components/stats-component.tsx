@@ -10,12 +10,12 @@ import "./stats.scss";
 
 type StatsItem = { name: string; count: number };
 
-interface StatsProps extends React.HTMLAttributes<HTMLElement> {
-  name: string;
+interface Props extends React.HTMLAttributes<HTMLElement> {
+  headerName: string;
   stats: StatsItem[];
 }
 
-export function Stats(props: StatsProps) {
+export function Stats(props: Props) {
   const [sortType, setSortType] = React.useState<"alpha" | "num">("alpha");
   const [sortDir, setSortDir] = React.useState<"asc" | "desc">("asc");
 
@@ -51,7 +51,7 @@ export function Stats(props: StatsProps) {
   return (
     <section>
       <h2 className="stats__header">
-        {props.name} ({props.stats.length})
+        {props.headerName} ({props.stats.length})
         <span className="stats__icons">
           <button
             type="button"

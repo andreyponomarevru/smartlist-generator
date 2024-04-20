@@ -1,2 +1,2 @@
 export * from "./excluded-tracks-slice";
-export * from "./components";
+export * from "./excluded-tracks-settings";

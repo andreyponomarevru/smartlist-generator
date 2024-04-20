@@ -1,8 +1,8 @@
 import React from "react";
 
-interface SubplaylistProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface Props extends React.HTMLAttributes<HTMLDivElement> {}
 
-export function Subplaylist(props: SubplaylistProps) {
+export function Subplaylist(props: Props) {
   return (
     <ol className={`subplaylist ${props.className || ""}`}>{props.children}</ol>
   );

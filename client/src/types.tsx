@@ -54,10 +54,7 @@ export type SearchQuery = {
 
 // SSE
 
-type ValidationStats = {
-  names: (string | number)[];
-  count: number;
-};
+type ValidationStats = { names: (string | number)[]; count: number };
 export type TrackValidatorError = {
   filePath: string;
   id3TagName: string | number;
@@ -69,15 +66,14 @@ export type ValidationResult = {
   artists: ValidationStats;
   years: ValidationStats;
   genres: ValidationStats;
-};
-export type ProcessStatus = "pending" | "success" | "failure" | null;
-export type ProcessResult = ValidationResult | null;
-export type ProcessName = "validation" | "seeding";
-export type Process = {
-  name: ProcessName;
+} | null;
+export type OSProcessStatus = "pending" | "success" | "failure" | null;
+export type OSProcessName = "validation" | "seeding";
+export type SSEMessage = {
+  name: OSProcessName;
   createdAt?: number;
   updatedAt?: number;
-  status: ProcessStatus;
-  result: ProcessResult;
+  status: OSProcessStatus;
+  result: ValidationResult;
 };
 export type ValidationQuery = { libPath: string };

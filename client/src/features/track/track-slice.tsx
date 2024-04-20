@@ -4,6 +4,10 @@ import { buildSearchQuery } from "../../utils";
 import { FilterFormValues, TrackMeta, APIResponseSuccess } from "../../types";
 import { LOCAL_MUSIC_LIB_DIR, MUSIC_LIB_DIR } from "../../config/env";
 
+//
+// Endpoints
+//
+
 function parseTracksResponse(track: TrackMeta): TrackMeta {
   return {
     ...track,

@@ -2,6 +2,7 @@ import React from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ErrorBoundary } from "../features/ui/error-boundary";
+import { PlayerProvider } from "../features/player";
 
 import { ROUTES } from "./routes";
 import { Layout } from "../features/layout";
@@ -17,7 +18,9 @@ export function App() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
+        <PlayerProvider>
+          <RouterProvider router={router} />
+        </PlayerProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );

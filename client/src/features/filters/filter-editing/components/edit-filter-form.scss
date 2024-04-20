@@ -1,0 +1,107 @@
+@import "../../../../global.scss";
+
+.edit-filter-form {
+  padding-bottom: 1rem;
+
+  &__playlist {
+    display: grid;
+    box-shadow: 0px 0px 1rem $color_grey-50;
+    border-radius: $border_radius_block;
+    grid-template-columns: 100%;
+    margin-bottom: 2rem;
+  }
+
+  &__form {
+    display: flex;
+    flex-flow: column nowrap;
+    font-size: $font-size_regular-text;
+    margin: 1rem 0 0 0;
+    padding-bottom: 1rem;
+    row-gap: 1rem;
+  }
+
+  &__select-wrapper {
+    display: flex;
+    flex-flow: row nowrap;
+    column-gap: 1rem;
+    align-items: center;
+    margin: 0;
+  }
+
+  &__controls {
+    display: grid;
+    grid-template-columns: auto auto;
+    align-content: space-between;
+    justify-content: space-between;
+    align-items: center;
+    column-gap: 1rem;
+  }
+
+  &__title {
+    display: flex;
+    flex-flow: column nowrap;
+    row-gap: 1rem;
+    width: 100%;
+  }
+
+  &__input {
+    width: 100%;
+    font-weight: bold;
+    font-size: $font-size_h2;
+    height: 3.5rem;
+  }
+
+  &__row {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    column-gap: 1rem;
+    align-items: center;
+    border-bottom: 1px solid $color_grey-50;
+    justify-content: flex-start;
+  }
+
+  &__row:nth-last-child(2) {
+    border-bottom: none;
+  }
+
+  &__operator-row {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    padding-bottom: 1rem;
+  }
+
+  &__addable-row {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    justify-content: space-between;
+    padding-bottom: 1rem;
+  }
+
+  &__row:last-child {
+    border-bottom: none;
+  }
+
+  &__select-boxes {
+    display: flex;
+    column-gap: 1rem;
+    align-items: center;
+  }
+
+  &__row_filter {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  &__btns {
+    display: flex;
+  }
+
+  &__btn:disabled {
+    color: $color_grey-70;
+  }
+
+  &__error {
+    font-size: $font-size_tiny;
+  }
+}

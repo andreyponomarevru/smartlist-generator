@@ -4,9 +4,10 @@ import {
   FilterFormValues,
   TrackMeta,
   SearchQuery,
-  ProcessResult,
   APIResponseError,
 } from "../types";
+
+// Type Assertions
 
 export function isAPIErrorType(err: unknown): err is APIResponseError {
   return (
@@ -26,6 +27,14 @@ export function getRTKQueryErr(err: unknown) {
   }
 }
 
+export function isFetchBaseQueryError(
+  error: unknown,
+): error is FetchBaseQueryError {
+  return typeof error === "object" && error !== null && "status" in error;
+}
+
+//
+
 export function isErrorWithMessage(
   error: unknown,
 ): error is { message: string } {
@@ -35,12 +44,6 @@ export function isErrorWithMessage(
     "message" in error &&
     typeof (error as any).message === "string"
   );
-}
-
-export function isFetchBaseQueryError(
-  error: unknown,
-): error is FetchBaseQueryError {
-  return typeof error === "object" && error !== null && "status" in error;
 }
 
 export function extractFilename(path: string) {
@@ -114,7 +117,7 @@ export function exportPlaylistAsJSON(
   link.click();
 }
 
-export function exportValidationReport(report: ProcessResult) {
+export function exportValidationReport<T>(report: T) {
   const link = document.createElement("a");
   link.href = `data:text/json;chatset=utf-8,${encodeURIComponent(
     JSON.stringify(report, null, 2),
