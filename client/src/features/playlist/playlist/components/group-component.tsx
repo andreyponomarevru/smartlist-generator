@@ -1,6 +1,6 @@
 import React from "react";
 import Select from "react-select";
-import { Controller, useForm, FormProvider } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import {
   FaChevronUp,
   FaChevronDown,
@@ -86,21 +86,27 @@ export function Group(props: Props) {
     selectFilterById(state, selectedFilterId),
   );
 
-  async function handleTrackSubmit(formValues: {
+  async function findTrackIfNotExcluded(formValues: {
+    filterId: OptionsList<string>;
+  }) {
+    return findTrack({
+      formValues: filters[formValues.filterId.value],
+      excludedTracks: [...excludedTracksIds, ...tracks.map((t) => t.trackId)],
+    }).unwrap();
+  }
+
+  async function handleFormSubmit(formValues: {
     filterId: OptionsList<string>;
   }) {
     try {
-      const foundTrack = await findTrack({
-        formValues: filters[formValues.filterId.value],
-        excludedTracks: [...excludedTracksIds, ...tracks.map((t) => t.trackId)],
-      }).unwrap();
+      const foundTrack = await findTrackIfNotExcluded(formValues);
       dispatch(addTrack({ groupId: props.groupId, tracks: foundTrack }));
     } catch (err) {
       console.log("Ooops ...", err);
     }
   }
 
-  function handleTrackResubmit(
+  function handleFormResubmit(
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
     trackId: number,
   ) {
@@ -110,13 +116,7 @@ export function Group(props: Props) {
         trackId: number,
       ) {
         try {
-          const foundTrack = await findTrack({
-            formValues: filters[formValues.filterId.value],
-            excludedTracks: [
-              ...excludedTracksIds,
-              ...tracks.map((t) => t.trackId),
-            ],
-          }).unwrap();
+          const foundTrack = await findTrackIfNotExcluded(formValues);
           dispatch(
             replaceTrack({
               groupId: props.groupId,
@@ -162,7 +162,7 @@ export function Group(props: Props) {
           <div className="group__name">
             <form
               className={`group__saved-filters-form ${props.className || ""}`}
-              onSubmit={form.handleSubmit(handleTrackSubmit)}
+              onSubmit={form.handleSubmit(handleFormSubmit)}
               onClick={(e) => e.stopPropagation()}
               role="presentation"
               id={`${CHOOSE_FILTER_FORM_ID}-${props.groupId}`}
@@ -261,7 +261,7 @@ export function Group(props: Props) {
                         index={index}
                         onRemoveTrack={handleTrackRemove}
                         onReorderTracks={handleTrackReorder}
-                        onResubmit={handleTrackResubmit}
+                        onResubmit={handleFormResubmit}
                         tracksTotal={playlist.tracks[`${props.groupId}`].length}
                       />
                     ),
