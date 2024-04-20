@@ -83,6 +83,19 @@ export function EditFilterForm(props: Props) {
   });
   const watchedFilters = form.watch();
 
+  function handleTrackResubmit(
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+    trackId: number,
+  ) {
+    form.handleSubmit((formValues) => {
+      function resubmit(formValues: FilterFormValues, trackId: number) {
+        handleTrackReplace({ formValues, trackId });
+      }
+
+      return resubmit(formValues, trackId);
+    })(e);
+  }
+
   // If the filter has been updated - hide playlist
   React.useEffect(() => {
     if (form.formState.isDirty) {
@@ -94,10 +107,6 @@ export function EditFilterForm(props: Props) {
   async function handleFilterSubmit(formValues: FilterFormValues) {
     handleTrackAdd(formValues);
     form.reset(formValues, { keepValues: true, keepDirty: false });
-  }
-
-  function handleResubmit(formValues: FilterFormValues, trackId: number) {
-    handleTrackReplace({ trackId, formValues });
   }
 
   function handleFilterSave(formValues: FilterFormValues) {
@@ -215,24 +224,23 @@ export function EditFilterForm(props: Props) {
           </Message>
         )}
       </form>
-      <FormProvider {...form}>
-        {tracks.length > 0 && (
-          <Subplaylist className="edit-filter-form__playlist">
-            {tracks.map((trackMeta: TrackMeta, index) => (
-              <Track
-                key={JSON.stringify(trackMeta) + props.filterId}
-                formId={props.filterId}
-                meta={trackMeta}
-                index={index}
-                onRemoveTrack={handleTrackRemove}
-                onReorderTracks={handleTrackReorder}
-                onResubmit={handleResubmit}
-                tracksTotal={tracks.length}
-              />
-            ))}
-          </Subplaylist>
-        )}
-      </FormProvider>
+
+      {tracks.length > 0 && (
+        <Subplaylist className="edit-filter-form__playlist">
+          {tracks.map((trackMeta: TrackMeta, index) => (
+            <Track
+              key={JSON.stringify(trackMeta) + props.filterId}
+              formId={props.filterId}
+              meta={trackMeta}
+              index={index}
+              onRemoveTrack={handleTrackRemove}
+              onReorderTracks={handleTrackReorder}
+              onResubmit={handleTrackResubmit}
+              tracksTotal={tracks.length}
+            />
+          ))}
+        </Subplaylist>
+      )}
     </div>
   );
 }

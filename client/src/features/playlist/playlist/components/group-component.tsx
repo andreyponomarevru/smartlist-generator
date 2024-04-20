@@ -100,25 +100,37 @@ export function Group(props: Props) {
     }
   }
 
-  async function handleTrackResubmit(
-    formValues: SavedFilterFormValues,
+  function handleTrackResubmit(
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
     trackId: number,
   ) {
-    try {
-      const foundTrack = await findTrack({
-        formValues: filters[formValues.filterId.value],
-        excludedTracks: [...excludedTracksIds, ...tracks.map((t) => t.trackId)],
-      }).unwrap();
-      dispatch(
-        replaceTrack({
-          groupId: props.groupId,
-          trackId,
-          newTracks: foundTrack,
-        }),
-      );
-    } catch (err) {
-      console.log("Ooops ...", err);
-    }
+    form.handleSubmit((formValues) => {
+      async function resubmit(
+        formValues: SavedFilterFormValues,
+        trackId: number,
+      ) {
+        try {
+          const foundTrack = await findTrack({
+            formValues: filters[formValues.filterId.value],
+            excludedTracks: [
+              ...excludedTracksIds,
+              ...tracks.map((t) => t.trackId),
+            ],
+          }).unwrap();
+          dispatch(
+            replaceTrack({
+              groupId: props.groupId,
+              trackId,
+              newTracks: foundTrack,
+            }),
+          );
+        } catch (err) {
+          console.log("Ooops ...", err);
+        }
+      }
+
+      return resubmit(formValues, trackId);
+    })(e);
   }
 
   function handleTrackRemove(trackId: number) {
@@ -236,37 +248,33 @@ export function Group(props: Props) {
             playlist.isGroupOpen[`${props.groupId}`] ? "" : "group__body_hidden"
           }`}
         >
-          <FormProvider {...form}>
-            {playlist.tracks[`${props.groupId}`].length > 0 && (
-              <>
-                <Subplaylist className="group__playlist">
-                  <ol className="subplaylist ">
-                    {playlist.tracks[`${props.groupId}`].map(
-                      (trackMeta: TrackMeta, index) => (
-                        <Track
-                          key={JSON.stringify(trackMeta) + props.groupId}
-                          formId={`${CHOOSE_FILTER_FORM_ID}-${props.groupId}`}
-                          meta={trackMeta}
-                          index={index}
-                          onRemoveTrack={handleTrackRemove}
-                          onReorderTracks={handleTrackReorder}
-                          onResubmit={handleTrackResubmit}
-                          tracksTotal={
-                            playlist.tracks[`${props.groupId}`].length
-                          }
-                        />
-                      ),
-                    )}
-                  </ol>
-                </Subplaylist>
-                {findTrackResult.error && (
-                  <Message type="danger">
-                    {findTrackResult.error.toString()}
-                  </Message>
-                )}
-              </>
-            )}
-          </FormProvider>
+          {playlist.tracks[`${props.groupId}`].length > 0 && (
+            <>
+              <Subplaylist className="group__playlist">
+                <ol className="subplaylist ">
+                  {playlist.tracks[`${props.groupId}`].map(
+                    (trackMeta: TrackMeta, index) => (
+                      <Track
+                        key={JSON.stringify(trackMeta) + props.groupId}
+                        formId={`${CHOOSE_FILTER_FORM_ID}-${props.groupId}`}
+                        meta={trackMeta}
+                        index={index}
+                        onRemoveTrack={handleTrackRemove}
+                        onReorderTracks={handleTrackReorder}
+                        onResubmit={handleTrackResubmit}
+                        tracksTotal={playlist.tracks[`${props.groupId}`].length}
+                      />
+                    ),
+                  )}
+                </ol>
+              </Subplaylist>
+              {findTrackResult.error && (
+                <Message type="danger">
+                  {findTrackResult.error.toString()}
+                </Message>
+              )}
+            </>
+          )}
 
           <button
             name="findtrack"

@@ -1,14 +1,9 @@
 import React from "react";
-import { useFormContext } from "react-hook-form";
 import { FaMinus, FaRedo, FaArrowDown, FaArrowUp } from "react-icons/fa";
 import { LuCopy } from "react-icons/lu";
 
 import { toHourMinSec } from "../../../utils";
-import {
-  FilterFormValues,
-  TrackMeta,
-  SavedFilterFormValues,
-} from "../../../types";
+import { TrackMeta } from "../../../types";
 import type { Direction } from "../../playlist";
 import { extractFilename } from "../../../utils";
 import { usePlayer } from "../../player";
@@ -30,95 +25,117 @@ interface Props {
     direction: Direction;
   }) => void;
   onResubmit: (
-    formValues: FilterFormValues & SavedFilterFormValues,
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
     trackId: number,
   ) => void;
 }
 
 export function Track(props: Props) {
-  const form = useFormContext<FilterFormValues & SavedFilterFormValues>();
-  const { meta, index } = props;
-
   const {
     player: { play, togglePlay, isPlaying, activeTrack },
   } = usePlayer();
 
+  function handleCopyFilePathToClipboardClick(
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+  ) {
+    e.stopPropagation();
+    navigator.clipboard.writeText(extractFilename(props.meta.filePath));
+  }
+
+  function handleTrackClick(e: React.MouseEvent<HTMLLIElement, MouseEvent>) {
+    e.stopPropagation();
+    if (activeTrack?.trackId === props.meta.trackId) {
+      togglePlay(!isPlaying);
+    } else {
+      play(props.meta);
+    }
+  }
+
+  function handleTrackReorderUp(
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+  ) {
+    e.stopPropagation();
+    props.onReorderTracks({ index: props.index, direction: "UP" });
+  }
+
+  function handleTrackReorderDown(
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+  ) {
+    e.stopPropagation();
+    props.onReorderTracks({ index: props.index, direction: "DOWN" });
+  }
+
+  function handleTrackResubmit(
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+  ) {
+    e.stopPropagation();
+    props.onResubmit(e, props.meta.trackId);
+  }
+
+  function handleTrackRemove(
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+  ) {
+    e.stopPropagation();
+    props.onRemoveTrack(props.meta.trackId);
+  }
+
   return (
     <li
-      key={meta.trackId + meta.duration + meta.title}
+      key={props.meta.trackId + props.meta.duration + props.meta.title}
       className={`track ${
-        activeTrack?.trackId === meta.trackId && isPlaying
+        activeTrack?.trackId === props.meta.trackId && isPlaying
           ? "track_playing"
-          : activeTrack?.trackId === meta?.trackId
+          : activeTrack?.trackId === props.meta?.trackId
             ? "track_paused"
             : ""
       }`}
-      onClick={(e) => {
-        e.stopPropagation();
-        if (activeTrack?.trackId === meta.trackId) {
-          togglePlay(!isPlaying);
-        } else {
-          play(meta);
-        }
-      }}
+      onClick={handleTrackClick}
       role="presentation"
     >
       <div className="track__sort-buttons">
         <button
           type="button"
           className="btn btn_type_icon btn_hover_grey-20"
-          onClick={(e) => {
-            e.stopPropagation();
-            props.onReorderTracks({ index, direction: "UP" });
-          }}
-          disabled={index === 0 || props.tracksTotal === 1}
+          onClick={handleTrackReorderUp}
+          disabled={props.index === 0 || props.tracksTotal === 1}
         >
           <FaArrowUp className="icon" />
         </button>
         <button
           type="button"
           className="btn btn_type_icon btn_hover_grey-20"
-          onClick={(e) => {
-            e.stopPropagation();
-            props.onReorderTracks({ index, direction: "DOWN" });
-          }}
-          disabled={props.tracksTotal - 1 === index || props.tracksTotal === 1}
+          onClick={handleTrackReorderDown}
+          disabled={
+            props.tracksTotal - 1 === props.index || props.tracksTotal === 1
+          }
         >
           <FaArrowDown className="icon" />
         </button>
       </div>
-      <span className="track__year">{meta.year}</span>
+      <span className="track__year">{props.meta.year}</span>
       <span className="track__main-meta">
-        <span className="track__artists">{meta.artists.join(", ")}</span>
-        <span className="track__title">{meta.title}</span>
+        <span className="track__artists">{props.meta.artists.join(", ")}</span>
+        <span className="track__title">{props.meta.title}</span>
         <span className="track__genres">
-          {meta.genres.map((name) => (
+          {props.meta.genres.map((name) => (
             <span key={name} className="track__genre">
               {name}
             </span>
           ))}
         </span>
       </span>
-      <div className="track__duration">{toHourMinSec(meta.duration)}</div>
+      <div className="track__duration">{toHourMinSec(props.meta.duration)}</div>
       <div className="track__controls">
         <button
           type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            navigator.clipboard.writeText(extractFilename(meta.filePath));
-          }}
+          onClick={handleCopyFilePathToClipboardClick}
           className="btn btn_type_icon btn_hover_grey-20"
         >
           <LuCopy className="icon" />
         </button>
         <button
           name="resubmit"
-          onClick={(e) => {
-            e.stopPropagation();
-            form.handleSubmit((formValues) => {
-              return props.onResubmit(formValues, meta.trackId);
-            })(e);
-          }}
+          onClick={handleTrackResubmit}
           type="submit"
           form={props.formId}
           disabled={false}
@@ -128,10 +145,7 @@ export function Track(props: Props) {
         </button>
         <button
           type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            props.onRemoveTrack(meta.trackId);
-          }}
+          onClick={handleTrackRemove}
           className="btn btn_type_icon btn_hover_grey-20"
         >
           <FaMinus className="icon" />
