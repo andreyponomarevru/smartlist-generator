@@ -2,9 +2,10 @@ import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 
 import {
   FilterFormValues,
-  TrackMeta,
   SearchQuery,
   APIResponseError,
+  FilterQuery,
+  Filter,
 } from "../types";
 
 // Type Assertions
@@ -14,6 +15,21 @@ export function isAPIErrorType(err: unknown): err is APIResponseError {
     typeof err === "object" && err !== null && "name" in err && "message" in err
   );
 }
+
+function isFetchBaseQueryError(err: unknown): err is FetchBaseQueryError {
+  return typeof err === "object" && err !== null && "status" in err;
+}
+
+function isErrorWithMessage(err: unknown): err is { message: string } {
+  return (
+    typeof err === "object" &&
+    err !== null &&
+    "message" in err &&
+    typeof err.message === "string"
+  );
+}
+
+//
 
 export function getRTKQueryErr(err: unknown) {
   if (isFetchBaseQueryError(err)) {
@@ -27,113 +43,83 @@ export function getRTKQueryErr(err: unknown) {
   }
 }
 
-export function isFetchBaseQueryError(
-  error: unknown,
-): error is FetchBaseQueryError {
-  return typeof error === "object" && error !== null && "status" in error;
-}
+export function extractFilename(path: string): string {
+  if (!path.includes("/")) return path;
 
-//
-
-export function isErrorWithMessage(
-  error: unknown,
-): error is { message: string } {
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    "message" in error &&
-    typeof (error as any).message === "string"
-  );
-}
-
-export function extractFilename(path: string) {
   const pathArray = path.split("/");
   const lastIndex = pathArray.length - 1;
+
   return pathArray[lastIndex];
 }
 
-export function toHourMinSec(sec: number) {
+export function toHourMinSec(sec: number): string {
+  if (sec < 0) {
+    throw new Error(`${sec} should be >= 0`);
+  } else if (!Number.isFinite(sec)) {
+    throw new Error(`${sec} should be a finite number`);
+  }
+
   const hms = new Date(sec * 1000).toISOString().substring(11, 19).split(":");
   if (hms[0] !== "00") return hms.join(":");
   else return hms.slice(1).join(":");
 }
 
-export function buildSearchQuery(
-  formValues: FilterFormValues,
-  excludedTracks: number[],
-) {
-  function buildFilters(filters: FilterFormValues["filters"]) {
-    // When there is only a single value selected in React-select multiselect dropdown, it is submitted as { label: string, value: object} , instead of as object inside an array ([ { label: string, value: object } ]).
-    // Here we wrap it in array, to keep it consistent.
-    const withFixedValueKey = filters.map((filter) => {
-      return {
-        name: filter.name.value,
-        condition: filter.condition?.value,
-        value:
-          !Array.isArray(filter["value"]) && filter["name"].value === "genre"
-            ? [filter["value"]]
-            : !Array.isArray(filter["value"])
-              ? filter["value"]?.value
-              : filter["value"],
-      };
-    });
+export function buildFilterQuery(filter: Filter): FilterQuery {
+  const validFilterNames = ["genre", "year"];
 
-    return withFixedValueKey.map((filter) => ({
-      ...filter,
-      // Strip irrelevant keys
-      //name: filter.name,
-      //condition: filter.condition,
-      // Merge all genre ids into a single array
-      value: Array.isArray(filter.value)
-        ? filter.value.map((v) => v?.value)
-        : filter.value,
-    }));
+  if (!validFilterNames.includes(filter.name.value)) {
+    throw new Error("Invalid filter name");
   }
 
-  const searchQuery: SearchQuery = {
-    operator: formValues.operator.value,
-    filters: buildFilters(formValues.filters),
-    excludeTracks: excludedTracks,
+  if (filter.condition === null) {
+    throw new Error("'condition' can't be null");
+  }
+
+  if (filter.value === null) {
+    throw new Error("'value' can't be null");
+  }
+  if (filter.name.value === "year" && Array.isArray(filter.value)) {
+    throw new Error("Year 'value' can't be an array");
+  }
+
+  return {
+    name: filter.name.value,
+    condition: filter.condition.value,
+    value: Array.isArray(filter["value"])
+      ? filter.value.map((v) => v.value)
+      : filter["value"].value,
   };
-
-  return searchQuery;
 }
 
-export function exportPlaylistAsJSON(
-  playlistName: string,
-  tracks: Record<string, TrackMeta[]>,
-) {
+export function buildFindTrackReqBody(
+  form: FilterFormValues,
+  excludedTracks: number[],
+  buildFilterQuery: (filter: Filter) => FilterQuery,
+): SearchQuery {
+  return {
+    operator: form.operator.value,
+    excludeTracks: excludedTracks,
+    filters: form.filters.map((f) => buildFilterQuery(f)),
+  };
+}
+
+export function exportData<T>(data: T, fileName = "exported-data"): void {
   const link = document.createElement("a");
   link.href = `data:text/json;chatset=utf-8,${encodeURIComponent(
-    JSON.stringify(
-      Object.values(tracks)
-        .flat()
-        .map((t) => t.filePath),
-      null,
-      2,
-    ),
+    JSON.stringify(data, null, 2),
   )}`;
-  link.download = `${playlistName}.json`;
+  link.download = `${fileName}.json`;
   link.click();
 }
 
-export function exportValidationReport<T>(report: T) {
-  const link = document.createElement("a");
-  link.href = `data:text/json;chatset=utf-8,${encodeURIComponent(
-    JSON.stringify(report, null, 2),
-  )}`;
-  link.download = "validation-report.json";
-  link.click();
-}
-
-export function encodeRFC3986URIComponent(str: string) {
+export function encodeRFC3986URIComponent(str: string): string {
   return encodeURI(str).replace(
     /[!'()*]/g,
     (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`,
   );
 }
 
-export function parseFileToStrings(file: File): Promise<string[] | string> {
+export function parseFileToStrings(file: File): Promise<string> {
   return new Promise(function (resolve, reject) {
     const fr = new FileReader();
 
