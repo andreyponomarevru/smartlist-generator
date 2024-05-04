@@ -396,7 +396,7 @@ describe("buildFindTrackReqBody", () => {
 
     buildFindTrackReqBody(form, excludedTracks, mockBuilder);
 
-    expect(mockBuilder).toBeCalledTimes(form.filters.length);
+    expect(mockBuilder).toHaveBeenCalledTimes(form.filters.length);
     expect(mockBuilder.mock.calls[0]).toStrictEqual([form.filters[0]]);
     expect(mockBuilder.mock.calls[1]).toStrictEqual([form.filters[1]]);
   });

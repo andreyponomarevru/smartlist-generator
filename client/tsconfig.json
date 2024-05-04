@@ -2,7 +2,7 @@
   "compilerOptions": {
     "jsx": "react",
     "preserveConstEnums": true,
-    "types": ["node"],
+    "types": ["node", "jest"],
 
     "outDir": "./build",
     "rootDir": "./src/",
@@ -10,7 +10,7 @@
     "paths": {
       "*": ["node_modules/*"]
     },
-    "target": "es6",
+    "target": "ES2020",
     "module": "es6",
     "sourceMap": true,
     "moduleResolution": "node",

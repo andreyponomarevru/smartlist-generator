@@ -20,15 +20,16 @@ export function Stats(props: Props) {
   const [sortDir, setSortDir] = React.useState<"asc" | "desc">("asc");
 
   function sortBy(a: StatsItem, b: StatsItem) {
-    if (sortType === "alpha") {
-      return sortDir === "asc"
-        ? a.name.toString().localeCompare(b.name.toString())
-        : b.name.toString().localeCompare(a.name.toString());
-    } else if (sortType === "num") {
-      return sortDir === "asc" ? a.count - b.count : b.count - a.count;
-    } else {
-      return 0;
-    }
+    const sort = {
+      alpha: {
+        asc: a.name.toString().localeCompare(b.name.toString()),
+        desc: b.name.toString().localeCompare(a.name.toString()),
+      },
+      num: { asc: a.count - b.count, desc: b.count - a.count },
+    };
+
+    if (sortType && sortDir) return sort[sortType][sortDir];
+    else return 0;
   }
 
   const statsList = [...props.stats].sort(sortBy).map((item) => {

@@ -3,25 +3,13 @@ import { FaDownload } from "react-icons/fa";
 
 import { FiltersState } from "../filters";
 import { Btn } from "../../ui/btn";
+import { exportData } from "../../../utils";
 
-interface Props {
-  savedFilters: FiltersState;
-}
-
-export function ExportSavedFiltersToJSONBtn(props: Props) {
-  function exportFilters(filters: FiltersState) {
-    const link = document.createElement("a");
-    link.href = `data:text/json;chatset=utf-8,${encodeURIComponent(
-      JSON.stringify(filters, null, 2),
-    )}`;
-    link.download = "filters-backup.json";
-    link.click();
-  }
-
+export function ExportSavedFiltersToJSONBtn(props: { filters: FiltersState }) {
   return (
     <Btn
-      onClick={() => exportFilters(props.savedFilters)}
-      isDisabled={Object.keys(props.savedFilters).length === 0}
+      onClick={() => exportData(props.filters, "saved-filters")}
+      isDisabled={Object.keys(props.filters).length === 0}
       className="btn_type_secondary"
     >
       <FaDownload className="icon" />

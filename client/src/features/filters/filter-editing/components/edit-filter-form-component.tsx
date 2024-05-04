@@ -96,19 +96,6 @@ export function EditFilterForm(props: Props) {
     })(e);
   }
 
-  // If the filter has been updated - hide playlist
-  React.useEffect(() => {
-    if (form.formState.isDirty) {
-      handleTracksReset();
-      form.reset(watchedFilters, { keepValues: true, keepDirty: false });
-    }
-  }, [form, watchedFilters]);
-
-  async function handleFilterSubmit(formValues: FilterFormValues) {
-    handleTrackAdd(formValues);
-    form.reset(formValues, { keepValues: true, keepDirty: false });
-  }
-
   function handleFilterSave(formValues: FilterFormValues) {
     if (props.filterId === EDIT_FILTER_FORM_ID) {
       dispatch(upsertFilter({ inputs: watchedFilters }));
@@ -118,6 +105,19 @@ export function EditFilterForm(props: Props) {
     form.reset(formValues, { keepValues: true, keepDirty: false });
     props.onCancelClick();
   }
+
+  async function handleFilterSubmit(formValues: FilterFormValues) {
+    handleTrackAdd(formValues);
+    form.reset(formValues, { keepValues: true, keepDirty: false });
+  }
+
+  // If the filter has been updated - hide playlist
+  React.useEffect(() => {
+    if (form.formState.isDirty) {
+      handleTracksReset();
+      form.reset(watchedFilters, { keepValues: true, keepDirty: false });
+    }
+  }, [form, watchedFilters]);
 
   return (
     <div className="edit-filter-form">

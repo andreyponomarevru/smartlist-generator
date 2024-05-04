@@ -2,7 +2,7 @@ import React from "react";
 import { FaDownload } from "react-icons/fa";
 
 import type { LibPathInput } from "../../types";
-import { exportValidationReport, getRTKQueryErr } from "../../utils";
+import { exportData, getRTKQueryErr } from "../../utils";
 import { Loader } from "../ui/loader/loader-component";
 import { Process as SSEMessage } from "../ui/process";
 import {
@@ -37,7 +37,9 @@ export function ValidationSettings(props: Props) {
             >
               <button
                 type="button"
-                onClick={() => exportValidationReport(latestMsg.result)}
+                onClick={() =>
+                  exportData(latestMsg.result, "validation-report")
+                }
                 className="btn btn_type_secondary"
               >
                 <FaDownload className="icon" /> Download report

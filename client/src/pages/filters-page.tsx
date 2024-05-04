@@ -48,7 +48,7 @@ export function FiltersPage() {
 
       <div className="filters-page__controls">
         <span></span>
-        <ExportSavedFiltersToJSONBtn savedFilters={savedFilters} />
+        <ExportSavedFiltersToJSONBtn filters={savedFilters} />
       </div>
     </div>
   );

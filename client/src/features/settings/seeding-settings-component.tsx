@@ -7,7 +7,7 @@ import {
   useStopProcessMutation,
   useStreamSSEsQuery,
 } from "../api";
-import { exportValidationReport, getRTKQueryErr } from "../../utils";
+import { getRTKQueryErr } from "../../utils";
 import { Loader } from "../ui/loader/loader-component";
 import { Process } from "../ui/process";
 import { Message } from "../ui/message";
@@ -35,11 +35,7 @@ export function SeedingSettings(props: Props) {
             className={`status-loader status-loader_${latestMsg.status}`}
           >
             {latestMsg.result && (
-              <button
-                type="button"
-                onClick={() => exportValidationReport(latestMsg.result)}
-                className="btn btn_type_secondary"
-              >
+              <button type="button" className="btn btn_type_secondary">
                 <FaDownload className="icon" /> Download report
               </button>
             )}

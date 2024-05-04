@@ -3,8 +3,8 @@ import React from "react";
 import { selectExcludedTracksIds } from "../excluded-tracks-slice";
 import { useAppSelector } from "../../../hooks/redux-ts-helpers";
 import { ImportExcludedTracksFromM3UBtn } from "../importing-excluded-tracks-from-m3u";
-import { ExcludedTracksStats } from "../excluded-tracks-stats";
-import { ClearExcludedTracksBtn } from "../clearing-excluded-tracks";
+import { ExcludedTracksStats } from "../stats";
+import { ClearExcludedTracksBtn } from "../clearing";
 
 export function ExcludedTracksSettings() {
   const excludedTracks = useAppSelector(selectExcludedTracksIds);

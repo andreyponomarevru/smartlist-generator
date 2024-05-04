@@ -8,16 +8,10 @@ import { importFilters, FiltersState } from "../filters";
 
 // Thunks
 
-export function thunkImportFilters(
-  e: React.ChangeEvent<HTMLInputElement>,
-): AppThunk {
+export function thunkImportFilters(fileList: FileList): AppThunk {
   return async function (dispatch, getState) {
     try {
-      if (!e.target.files || e.target.files.length === 0) {
-        throw new Error("No file(s)");
-      }
-
-      const files = Array.from(e.target.files);
+      const files = Array.from(fileList);
       const isValidExtension = files.every((file) => {
         return file.name.split(".").pop()?.toLowerCase() === "json";
       });

@@ -2,7 +2,7 @@ import React from "react";
 import { IoMdAddCircle } from "react-icons/io";
 
 import { Group } from "../features/playlist";
-import { getPlaylistTotalDuration } from "../features/playlist";
+import { getPlaylistDuration } from "../features/playlist";
 import { ModalProvider } from "../features/ui/modal";
 import { useAppDispatch, useAppSelector } from "../hooks/redux-ts-helpers";
 import {
@@ -14,12 +14,14 @@ import {
 import { ExportPlaylistToM3UBtn } from "../features/playlist/exporting-playlist-to-m3u";
 
 import "./playlist-page.scss";
+import { selectFilters } from "../features/filters/filters";
 
 export function PlaylistPage() {
   const dispatch = useAppDispatch();
 
   const tracks = useAppSelector(selectTracks);
   const groups = useAppSelector(selectGroups);
+  const savedFilters = useAppSelector(selectFilters);
 
   const playlistName = `Playlist ${new Date().toDateString()}`;
 
@@ -31,7 +33,7 @@ export function PlaylistPage() {
             {playlistName}
           </header>
           <div className="playlist-page__duration">
-            {getPlaylistTotalDuration(tracks)}
+            {getPlaylistDuration(tracks)}
           </div>
         </div>
 
@@ -47,6 +49,7 @@ export function PlaylistPage() {
             type="button"
             className="btn btn_type_primary add-section-btn"
             onClick={() => dispatch(addGroup({ insertAt: 0 }))}
+            disabled={Object.keys(savedFilters).length === 0}
           >
             <IoMdAddCircle className="icon" />
             Add Group

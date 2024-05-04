@@ -6,7 +6,6 @@ import "./filter-header.scss";
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
   name: string;
-
   isOpen: boolean;
   onOpenClick: () => void;
   onEditClick: () => void;

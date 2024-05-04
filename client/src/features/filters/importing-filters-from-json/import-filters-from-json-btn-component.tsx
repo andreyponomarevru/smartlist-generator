@@ -14,7 +14,10 @@ export function ImportFiltersFromJSONBtn() {
     if (importError) setImportError("");
 
     try {
-      await dispatch(thunkImportFilters(e));
+      if (!e.target.files || e.target.files.length === 0) {
+        throw new Error("No file(s)");
+      }
+      await dispatch(thunkImportFilters(e.target.files));
     } catch (err) {
       if (err instanceof Error) setImportError(err.message);
       setTimeout(() => setImportError(""), 1000);

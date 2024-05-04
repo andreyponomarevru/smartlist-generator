@@ -1,15 +1,8 @@
 import React from "react";
 import Select from "react-select";
 import { Controller, useForm } from "react-hook-form";
-import {
-  FaChevronUp,
-  FaChevronDown,
-  FaArrowDown,
-  FaArrowUp,
-  FaRegTrashAlt,
-} from "react-icons/fa";
+import { FaChevronUp, FaChevronDown } from "react-icons/fa";
 import { IoMdAddCircle } from "react-icons/io";
-import { GrCircleInformation } from "react-icons/gr";
 
 import {
   useAppDispatch,
@@ -22,19 +15,12 @@ import {
 } from "../../../../types";
 import { Track } from "../../../track";
 import { Subplaylist } from "../../../ui/subplaylist";
-import { Modal, useModal } from "../../../ui/modal";
-import {
-  FilterDetails,
-  selectFilterById,
-  selectFilters,
-} from "../../../filters/filters";
+import { selectFilterById, selectFilters } from "../../../filters/filters";
 import { useLazyFindTrackQuery } from "../../../track";
 import type { Direction } from "..";
 import { selectExcludedTracksIds } from "../../../excluded-tracks";
 import {
   addGroup,
-  reorderGroup,
-  destroyGroup,
   toggleOpenGroup,
   addTrack,
   removeTrack,
@@ -45,6 +31,8 @@ import {
   selectTracksFromGroup,
 } from "../playlist-slice";
 import { Message } from "../../../ui/message";
+import { Btn } from "../../../ui/btn";
+import { GroupControls } from "./group-controls-component";
 
 import "./group.scss";
 
@@ -58,8 +46,6 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 type SavedFilter = { filterId: { label: string; value: string } };
 
 export function Group(props: Props) {
-  const { setState: setModalState } = useModal();
-
   const dispatch = useAppDispatch();
   const playlist = useAppSelector(selectPlaylist);
   const excludedTracksIds = useAppSelector(selectExcludedTracksIds);
@@ -188,6 +174,7 @@ export function Group(props: Props) {
               />
             </form>
           </div>
+
           <div className="group__toggle-group-btn">
             {playlist.isGroupOpen[`${props.groupId}`] ? (
               <FaChevronUp className="icon" />
@@ -195,52 +182,15 @@ export function Group(props: Props) {
               <FaChevronDown className="icon" />
             )}
           </div>
+
           <span></span>
-          <div
-            className="group__header-btns"
-            onClick={(e) => e.stopPropagation()}
-            role="presentation"
-          >
-            <button
-              type="button"
-              onClick={() => setModalState({ isVisible: true })}
-              className="btn btn_type_icon btn_hover_grey-20"
-            >
-              <GrCircleInformation className="icon" />
-            </button>
-            <Modal title={filters[selectedFilterId].name}>
-              <FilterDetails filter={selectedFilterDetails} />
-            </Modal>
-            <button
-              type="button"
-              onClick={() => dispatch(destroyGroup({ groupId: props.groupId }))}
-              className="btn btn_type_icon btn_hover_grey-20"
-            >
-              <span>
-                <FaRegTrashAlt className="icon" />
-              </span>
-            </button>
-            <button
-              type="button"
-              onClick={() =>
-                dispatch(reorderGroup({ index: props.index, direction: "UP" }))
-              }
-              className="btn btn_type_icon btn_hover_grey-20 group__sort-btn"
-            >
-              <FaArrowUp className="icon" />
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                dispatch(
-                  reorderGroup({ index: props.index, direction: "DOWN" }),
-                );
-              }}
-              className="btn btn_type_icon btn_hover_grey-20 group__sort-btn"
-            >
-              <FaArrowDown className="icon" />
-            </button>
-          </div>
+
+          <GroupControls
+            groupName={filters[selectedFilterId].name}
+            details={selectedFilterDetails}
+            groupId={props.groupId}
+            groupIndex={props.index}
+          />
         </header>
 
         <div
@@ -287,14 +237,14 @@ export function Group(props: Props) {
           </button>
         </div>
       </div>
-      <button
-        type="button"
-        className="btn btn_type_secondary"
+
+      <Btn
+        className="btn_type_secondary"
         onClick={() => dispatch(addGroup({ insertAt: props.index + 1 }))}
       >
         <IoMdAddCircle className="icon" />
         Add Group
-      </button>
+      </Btn>
     </>
   );
 }

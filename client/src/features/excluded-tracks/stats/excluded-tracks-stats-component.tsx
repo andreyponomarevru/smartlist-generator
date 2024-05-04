@@ -3,24 +3,7 @@ import React from "react";
 import { useGetStatsQuery } from "../../stats";
 import { selectExcludedTracksIds } from "../excluded-tracks-slice";
 import { useAppSelector } from "../../../hooks/redux-ts-helpers";
-
-function calcExcludedStats(excludedCount = 0, stats: { count: number }[] = []) {
-  const totalCount =
-    stats.reduce(
-      (accumulator, currentValue) => accumulator + currentValue.count,
-      0,
-    ) || 0;
-  const tracksLeft = totalCount - excludedCount;
-
-  return {
-    totalCount,
-    excludedPercentage:
-      totalCount === 0 && excludedCount === 0
-        ? 0
-        : Number(((100 * excludedCount) / totalCount).toFixed(1)),
-    tracksLeft,
-  };
-}
+import { calcExcludedStats } from "./utils";
 
 export function ExcludedTracksStats() {
   const excludedTracks = useAppSelector(selectExcludedTracksIds);

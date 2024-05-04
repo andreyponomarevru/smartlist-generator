@@ -1,6 +1,6 @@
 import { apiSplitSlice } from "../../features/api";
 
-import { buildSearchQuery } from "../../utils";
+import { buildFindTrackReqBody, buildFilterQuery } from "../../utils";
 import { FilterFormValues, TrackMeta, APIResponseSuccess } from "../../types";
 import { LOCAL_MUSIC_LIB_DIR, MUSIC_LIB_DIR } from "../../config/env";
 
@@ -29,7 +29,11 @@ export const extendedAPIslice = apiSplitSlice.injectEndpoints({
           accept: "application/json",
         },
         body: JSON.stringify(
-          buildSearchQuery(arg.formValues, arg.excludedTracks),
+          buildFindTrackReqBody(
+            arg.formValues,
+            arg.excludedTracks,
+            buildFilterQuery,
+          ),
         ),
       }),
       transformResponse: (

@@ -5,7 +5,7 @@ import { encodeRFC3986URIComponent } from "../../../utils";
 import { Btn } from "../../../features/ui/btn";
 import { TrackMeta } from "../../../types";
 
-export function exportPlaylistToM3U(
+function exportPlaylistToM3U(
   playlistName: string,
   tracks: { filePath: string }[],
 ) {

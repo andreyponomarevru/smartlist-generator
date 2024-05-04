@@ -6,13 +6,14 @@
   "scripts": {
     "serve": "webpack serve --config ./webpack.dev.js",
     "build": "webpack --config ./webpack.prod.js",
-    "test:unit": "jest JEST_HIDE_USAGE= --watch ./_unit-tests_",
-    "test:coverage": "jest --coverage ./_unit-tests_"
+    "test:unit": "jest --detectOpenHandles --verbose --watchAll --silent ./src",
+    "test:coverage": "jest --coverage"
   },
   "author": "Andrey Ponomarev",
   "license": "ISC",
   "dependencies": {
     "@reduxjs/toolkit": "^2.2.3",
+    "identity-obj-proxy": "^3.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.51.2",

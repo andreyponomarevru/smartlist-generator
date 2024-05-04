@@ -14,14 +14,15 @@ export type TrackMeta = {
 //
 
 export type OptionsList<Value = number> = { label: string; value: Value };
+export type Filter = {
+  name: OptionsList<string>;
+  condition: OptionsList<string> | null;
+  value: OptionsList<number> | OptionsList<number>[] | null;
+};
 export interface FilterFormValues {
   name: string;
-  operator: { label: string; value: string };
-  filters: {
-    name: { label: string; value: string };
-    condition: { label: string; value: string } | null;
-    value: OptionsList<number> | OptionsList<number>[] | null;
-  }[];
+  operator: OptionsList<string>;
+  filters: Filter[];
 }
 export interface SavedFilterFormValues {
   filterId: OptionsList<string>;
@@ -42,13 +43,14 @@ export type Stats = {
   years: { name: string; count: number }[];
   genres: { id?: number; name: string; count: number }[];
 };
+export type FilterQuery = {
+  name: string;
+  condition: string;
+  value: number | number[];
+};
 export type SearchQuery = {
   operator: string;
-  filters: {
-    name: string;
-    condition?: string;
-    value: number | (number | undefined)[] | undefined;
-  }[];
+  filters: FilterQuery[];
   excludeTracks: number[];
 };
 

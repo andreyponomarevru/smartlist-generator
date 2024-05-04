@@ -2,7 +2,7 @@ import React from "react";
 
 interface Props extends React.HTMLAttributes<HTMLButtonElement> {
   onClick: () => void;
-  isDisabled: boolean;
+  isDisabled?: boolean;
 }
 
 export function Btn(props: Props) {
@@ -11,7 +11,7 @@ export function Btn(props: Props) {
       type="button"
       onClick={props.onClick}
       className={`btn ${props.className || ""} `}
-      disabled={props.isDisabled}
+      disabled={props.isDisabled || false}
     >
       {props.children}
     </button>
