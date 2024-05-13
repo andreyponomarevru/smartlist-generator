@@ -80,5 +80,5 @@ CREATE TABLE IF NOT EXISTS track_genre (
   FOREIGN KEY (track_id) REFERENCES track (track_id)
     ON DELETE CASCADE,
   FOREIGN KEY (genre_id) REFERENCES genre (genre_id)
-    ON DELETE RESTRICT
+    ON DELETE CASCADE
 );

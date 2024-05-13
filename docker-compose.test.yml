@@ -5,10 +5,9 @@ services:
     container_name: api
     build:
       context: ./api
-      dockerfile: Dockerfile.dev
+      dockerfile: ./docker/Dockerfile.dev
     volumes:
-      - ./api/src:/node/src
-      - ./api/tsconfig.json:/api/tsconfig.json
+      - ./api:/node
       # ":/tracks" should match the MUSIC_LIB_DIR env var in .common.env
       - /mnt/CE64EB6A64EB53AD/music-lib/tracks:/tracks
     expose:
@@ -17,33 +16,34 @@ services:
       - "8080:8080"
       - "9229:9229"
     env_file:
-      - ./api/.env
-      - ./postgres/.env
+      - ./api/docker/.test.env
+      - ./postgres/docker/.test.env
       - ./.common.env
+    depends_on:
+      - testdb_postgres
 
-  postgres:
+  testdb_postgres:
     container_name: postgres
     build:
       context: ./postgres
-      dockerfile: Dockerfile
+      dockerfile: ./docker/Dockerfile.dev
     restart: always
     env_file:
-      - ./postgres/.env
+      - ./postgres/docker/.dev.env
     ports:
       - 5433:5432
     volumes:
       - ./postgres/volume/:/var/lib/postgresql/data
-      - ./postgres/docker-entrypoint-initdb.d/init-dev.sql:/docker-entrypoint-initdb.d/init.sql
 
   client:
     container_name: client
     build:
       context: ./client
-      dockerfile: Dockerfile
+      dockerfile: ./docker/Dockerfile.dev
     restart: "always"
     env_file:
       - ./.common.env
-      - ./client/.env
+      - ./client/docker/.dev.env
     expose:
       - 3000
     ports:

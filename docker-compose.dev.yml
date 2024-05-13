@@ -1,0 +1,60 @@
+version: "3.7"
+
+services:
+  api:
+    container_name: api
+    build:
+      context: ./api
+      dockerfile: ./docker/Dockerfile.dev
+    volumes:
+      - ./api:/node
+      # ":/tracks" should match the MUSIC_LIB_DIR env var in .common.env
+      - /mnt/CE64EB6A64EB53AD/music-lib/tracks:/tracks
+    expose:
+      - "8080"
+    ports:
+      - "8080:8080"
+      - "9229:9229"
+    env_file:
+      - ./api/docker/.dev.env
+      - ./postgres/docker/.dev.env
+      - ./.common.env
+    depends_on:
+      - devdb_postgres
+
+  devdb_postgres:
+    container_name: postgres
+    build:
+      context: ./postgres
+      dockerfile: ./docker/Dockerfile.dev
+    restart: always
+    env_file:
+      - ./postgres/docker/.dev.env
+    ports:
+      - 5433:5432
+    volumes:
+      - ./postgres/volume/:/var/lib/postgresql/data
+      - ./postgres/docker-entrypoint-initdb.d/init.dev.sql:/docker-entrypoint-initdb.d/init.sql
+
+  client:
+    container_name: client
+    build:
+      context: ./client
+      dockerfile: ./docker/Dockerfile.dev
+    restart: "always"
+    env_file:
+      - ./.common.env
+      - ./client/docker/.dev.env
+    expose:
+      - 3000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./client/:/client/
+    depends_on:
+      - devdb_postgres
+      - api
+
+networks:
+  frontnet:
+    driver: bridge
