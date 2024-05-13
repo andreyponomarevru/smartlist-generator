@@ -1,4 +1,4 @@
-import { describe, expect, it, jest } from "@jest/globals";
+import { describe, expect, it, jest, test } from "@jest/globals";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 
 import {
@@ -35,45 +35,13 @@ describe("getRTKQueryErr", () => {
   });
 
   describe("returns a non-empty string if an unknown error passed is a", () => {
-    it("string", () => {
-      const err = "Some error";
-
-      const result = typeof getRTKQueryErr(err);
-
-      expect(result).toBe("string");
-      expect(result).not.toBe("");
-    });
-
-    it("null", () => {
-      const err = null;
-
-      const result = typeof getRTKQueryErr(err);
-
-      expect(result).toBe("string");
-      expect(result).not.toBe("");
-    });
-
-    it("undefined", () => {
-      const err = undefined;
-
-      const result = typeof getRTKQueryErr(err);
-
-      expect(result).toBe("string");
-      expect(result).not.toBe("");
-    });
-
-    it("regular object", () => {
-      const err = {};
-
-      const result = typeof getRTKQueryErr(err);
-
-      expect(result).toBe("string");
-      expect(result).not.toBe("");
-    });
-
-    it("instance of Error", () => {
-      const err = new Error();
-
+    test.each([
+      { err: "Some error" },
+      { err: null },
+      { err: undefined },
+      { err: {} },
+      { err: new Error("error") },
+    ])("$err", ({ err }) => {
       const result = typeof getRTKQueryErr(err);
 
       expect(result).toBe("string");
@@ -108,23 +76,14 @@ describe("extractFilename", () => {
   });
 
   describe("doesn't throw an error if", () => {
-    it("the path is an empty string", () => {
-      const result = () => extractFilename("");
+    test.each([{ path: "" }, { path: "/" }, { path: "d/" }])(
+      "$path",
+      ({ path }) => {
+        const result = () => extractFilename(path);
 
-      expect(result).not.toThrow();
-    });
-
-    it("the path is a forward slash", () => {
-      const result = () => extractFilename("/");
-
-      expect(result).not.toThrow();
-    });
-
-    it("the path ends with a forward slash", () => {
-      const result = () => extractFilename("d/");
-
-      expect(result).not.toThrow();
-    });
+        expect(result).not.toThrow();
+      },
+    );
   });
 
   it("returns the path as is, if it is an invalid path", () => {
@@ -156,26 +115,13 @@ describe("toHourMinSec", () => {
   });
 
   describe("throws an error if the duration is", () => {
-    it("negative number", () => {
-      const result = () => toHourMinSec(-800);
-
-      expect(result).toThrow();
-    });
-
-    it("Infinity", () => {
-      const result = () => toHourMinSec(Infinity);
-
-      expect(result).toThrow();
-    });
-
-    it("-Infinity", () => {
-      const result = () => toHourMinSec(-Infinity);
-
-      expect(result).toThrow();
-    });
-
-    it("NaN", () => {
-      const result = () => toHourMinSec(NaN);
+    test.each([
+      { sec: -800 },
+      { sec: Infinity },
+      { sec: -Infinity },
+      { sec: NaN },
+    ])("$sec", ({ sec }) => {
+      const result = () => toHourMinSec(sec);
 
       expect(result).toThrow();
     });
