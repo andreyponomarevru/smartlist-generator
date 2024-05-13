@@ -1,4 +1,4 @@
-import { describe, expect, it } from "@jest/globals";
+import { describe, expect, it, test } from "@jest/globals";
 
 import { calcExcludedStats } from "./utils";
 
@@ -32,39 +32,21 @@ describe("calcExcludedStats", () => {
     expect(result).toThrow("excludedCount should be an integer");
   });
 
-  describe("returns an object with all keys set to 0", () => {
+  describe("returns an object with all keys set to 0 if excludedCount is", () => {
     const expected = {
       totalCount: 0,
       excludedPercentage: 0,
       tracksLeft: 0,
     };
 
-    it("if no arguments provided", () => {
-      const result = calcExcludedStats();
-
-      expect(result).toStrictEqual(expected);
-    });
-
-    it("if excludedCount is NaN", () => {
-      const result = calcExcludedStats(NaN);
-
-      expect(result).toStrictEqual(expected);
-    });
-
-    it("if excludedCount is Infinity", () => {
-      const result = calcExcludedStats(Infinity);
-
-      expect(result).toStrictEqual(expected);
-    });
-
-    it("if excludedCount is -Infinity", () => {
-      const result = calcExcludedStats(-Infinity);
-
-      expect(result).toStrictEqual(expected);
-    });
-
-    it("if excludedCount is a negative number", () => {
-      const result = calcExcludedStats(-10);
+    test.each([
+      { excludedCount: undefined },
+      { excludedCount: NaN },
+      { excludedCount: Infinity },
+      { excludedCount: -Infinity },
+      { excludedCount: -10 },
+    ])("$excludedCount", ({ excludedCount }) => {
+      const result = calcExcludedStats(excludedCount);
 
       expect(result).toStrictEqual(expected);
     });
