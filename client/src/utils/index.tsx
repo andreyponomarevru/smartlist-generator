@@ -38,7 +38,6 @@ export function getRTKQueryErr(err: unknown) {
   } else if (isErrorWithMessage(err)) {
     return err.message;
   } else {
-    console.log("Unknown type of error", err);
     return "Unknown type of error";
   }
 }
