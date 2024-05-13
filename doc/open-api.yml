@@ -37,6 +37,33 @@ components:
       type: object
       properties:
         results:
+          type: object
+          properties:
+            years:
+              type: array 
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  count:
+                    type: integer
+            genres:
+              type: array 
+              items:
+                type: object
+                properties:
+                  id: 
+                    type: number
+                  name:
+                    type: string
+                  count:
+                    type: integer
+
+    GenreStats:
+      type: object
+      properties:
+        results:
           type: array
           items:
             type: object
@@ -46,7 +73,7 @@ components:
               name:
                 type: string
               count:
-                type: integer
+                type: integer    
 
     FoundTrack:
         type: object 
@@ -150,33 +177,16 @@ components:
 
 paths:
 
-  /stats/genres:
+  /stats:
     get:
-      summary: Returns genres stats
+      summary: Returns stats for genres, years, etc.
       description: >-
         ```
-        curl "localhost:8080/api/stats/genres"
+        curl "localhost:8080/api/stats"
         ```
       responses:
         '200':
-          description: Array of genres and track counts
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Stats'
-
-##########################################################################
-
-  /stats/years:
-    get:
-      summary: Returns years stats
-      description: >-
-        ```
-        curl "localhost:8080/api/stats/years"
-        ```
-      responses:
-        '200':
-          description: Array of years and track counts
+          description: Arrays of stats for different entities
           content:
             application/json:
               schema:
