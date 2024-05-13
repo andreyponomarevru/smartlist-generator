@@ -8,17 +8,16 @@ export interface Track {
   title: string;
   genres: string[];
 }
-export interface ValidatedTrack {
-  trackId?: number;
+export interface FoundTrack extends Track {
+  genreIds: number[];
+  trackId: number;
   filePath: string;
-  duration: number;
-  artists: string[];
-  year: number;
-  title: string;
-  genres: string[];
+}
+export interface ParsedTrack extends Track {
+  filePath: string;
   hasCover: boolean;
 }
-export type FoundTrackDBResponse = {
+export type DBResponseFoundTrack = {
   artists: string[];
   duration: string;
   genres: string[];
@@ -27,16 +26,6 @@ export type FoundTrackDBResponse = {
   track_id: number;
   year: number;
   file_path: string;
-};
-export type FoundTrack = {
-  artists: string[];
-  duration: number;
-  genres: string[];
-  genreIds: number[];
-  title: string;
-  trackId: number;
-  year: number;
-  filePath: string;
 };
 export type Filter = {
   name: string;
@@ -49,40 +38,40 @@ export type TrackValidatorError = {
   id3TagValue?: string | string[] | number;
   err: string;
 };
-type ValidationStats = {
-  names: (string | number)[];
-  count: number;
-};
-type ValidationResult = {
+type ValidationStats = { names: (string | number)[]; count: number };
+export type ValidationResult = {
   errors: TrackValidatorError[];
   artists: ValidationStats;
   years: ValidationStats;
   genres: ValidationStats;
-};
-export type ProcessStatus = "pending" | "success" | "failure" | null;
-export type ProcessResult = ValidationResult | null;
-export type ProcessName = "validation" | "seeding";
+} | null;
+export type OSProcessStatus = "pending" | "success" | "failure" | null;
+export type OSProcessName = "validation" | "seeding";
 export type ProcessDBResponse = {
-  name: ProcessName;
+  name: OSProcessName;
   created_at: number;
   updated_at: number;
-  status: ProcessStatus;
-  result: ProcessResult;
+  status: OSProcessStatus;
+  result: ValidationResult;
 };
-export type Process = {
-  name: ProcessName;
+export type SSEMessage = {
+  name: OSProcessName;
   createdAt: number;
   updatedAt: number;
-  status: ProcessStatus;
-  result: ProcessResult;
+  status: OSProcessStatus;
+  result: ValidationResult;
 };
-export type ProcessMessage = {
-  name: ProcessName;
-  status: ProcessStatus;
-  result?: ProcessResult;
+export type OSProcessMessage = {
+  name: OSProcessName;
+  status: OSProcessStatus;
+  result?: ValidationResult;
 };
-export type SSEname = ProcessName | "test";
+export type SSEname = OSProcessName | "test";
 export type AppLoader = {
   app: express.Express;
   express: typeof import("express");
+};
+export type Stats = {
+  years: { name: string; count: number }[];
+  genres: { id: number; name: string; count: number }[];
 };

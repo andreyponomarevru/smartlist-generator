@@ -6,5 +6,5 @@ import { Filter } from "../../types";
 export const schemaFilter = Joi.object<Filter>({
   name: Joi.string().valid("year", "genre"),
   condition: Joi.string().valid(...FILTER_CONDITIONS),
-  value: Joi.alternatives(Joi.number(), Joi.array().items(Joi.number())),
+  value: Joi.array().items(Joi.number()).single(),
 });

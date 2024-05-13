@@ -1,16 +1,18 @@
 import { traverseDirs } from "../utils";
 import { trackService } from "../services/tracks";
 import { GENRES } from "../config/constants";
-import { ProcessMessage } from "../types";
+import { OSProcessMessage } from "../types";
 
-const libPath = process.argv[2];
+async function startProcess(tracks: typeof trackService) {
+  const LIB_PATH = process.argv[2];
 
-(async () => {
   if (!process.send) throw new Error("process.send is undefined");
 
-  await trackService.destroyAll();
-  await trackService.createGenres(GENRES);
-  await traverseDirs(libPath, trackService.create);
+  await tracks.destroyAll();
+  await tracks.createGenres(GENRES);
+  await traverseDirs(LIB_PATH, tracks.create);
 
-  process.send!({ name: "seeding", status: "success" } as ProcessMessage);
-})();
+  process.send!({ name: "seeding", status: "success" } as OSProcessMessage);
+}
+
+startProcess(trackService);

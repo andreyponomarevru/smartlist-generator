@@ -1,10 +1,12 @@
 import { statsRepo } from "../repositories/stats";
 
+import { Stats } from "../types";
+
 export const statsService = {
-  countTracksByGenre: async function (excluded: number[]) {
-    return await statsRepo.countTracksByGenre(excluded);
-  },
-  countTracksByYear: async function (excluded: number[]) {
-    return await statsRepo.countTracksByYear(excluded);
+  readStats: async function (excluded: number[]): Promise<Stats> {
+    return {
+      genres: await statsRepo.countTracksByGenre(excluded),
+      years: await statsRepo.countTracksByYear(excluded),
+    };
   },
 };

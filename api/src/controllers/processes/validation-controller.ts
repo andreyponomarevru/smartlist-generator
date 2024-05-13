@@ -2,7 +2,7 @@ import { ChildProcess, spawn } from "child_process";
 
 import { Request, Response, NextFunction } from "express";
 
-import { ProcessMessage, Process } from "../../types";
+import { OSProcessMessage, SSEMessage } from "../../types";
 import { HttpError } from "../../utils";
 import { NODE_PROCESS, PROCESSES } from "../../config/processes";
 import { wrapResponse } from "../../utils";
@@ -22,10 +22,10 @@ let validationProcess: ChildProcess | null = null;
 export const validationController = {
   startValidation: async function (
     req: Request<unknown, unknown, { libPath: string }>,
-    res: Response<{ results: Process } | HttpError>,
+    res: Response<{ results: SSEMessage } | HttpError>,
     next: NextFunction,
   ) {
-    async function onMessage(message: ProcessMessage) {
+    async function onMessage(message: OSProcessMessage) {
       console.log("[message] Done. All files has been validated");
       validationSSE.send(await processService.update(message), "validation");
     }

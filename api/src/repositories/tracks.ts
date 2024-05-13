@@ -1,13 +1,11 @@
-import format from "pg-format";
-
 import { dbConnection } from "../config/postgres";
 import { logDBError } from "../utils";
-import { SearchParams, buildSQLQuery } from "../utils/query-builder";
-import { FoundTrackDBResponse, FoundTrack, ValidatedTrack } from "../types";
+import { type SearchParams, buildSQLQuery } from "../utils/query-builder";
+import { DBResponseFoundTrack, FoundTrack, ParsedTrack } from "../types";
 import { GENRES } from "../config/constants";
 
 export const tracksRepo = {
-  create: async function (newTrack: ValidatedTrack): Promise<void> {
+  create: async function (newTrack: ParsedTrack): Promise<void> {
     const pool = await dbConnection.open();
     const client = await pool.connect();
 
@@ -113,7 +111,7 @@ export const tracksRepo = {
 
     try {
       const sql = buildSQLQuery(searchParams);
-      const response = await pool.query<FoundTrackDBResponse>(sql);
+      const response = await pool.query<DBResponseFoundTrack>(sql);
 
       return response.rows.length === 0
         ? []
@@ -152,7 +150,7 @@ export const tracksRepo = {
     const pool = await dbConnection.open();
 
     try {
-      const response = await pool.query<FoundTrackDBResponse>(
+      const response = await pool.query<DBResponseFoundTrack>(
         `SELECT track_id, file_path FROM track WHERE file_path = ANY($1);`,
         [filePaths],
       );
@@ -166,43 +164,6 @@ export const tracksRepo = {
           });
     } catch (err) {
       logDBError("Can't find tracks", err);
-      throw err;
-    }
-  },
-
-  destroyAll: async function () {
-    const pool = await dbConnection.open();
-
-    try {
-      await pool.query({
-        text: `
-          TRUNCATE track, artist, track_artist, genre, track_genre;`,
-      });
-      // Reset Postgres auto-increment id value to 0
-      await pool.query({
-        text: `ALTER SEQUENCE track_track_id_seq RESTART;`,
-      });
-      await pool.query({
-        text: `ALTER SEQUENCE artist_artist_id_seq RESTART;`,
-      });
-    } catch (err) {
-      logDBError("An error occured while clearing all db tables.", err);
-      throw err;
-    }
-  },
-
-  createGenres: async function (genres: typeof GENRES) {
-    const pool = await dbConnection.open();
-
-    try {
-      await pool.query({
-        text: format(
-          `INSERT INTO genre (genre_id, name) VALUES %L;`,
-          genres.map(({ id, name }) => [id, name]),
-        ),
-      });
-    } catch (err) {
-      logDBError("An error occured while adding genres to db", err);
       throw err;
     }
   },

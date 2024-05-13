@@ -1,18 +1,18 @@
 import { dbConnection } from "../config/postgres";
 import { logDBError } from "../utils";
 import {
-  ProcessStatus,
-  Process,
-  ProcessResult,
+  OSProcessStatus,
+  SSEMessage,
+  ValidationResult,
   ProcessDBResponse,
-  ProcessName,
+  OSProcessName,
 } from "../types";
 
 export const processesRepo = {
   create: async function (newTask: {
-    name: Process["name"];
-    status: Process["status"];
-  }): Promise<Process> {
+    name: SSEMessage["name"];
+    status: SSEMessage["status"];
+  }): Promise<SSEMessage> {
     const pool = await dbConnection.open();
 
     try {
@@ -33,7 +33,7 @@ export const processesRepo = {
     }
   },
 
-  read: async function (name: ProcessName): Promise<Process | null> {
+  read: async function (name: OSProcessName): Promise<SSEMessage | null> {
     const pool = await dbConnection.open();
 
     try {
@@ -59,7 +59,7 @@ export const processesRepo = {
     }
   },
 
-  destroy: async function (name: ProcessName) {
+  destroy: async function (name: OSProcessName) {
     const pool = await dbConnection.open();
 
     try {
@@ -74,9 +74,9 @@ export const processesRepo = {
   },
 
   update: async function (updatedTask: {
-    name: ProcessName;
-    status?: ProcessStatus;
-    result?: ProcessResult;
+    name: OSProcessName;
+    status?: OSProcessStatus;
+    result?: ValidationResult;
   }) {
     const pool = await dbConnection.open();
 

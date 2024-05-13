@@ -1,32 +1,36 @@
 import { traverseDirs } from "../utils";
 import { TrackValidator, schemaCreateTrack } from "../services/tracks";
-import { ProcessMessage } from "../types";
+import { OSProcessMessage } from "../types";
+import { parseAudioFile } from "../services/tracks/parse-audio-file";
 
-const LIB_PATH = process.argv[2];
+async function startProcess(trackValidator: TrackValidator) {
+  const LIB_PATH = process.argv[2];
 
-const tracksValidator = new TrackValidator(schemaCreateTrack);
-
-(async () => {
-  await traverseDirs(LIB_PATH, await tracksValidator.validate);
+  await traverseDirs(LIB_PATH, async (filePath: string) => {
+    await trackValidator.validate(await parseAudioFile(filePath));
+  });
 
   if (!process.send) throw new Error("process.send is undefined");
+
   process.send!({
     name: "validation",
-    status: tracksValidator.errors.length === 0 ? "success" : "failure",
+    status: trackValidator.errors.length === 0 ? "success" : "failure",
     result: {
-      errors: tracksValidator.errors,
+      errors: trackValidator.errors,
       artists: {
-        names: [...tracksValidator.db.artist].sort(),
-        count: tracksValidator.db.artist.size,
+        names: [...trackValidator.stats.artist].sort(),
+        count: trackValidator.stats.artist.size,
       },
       years: {
-        names: [...tracksValidator.db.year].sort(),
-        count: tracksValidator.db.year.size,
+        names: [...trackValidator.stats.year].sort(),
+        count: trackValidator.stats.year.size,
       },
       genres: {
-        names: [...tracksValidator.db.genre].sort(),
-        count: tracksValidator.db.genre.size,
+        names: [...trackValidator.stats.genre].sort(),
+        count: trackValidator.stats.genre.size,
       },
     },
-  } as ProcessMessage);
-})();
+  } as OSProcessMessage);
+}
+
+startProcess(new TrackValidator(schemaCreateTrack));

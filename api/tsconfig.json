@@ -1,7 +1,12 @@
 {
+  "ts-node": {
+    "compilerOptions": {
+      "module": "commonjs"
+    }
+  },
   "compilerOptions": {
     "target": "ES6",
-    "module": "commonjs",
+    "module": "ES2020",
     "sourceMap": true,
     "outDir": "./build",
 
@@ -17,7 +22,7 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "skipLibCheck": true,
-    "types": ["node"]
+    "types": ["node", "jest", "jest-extended"]
   },
   "compileOnSave": true,
   "include": ["src/**/*"],

@@ -1,4 +1,4 @@
-import fs from "fs-extra";
+import fs from "fs";
 import { Request, Response } from "express";
 
 // Function implements streaming the file starting from any time point the
@@ -10,7 +10,7 @@ export async function streamChunked<T>(req: Request<T>, res: Response) {
 
   // TODO: cache `stat` variable to avoid I/O operation on each rewiding the
   // client does in player (write `getFileStat()` function)
-  const stat = await fs.stat(res.locals.trackFilePath);
+  const stat = await fs.promises.stat(res.locals.trackFilePath);
   // fs.stats returns an object providing information about the file.
 
   // Set chunk size to 1 MB

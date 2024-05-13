@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { ValidatedTrack } from "../../types";
+import { ParsedTrack } from "../../types";
 import { GENRES } from "../../config/constants";
 
 const genreName = Joi.string()
@@ -21,7 +21,7 @@ const artistName = Joi.string().trim().min(1).max(200).required().messages({
   "string.max": '"artist" item is longer than 200 characters',
 });
 
-export const schemaCreateTrack = Joi.object<ValidatedTrack>({
+export const schemaCreateTrack = Joi.object<ParsedTrack>({
   filePath: Joi.string().trim().min(1).max(255).messages({
     "string.base": '"filePath" should be a type of "string"',
     "string.empty": '"filePath" cannot be an empty string',

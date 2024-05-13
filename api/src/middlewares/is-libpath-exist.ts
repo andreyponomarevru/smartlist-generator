@@ -1,15 +1,13 @@
-import fs from "fs-extra";
-
 import { Request, Response, NextFunction } from "express";
 
-import { HttpError } from "../utils";
+import { HttpError, isFileExist } from "../utils";
 
 export async function isLibPathExist(
   req: Request<unknown, unknown, { libPath: string }>,
   res: Response,
   next: NextFunction,
 ) {
-  if (req.body.libPath && (await fs.exists(req.body.libPath))) {
+  if (req.body.libPath && (await isFileExist(req.body.libPath))) {
     next();
   } else {
     next(

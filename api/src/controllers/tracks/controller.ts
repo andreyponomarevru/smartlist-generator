@@ -14,8 +14,7 @@ export const tracksController = {
     next: NextFunction,
   ) {
     try {
-      const searchParams = req.body;
-      res.json(wrapResponse(await trackService.find(searchParams)));
+      res.json(wrapResponse(await trackService.find(req.body)));
     } catch (err) {
       next(err);
     }
@@ -27,8 +26,9 @@ export const tracksController = {
     next: NextFunction,
   ) {
     try {
-      const { filePaths } = req.body;
-      res.json(wrapResponse(await trackService.findIdsByFilePaths(filePaths)));
+      res.json(
+        wrapResponse(await trackService.findIdsByFilePaths(req.body.filePaths)),
+      );
     } catch (err) {
       next(err);
     }

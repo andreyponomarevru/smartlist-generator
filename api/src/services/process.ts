@@ -1,27 +1,32 @@
 import { processesRepo } from "../repositories";
-import { ProcessName, ProcessStatus, ProcessResult } from "../types";
+import {
+  OSProcessName,
+  OSProcessStatus,
+  ValidationResult,
+  SSEMessage,
+} from "../types";
 
 export const processService = {
   create: async function (newTask: {
-    name: ProcessName;
-    status: ProcessStatus;
-  }) {
+    name: OSProcessName;
+    status: OSProcessStatus;
+  }): Promise<SSEMessage> {
     return await processesRepo.create(newTask);
   },
 
-  read: async function (name: ProcessName) {
+  read: async function (name: OSProcessName): Promise<SSEMessage | null> {
     return await processesRepo.read(name);
   },
 
   update: async function (updatedTask: {
-    name: ProcessName;
-    status?: ProcessStatus | undefined;
-    result?: ProcessResult | undefined;
-  }) {
+    name: OSProcessName;
+    status?: OSProcessStatus;
+    result?: ValidationResult;
+  }): Promise<SSEMessage | null> {
     return await processesRepo.update(updatedTask);
   },
 
-  destroy: async function (name: ProcessName) {
+  destroy: async function (name: OSProcessName): Promise<void> {
     await processesRepo.destroy(name);
   },
 };

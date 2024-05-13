@@ -1,11 +1,11 @@
 export * from "./validation-schemas";
-export * from "./validator";
+export * from "./track-validator";
 
-import { tracksRepo } from "../../repositories";
-import { SearchParams } from "../../utils/query-builder";
+import { tracksRepo, libRepo } from "../../repositories";
+import { type SearchParams } from "../../utils/query-builder";
 import { GENRES } from "../../config/constants";
 import { schemaCreateTrack } from "./validation-schemas";
-import { parseAudioFile } from "./validator";
+import { parseAudioFile } from "./parse-audio-file";
 
 export const trackService = {
   create: async function (filePath: string) {
@@ -27,10 +27,10 @@ export const trackService = {
   },
 
   destroyAll: async function () {
-    await tracksRepo.destroyAll();
+    await libRepo.destroyAll();
   },
 
   createGenres: async function (genres: typeof GENRES) {
-    await tracksRepo.createGenres(genres);
+    await libRepo.createGenres(genres);
   },
 };

@@ -3,7 +3,7 @@ import { ChildProcess, spawn } from "child_process";
 import { Request, Response, NextFunction } from "express";
 
 import { NODE_PROCESS, PROCESSES } from "../../config/processes";
-import { ProcessMessage, Process } from "../../types";
+import { OSProcessMessage, SSEMessage } from "../../types";
 import { HttpError } from "../../utils";
 import { wrapResponse } from "../../utils";
 import { processService, trackService } from "../../services";
@@ -22,10 +22,10 @@ let seedingProcess: ChildProcess | null = null;
 export const seedingController = {
   startSeeding: async function (
     req: Request<unknown, unknown, StartSeedingReqBody>,
-    res: Response<{ results: Process } | HttpError>,
+    res: Response<{ results: SSEMessage } | HttpError>,
     next: NextFunction,
   ) {
-    async function onMessage(message: ProcessMessage) {
+    async function onMessage(message: OSProcessMessage) {
       console.log("[message] Done. Database has been seeded");
       seedingSSE.send(await processService.update(message), "seeding");
     }

@@ -1,7 +1,7 @@
 export * from "./query-builder";
 
 import path from "path";
-import fs from "fs-extra";
+import fs from "fs/promises";
 
 import { SUPPORTED_CODEC } from "../config/env";
 
@@ -9,16 +9,23 @@ export function wrapResponse<T>(data: T) {
   return { results: data };
 }
 
-export function logDBError(msg: string, err: unknown) {
-  if (err instanceof Error) {
+export function logDBError(msg: string, originalErr: unknown) {
+  if (originalErr instanceof Error) {
     console.error(
-      `${__filename}: ${msg}\n${
-        process.env.NODE_ENV === "development" ? err.stack : ""
-      }`,
+      process.env.NODE_ENV === "development"
+        ? `${msg} - ${originalErr.stack}`
+        : "",
     );
   } else {
-    console.error(err);
+    console.error(`${msg} - ${originalErr}`);
   }
+}
+
+export async function isFileExist(path: string) {
+  return fs
+    .access(path)
+    .then(() => true)
+    .catch(() => false);
 }
 
 export async function traverseDirs(
@@ -28,43 +35,31 @@ export async function traverseDirs(
   const fileSystemNodes = await fs.readdir(dirpath);
 
   for (const fileSystemNode of fileSystemNodes) {
-    const nodePath = path.join(dirpath, fileSystemNode);
-    const nodeStats = await fs.stat(nodePath);
+    const nodeFullPath = path.join(dirpath, fileSystemNode);
+    const nodeStats = await fs.stat(nodeFullPath);
 
     if (nodeStats.isDirectory()) {
-      await traverseDirs(nodePath, callback);
-    } else if (SUPPORTED_CODEC.includes(getExtensionName(nodePath))) {
+      await traverseDirs(nodeFullPath, callback);
+    } else if (SUPPORTED_CODEC.includes(getExtensionName(nodeFullPath))) {
       try {
-        await callback(nodePath);
+        await callback(nodeFullPath);
       } catch (err) {
         if (err instanceof Error) {
-          console.error(`[Error. Skip file ${nodePath}] ${err}, ${err.stack}`);
+          console.error(
+            `[Error. Skip file ${nodeFullPath}] ${err}, ${err.stack}`,
+          );
+        } else {
+          console.error(err);
         }
       }
     }
   }
 }
 
-export function hyphenToUpperCase(str: string): string {
-  function format(match: string, offset: number, string: string) {
-    return offset > 0 ? string[offset + 1].toUpperCase() : "";
-  }
-  return str.replace(/-[a-z0-9]{0,1}/g, format);
-}
-
 export function getExtensionName(nodePath: string): string {
+  if (nodePath === "") throw new Error("Can't be an empty string");
+
   return path.extname(nodePath).slice(1).toLowerCase();
-}
-
-export function parseFilterIDs(arr: unknown): number[] | null {
-  if (Array.isArray(arr)) return arr.map((id) => parseInt(id));
-  else return null;
-}
-
-export function filterByExtension(filepath: string) {
-  return new RegExp(`\\.(${SUPPORTED_CODEC.join("|")})$`).test(
-    filepath.toLowerCase(),
-  );
 }
 
 export class HttpError extends Error {
@@ -89,8 +84,8 @@ export class HttpError extends Error {
   }
 }
 
-export class CustomDatabaseError extends Error {
-  constructor(message: string) {
-    super(message);
-  }
+export function parseID3V2Array(arr: string[] = []): string[] {
+  return arr.length > 0
+    ? [...new Set(arr.filter((str) => str.trim()).map((str) => str.trim()))]
+    : [];
 }

@@ -9,7 +9,7 @@ type Location = "body" | "headers" | "query" | "params";
 export function validate<T>(
   schema: Joi.AnySchema<T>,
   location: Location,
-): RequestHandler<any, any, any, any> {
+): RequestHandler<any, unknown, unknown, any> {
   async function reqHandler(req: Request, res: Response, next: NextFunction) {
     console.log(
       `${__filename}: [before validation] ${util.inspect(req[location])}`,

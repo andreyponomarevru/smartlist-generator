@@ -14,7 +14,8 @@ export const FILTER_CONDITIONS = [
   "does not contain any",
 ];
 
-export const GENRES: ReadonlyArray<{ id: number; name: string }> = [
+export type Genre = { id: number; name: string };
+export const GENRES: ReadonlyArray<Genre> = [
   { id: 0, name: "[Soundtrack]" },
   { id: 1, name: "2-Step" },
   { id: 2, name: "Acid House" },
@@ -46,4 +47,6 @@ export const GENRES: ReadonlyArray<{ id: number; name: string }> = [
   { id: 28, name: "UK Garage" },
   { id: 29, name: "Vocal" },
   { id: 30, name: "World Music" },
+  { id: 31, name: "Field Recording" },
+  { id: 32, name: "Spoken Word" },
 ];

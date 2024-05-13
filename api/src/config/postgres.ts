@@ -17,6 +17,8 @@ const CONFIG: PoolConfig = {
   database: POSTGRES_DATABASE,
   password: POSTGRES_PASSWORD,
   port: POSTGRES_PORT,
+  // maximum number of clients the pool should contain
+  max: 1,
 };
 
 let pool: Pool | undefined;
