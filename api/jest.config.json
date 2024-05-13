@@ -1,0 +1,20 @@
+{
+  "roots": [
+    "<rootDir>/src",
+    "<rootDir>/tests-e2e",
+    "<rootDir>/tests-integration"
+  ],
+  "testMatch": [
+    "**/__tests__/**/*.+(ts|tsx|js)",
+    "**/?(*.)+(spec|test).+(ts|tsx|js)"
+  ],
+  "moduleFileExtensions": ["ts", "js", "json"],
+  "transform": {
+    "^.+\\.(ts|tsx)$": ["ts-jest", { "useESM": true }]
+  },
+  "setupFilesAfterEnv": ["jest-extended/all"],
+  "clearMocks": true,
+  "resetMocks": true,
+  "restoreMocks": true,
+  "extensionsToTreatAsEsm": [".ts"]
+}
