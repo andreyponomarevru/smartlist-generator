@@ -1,81 +1,104 @@
 ########################
-### Project-specific ###
+
+### Project-specific
+
 ########################
 
+coverage/
 .dev
 volume/
 redis_data/
 mongodb/data
 
 ################
-### Postgres ###
+
+### Postgres
+
 ################
 
 volume/
-.env
-
-######################
-### Compiled files ###
-######################
-
-*.com
-*.class
-*.dll
-*.exe
-*.o
-*.so
-
-##################################
-### Vim session and temp files ###
-##################################
-
-*.vim
-*.swo
-*.swp
-
-################################
-### Visual Studio Code files ###
-################################
-
-*.code-workspace
-
-######################
-### Packaged files ###
-######################
-
-*.7z
-*.dmg
-*.gz
-*.iso
-*.jar
-*.rar
-*.tar
-*.zip
-
-#############
-### Other ###
-#############
-
 *.env
-*.log
+
+
+######################
+
+### Compiled files
+
+######################
+
+_.com
+_.class
+_.dll
+_.exe
+_.o
+_.so
+
+##################################
+
+### Vim session and temp files
+
+##################################
+
+_.vim
+_.swo
+\*.swp
+
+################################
+
+### Visual Studio Code files
+
+################################
+
+\*.code-workspace
+
+######################
+
+### Packaged files
+
+######################
+
+_.7z
+_.dmg
+_.gz
+_.iso
+_.jar
+_.rar
+_.tar
+_.zip
+
+#############
+
+### Other
+
+#############
+
+_.env
+_.log
 log/
-*~
-~*
+_~
+~_
+
 # ignore all files starting with a dot (e.g. `.README.txt`)
-.*
+
+.\*
+
 # ignore all dirs starting with a dot (e.g. `.ui-design`)
-.*/
-.goutputstream-*
+
+._/
+.goutputstream-_
 node_modules/
 dist/
-_source/
+\_source/
 
 # SSL certificate files
-*.crt
-*.key
+
+_.crt
+_.key
 
 ###########################################################
-### Whitelisted Files (track these files if they exist) ###
+
+### Whitelisted Files (track these files if they exist)
+
 ###########################################################
 
 !.gitignore
