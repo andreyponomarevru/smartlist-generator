@@ -4,10 +4,7 @@
     "<rootDir>/tests-e2e",
     "<rootDir>/tests-integration"
   ],
-  "testMatch": [
-    "**/__tests__/**/*.+(ts|tsx|js)",
-    "**/?(*.)+(spec|test).+(ts|tsx|js)"
-  ],
+  "testMatch": ["**/*.+(ts|tsx|js)", "**/?(*.)+(spec|test).+(ts|tsx|js)"],
   "moduleFileExtensions": ["ts", "js", "json"],
   "transform": {
     "^.+\\.(ts|tsx)$": ["ts-jest", { "useESM": true }]
