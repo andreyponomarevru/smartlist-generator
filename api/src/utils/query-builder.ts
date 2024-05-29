@@ -1,8 +1,9 @@
 import { Filter } from "../types";
+import { FILTER_OPERATOR } from "../config/constants";
 
 export type SearchParams = {
-  operator: string;
-  filters: { operator: string; filters: Filter[] }[] | Filter[];
+  operator: (typeof FILTER_OPERATOR)[number];
+  filters: { filters: Filter[] }[] | Filter[];
   excludeTracks: number[];
 };
 
@@ -75,7 +76,7 @@ function parseFilter({ name, condition, value }: Filter) {
 }
 
 function buildWhere(searchParams: {
-  operator: string;
+  operator?: string;
   filters: SearchParams["filters"];
 }): string {
   const where = [];

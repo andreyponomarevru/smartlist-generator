@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 
-import { trackService } from "../services/tracks";
+import { trackService } from "../services";
 import { HttpError } from "../utils";
 
 export type GetTrackFilePathReqParams = { id: number };

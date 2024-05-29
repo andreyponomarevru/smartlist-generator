@@ -2,13 +2,15 @@ import { SpawnOptions } from "child_process";
 
 import { NODE_ENV } from "./env";
 
-const SCRIPT_EXTENSION = NODE_ENV === "development" ? "ts" : "js";
+const SCRIPT_EXTENSION =
+  NODE_ENV === "development" || NODE_ENV === "test" ? "ts" : "js";
 
 type Processes = {
   [key: string]: { scriptPath: string; processOpts: SpawnOptions };
 };
 
-export const NODE_PROCESS = NODE_ENV === "development" ? "ts-node" : "node";
+export const NODE_PROCESS =
+  NODE_ENV === "development" || NODE_ENV === "test" ? "ts-node" : "node";
 
 export const PROCESSES: Processes = {
   validation: {

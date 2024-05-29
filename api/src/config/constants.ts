@@ -2,7 +2,7 @@ export const API_PREFIX = "/api";
 
 //
 
-export const FILTER_OPERATOR = ["and", "or"];
+export const FILTER_OPERATOR = ["and", "or"] as const;
 export const FILTER_CONDITIONS = [
   "is",
   "is not",
@@ -12,7 +12,7 @@ export const FILTER_CONDITIONS = [
   "contains all",
   "does not contain all",
   "does not contain any",
-];
+] as const;
 
 export type Genre = { id: number; name: string };
 export const GENRES: ReadonlyArray<Genre> = [

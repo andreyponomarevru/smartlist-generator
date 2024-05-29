@@ -4,14 +4,17 @@
     "<rootDir>/tests-e2e",
     "<rootDir>/tests-integration"
   ],
-  "testMatch": ["**/*.+(ts|tsx|js)", "**/?(*.)+(spec|test).+(ts|tsx|js)"],
+  "testMatch": ["**/?(*.)+(spec|test).+(ts|tsx|js)"],
   "moduleFileExtensions": ["ts", "js", "json"],
   "transform": {
     "^.+\\.(ts|tsx)$": ["ts-jest", { "useESM": true }]
   },
-  "setupFilesAfterEnv": ["jest-extended/all"],
   "clearMocks": true,
   "resetMocks": true,
   "restoreMocks": true,
-  "extensionsToTreatAsEsm": [".ts"]
+  "extensionsToTreatAsEsm": [".ts"],
+  "setupFilesAfterEnv": [
+    "<rootDir>/test-helpers/truncate-tables.ts",
+    "<rootDir>/test-helpers/disconnect-from-db.ts"
+  ]
 }

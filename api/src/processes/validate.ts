@@ -3,7 +3,7 @@ import { TrackValidator, schemaCreateTrack } from "../services/tracks";
 import { OSProcessMessage } from "../types";
 import { parseAudioFile } from "../services/tracks/parse-audio-file";
 
-async function startProcess(trackValidator: TrackValidator) {
+export async function startProcess(trackValidator: TrackValidator) {
   const LIB_PATH = process.argv[2];
 
   await traverseDirs(LIB_PATH, async (filePath: string) => {
@@ -33,4 +33,4 @@ async function startProcess(trackValidator: TrackValidator) {
   } as OSProcessMessage);
 }
 
-startProcess(new TrackValidator(schemaCreateTrack));
+(async () => await startProcess(new TrackValidator(schemaCreateTrack)))();

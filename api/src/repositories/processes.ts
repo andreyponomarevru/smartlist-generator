@@ -16,10 +16,10 @@ export const processesRepo = {
     const pool = await dbConnection.open();
 
     try {
-      const response = await pool.query<ProcessDBResponse>({
-        text: `INSERT INTO process (name, status) VALUES ($1, $2) RETURNING *;`,
-        values: [newTask.name, newTask.status],
-      });
+      const response = await pool.query<ProcessDBResponse>(
+        `INSERT INTO process (name, status) VALUES ($1, $2) RETURNING *;`,
+        [newTask.name, newTask.status],
+      );
       return {
         name: response.rows[0].name,
         createdAt: response.rows[0].created_at,
@@ -37,10 +37,10 @@ export const processesRepo = {
     const pool = await dbConnection.open();
 
     try {
-      const response = await pool.query<ProcessDBResponse>({
-        text: `SELECT * FROM process WHERE name = $1;`,
-        values: [name],
-      });
+      const response = await pool.query<ProcessDBResponse>(
+        `SELECT * FROM process WHERE name = $1;`,
+        [name],
+      );
 
       if (response.rows.length === 0) {
         return null;
@@ -63,10 +63,7 @@ export const processesRepo = {
     const pool = await dbConnection.open();
 
     try {
-      await pool.query({
-        text: `DELETE FROM process WHERE name = $1;`,
-        values: [name as string],
-      });
+      await pool.query(`DELETE FROM process WHERE name = $1;`, [name]);
     } catch (err) {
       logDBError(`An error occured while deleting the process '${name}'`, err);
       throw err;
@@ -77,21 +74,20 @@ export const processesRepo = {
     name: OSProcessName;
     status?: OSProcessStatus;
     result?: ValidationResult;
-  }) {
+  }): Promise<SSEMessage | null> {
     const pool = await dbConnection.open();
 
     try {
-      const response = await pool.query<ProcessDBResponse>({
-        text: `
-          UPDATE process 
-          SET 
-            status = COALESCE($2, status), 
-            result = COALESCE($3, result),
-            updated_at = CURRENT_TIMESTAMP
-          WHERE name = $1
-          RETURNING *;`,
-        values: [updatedTask.name, updatedTask.status, updatedTask.result],
-      });
+      const response = await pool.query<ProcessDBResponse>(
+        `UPDATE process 
+         SET 
+           status = COALESCE($2, status), 
+           result = COALESCE($3, result),
+           updated_at = CURRENT_TIMESTAMP
+         WHERE name = $1
+         RETURNING *;`,
+        [updatedTask.name, updatedTask.status, updatedTask.result],
+      );
 
       if (response.rows.length === 0) {
         return null;

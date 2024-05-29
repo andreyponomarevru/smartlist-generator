@@ -1,8 +1,8 @@
 version: "3.7"
 
 services:
-  api:
-    container_name: api
+  dev_api:
+    container_name: dev_api
     build:
       context: ./api
       dockerfile: ./docker/Dockerfile.dev
@@ -19,11 +19,9 @@ services:
       - ./api/docker/.dev.env
       - ./postgres/docker/.dev.env
       - ./.common.env
-    depends_on:
-      - devdb_postgres
 
-  devdb_postgres:
-    container_name: postgres
+  dev_postgres:
+    container_name: dev_postgres
     build:
       context: ./postgres
       dockerfile: ./docker/Dockerfile.dev
@@ -33,11 +31,11 @@ services:
     ports:
       - 5433:5432
     volumes:
-      - ./postgres/volume/:/var/lib/postgresql/data
+      - ./postgres/dev-volume/:/var/lib/postgresql/data
       - ./postgres/docker-entrypoint-initdb.d/init.dev.sql:/docker-entrypoint-initdb.d/init.sql
 
-  client:
-    container_name: client
+  dev_client:
+    container_name: dev_client
     build:
       context: ./client
       dockerfile: ./docker/Dockerfile.dev
@@ -51,9 +49,6 @@ services:
       - "3000:3000"
     volumes:
       - ./client/:/client/
-    depends_on:
-      - devdb_postgres
-      - api
 
 networks:
   frontnet:

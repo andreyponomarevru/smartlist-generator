@@ -13,18 +13,12 @@ export const tracksRepo = {
       await client.query("BEGIN");
 
       const { track_id: trackId } = (
-        await client.query<{ track_id: number }>({
-          text: `
-            INSERT INTO track (title, year, duration, file_path) 
-            VALUES ($1, $2, $3, $4) 
-            RETURNING track_id`,
-          values: [
-            newTrack.title,
-            newTrack.year,
-            newTrack.duration,
-            newTrack.filePath,
-          ],
-        })
+        await client.query<{ track_id: number }>(
+          `INSERT INTO track (title, year, duration, file_path) 
+           VALUES ($1, $2, $3, $4) 
+           RETURNING track_id`,
+          [newTrack.title, newTrack.year, newTrack.duration, newTrack.filePath],
+        )
       ).rows[0];
 
       for (const genreName of newTrack.genres) {
@@ -33,15 +27,14 @@ export const tracksRepo = {
           throw new Error(`'${genreName}' is not a valid genre name`);
         }
 
-        await client.query({
-          text: `
-            INSERT INTO track_genre 
-              (track_id, genre_id) 
-            VALUES 
-              ($1::integer, $2::integer) 
-            ON CONFLICT DO NOTHING;`,
-          values: [trackId, validGenre.id],
-        });
+        await client.query(
+          `INSERT INTO track_genre 
+             (track_id, genre_id) 
+           VALUES 
+             ($1::integer, $2::integer) 
+           ON CONFLICT DO NOTHING;`,
+          [trackId, validGenre.id],
+        );
       }
 
       // Insert artists
@@ -49,31 +42,27 @@ export const tracksRepo = {
       for (const artist of newTrack.artists) {
         let artistId: number | null = null;
 
-        const response = await client.query<{ artist_id: number }>({
-          text: `
-            INSERT INTO artist (name) VALUES ($1)
-            ON CONFLICT DO NOTHING RETURNING artist_id`,
-          values: [artist],
-        });
+        const response = await client.query<{ artist_id: number }>(
+          `INSERT INTO artist (name) VALUES ($1)
+           ON CONFLICT DO NOTHING RETURNING artist_id`,
+          [artist],
+        );
         if (response.rowCount !== 0) {
           artistId = response.rows[0].artist_id;
         } else {
-          const response = await client.query<{ artist_id: number }>({
-            text: `SELECT artist_id FROM artist WHERE name = $1;`,
-            values: [artist],
-          });
+          const response = await client.query<{ artist_id: number }>(
+            `SELECT artist_id FROM artist WHERE name = $1;`,
+            [artist],
+          );
           artistId = response.rows[0].artist_id;
         }
 
-        await client.query({
-          text: `
-            INSERT INTO track_artist 
-              (track_id, artist_id) 
-            VALUES 
-              ($1::integer, $2::integer) 
-            ON CONFLICT DO NOTHING`,
-          values: [trackId, artistId],
-        });
+        await client.query(
+          `INSERT INTO track_artist (track_id, artist_id) 
+           VALUES ($1::integer, $2::integer) 
+           ON CONFLICT DO NOTHING`,
+          [trackId, artistId],
+        );
       }
 
       await client.query("COMMIT");
@@ -93,11 +82,10 @@ export const tracksRepo = {
     const pool = await dbConnection.open();
 
     try {
-      const getFilePath = {
-        text: "SELECT file_path FROM track WHERE track_id = $1;",
-        values: [trackId],
-      };
-      const response = await pool.query<{ file_path: string }>(getFilePath);
+      const response = await pool.query<{ file_path: string }>(
+        "SELECT file_path FROM track WHERE track_id = $1;",
+        [trackId],
+      );
 
       return response.rows.length === 0 ? null : response.rows[0].file_path;
     } catch (err) {
@@ -110,8 +98,9 @@ export const tracksRepo = {
     const pool = await dbConnection.open();
 
     try {
-      const sql = buildSQLQuery(searchParams);
-      const response = await pool.query<DBResponseFoundTrack>(sql);
+      const response = await pool.query<DBResponseFoundTrack>(
+        buildSQLQuery(searchParams),
+      );
 
       return response.rows.length === 0
         ? []

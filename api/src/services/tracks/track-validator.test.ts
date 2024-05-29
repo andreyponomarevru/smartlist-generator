@@ -7,7 +7,6 @@ import { ParsedTrack } from "../../types";
 jest.mock("./validation-schemas", () => ({
   schemaCreateTrack: { validateAsync: jest.fn() },
 }));
-jest.mock("../../utils", () => ({ parseID3V2Array: () => [] }));
 
 describe("TrackValidator", () => {
   it("creates a new instance of validator containing required props", () => {

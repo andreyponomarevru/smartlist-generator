@@ -10,9 +10,8 @@ export const statsRepo = {
         genre_id: number;
         name: string;
         count: number;
-      }>({
-        text: `
-          SELECT 
+      }>(
+        `SELECT 
             ge.genre_id, ge.name, COUNT(*)::integer
           FROM genre AS ge
             INNER JOIN track_genre AS tr_ge ON tr_ge.genre_id = ge.genre_id
@@ -23,8 +22,8 @@ export const statsRepo = {
           }  
           GROUP BY ge.genre_id
           ORDER BY count DESC;`,
-        values: excludedTracks.length > 0 ? [excludedTracks] : [],
-      });
+        excludedTracks.length > 0 ? [excludedTracks] : [],
+      );
 
       return response.rows.length === 0
         ? []
@@ -44,25 +43,13 @@ export const statsRepo = {
   countTracksByYear: async function (excludedTracks: number[] = []) {
     const pool = await dbConnection.open();
 
-    console.log(
-      "excludedTracks: ",
-      `
-    SELECT 
-      year, COUNT(year)::integer 
-    FROM 
-      track AS tr 
-    ${excludedTracks.length > 0 ? "WHERE tr.track_id != ALL($1::int[])" : ""}
-    GROUP BY year 
-    ORDER BY count DESC;`,
-    );
     try {
       const response = await pool.query<{
         year_id: number;
         year: number;
         count: number;
-      }>({
-        text: `
-          SELECT 
+      }>(
+        `SELECT 
             year, COUNT(year)::integer 
           FROM 
             track AS tr 
@@ -73,8 +60,8 @@ export const statsRepo = {
           }
           GROUP BY year 
           ORDER BY count DESC;`,
-        values: excludedTracks.length > 0 ? [excludedTracks] : [],
-      });
+        excludedTracks.length > 0 ? [excludedTracks] : [],
+      );
 
       return response.rows.length === 0
         ? []
