@@ -1,9 +1,13 @@
 import { Request, Response } from "express";
 import { jest, describe, it, expect } from "@jest/globals";
 import { isLibPathExist } from ".//is-libpath-exist";
-import { isFileExist } from "../utils";
+import { HttpError, isFileExist } from "../utils";
 
-jest.mock("../utils", () => ({ HttpError: class {}, isFileExist: jest.fn() }));
+jest.mock<typeof import("../utils")>("../utils", () => ({
+  ...jest.requireActual<typeof import("../utils")>("../utils"),
+  HttpError: class {} as unknown as typeof HttpError,
+  isFileExist: jest.fn<typeof isFileExist>(),
+}));
 
 describe("isLibPathExist", () => {
   const res = {} as Response;
