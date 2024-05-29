@@ -24,6 +24,7 @@ export function validate<T>(
       );
     } catch (err) {
       next(err);
+      return;
     }
 
     next();
