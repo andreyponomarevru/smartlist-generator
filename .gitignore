@@ -5,10 +5,10 @@
 ########################
 
 coverage/
-.dev
+.dev/
 volume/
 redis_data/
-mongodb/data
+mongodb/data/
 
 ################
 
