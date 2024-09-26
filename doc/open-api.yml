@@ -170,8 +170,9 @@ components:
         status: 
           $ref: '#/components/schemas/ProcessStatus'
         result:
-          $ref: '#/components/schemas/ValidationResult'
           nullable: true 
+          allOf:
+            - $ref: '#/components/schemas/ValidationResult'
 
 ##########################################################################
 
