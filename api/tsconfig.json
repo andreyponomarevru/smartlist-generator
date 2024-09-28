@@ -22,7 +22,8 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "skipLibCheck": true,
-    "types": ["node", "jest", "jest-extended"]
+    "types": ["node", "jest", "jest-extended"],
+    "resolveJsonModule": true
   },
   "compileOnSave": true,
   "include": ["src/**/*"],
