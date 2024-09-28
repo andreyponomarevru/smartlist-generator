@@ -100,6 +100,3 @@ DROP TABLE IF EXISTS
 DROP INDEX IF EXISTS
   artist_name_idx,
   track_title_idx;
-
-ALTER SEQUENCE track_track_id_seq RESTART;
-ALTER SEQUENCE artist_artist_id_seq RESTART;
